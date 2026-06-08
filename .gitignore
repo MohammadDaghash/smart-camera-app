@@ -1,0 +1,8 @@
+backend/venv/
+backend/__pycache__/
+*.py[cod]
+.DS_Store
+
+# Keep personal face photos local unless you intentionally decide to upload them.
+backend/known_faces/*
+!backend/known_faces/.gitkeep

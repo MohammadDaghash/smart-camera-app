@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Camera Live View</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(900px, 100%);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .status {
+      margin: 0 0 20px;
+      color: #15803d;
+      font-weight: 700;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #111827;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Smart Camera Live View</h1>
+    <p class="status">Camera is live</p>
+    <img src="/video" alt="Live webcam stream">
+  </main>
+</body>
+</html>
