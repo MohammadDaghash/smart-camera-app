@@ -22,7 +22,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 | --- | --- | --- |
 | Omar | 5-year software engineer at Microsoft | Backend architecture, camera pipeline optimization, scalability, code review, GitHub workflow supervision |
 | Mohammad | BSc Mathematics and Computer Science, MSc student in Data Analysis and Statistics | Face recognition, computer vision, smoothing, confidence thresholds, ML logic, future movement analysis |
-| Majd | BSc Software Engineering, full-stack focused | Frontend, dashboard UI, user experience, overlays, status indicators |
+| Majd | BSc Software Engineering, MSc student in Data Analysis and Statistics, full-stack focused | Frontend, dashboard UI, user experience, overlays, status indicators |
 
 ## Technologies
 
