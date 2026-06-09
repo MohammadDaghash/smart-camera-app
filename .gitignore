@@ -1,6 +1,12 @@
 backend/venv/
+backend/.venv/
 backend/__pycache__/
+backend/app/**/__pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
+.env
+backend/.env
 .DS_Store
 
 # Keep personal face photos local unless you intentionally decide to upload them.
