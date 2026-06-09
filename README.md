@@ -124,9 +124,8 @@ backend/known_faces/
 
 Branch roles:
 
-- `main`: stable production-ready versions
-- `dev`: active development integration branch
-- `feature/*`: focused feature branches created from `dev`
+- `main`: primary protected branch
+- `feature/*`: focused feature branches created from `main`
 
 Example feature branches:
 
@@ -139,8 +138,8 @@ feature/backend-refactor
 Basic workflow:
 
 ```bash
-git checkout dev
-git pull origin dev
+git checkout main
+git pull origin main
 git checkout -b feature/my-feature
 
 # make changes
@@ -149,11 +148,13 @@ git commit -m "Describe the change"
 git push -u origin feature/my-feature
 ```
 
-Open a pull request from the feature branch into `dev`. After testing and review, merge `dev` into `main` for stable releases.
+Open a pull request from the feature branch into `main`. Each pull request should be reviewed before merge.
 
 See [docs/git-workflow.md](docs/git-workflow.md) for the full workflow.
 
 ## Roadmap
+
+See [docs/spec.md](docs/spec.md) for the living product spec and feature priorities.
 
 - Multi-photo recognition per person
 - Recognition smoothing across frames

@@ -1,37 +1,60 @@
-# Smart Camera App - Team Setup
+# Team Setup
 
-The Smart Camera App repository is ready:
+This document defines how the team collaborates on the project. Product scope,
+feature priorities, and long-term plans live in [spec.md](spec.md).
 
-https://github.com/MohammadDaghash/smart-camera-app
+## Branch Workflow
 
-## Current Workflow
+- `main`: primary protected branch
+- `feature/<feature-name>`: all development work
 
-- `main` = stable production-ready version
-- `dev` = active development branch
-- `feature/*` = individual feature branches created from `dev`
+All changes should go through a pull request into `main`. Direct pushes to
+`main` should be blocked in GitHub branch protection, and each pull request
+should require at least one reviewer.
 
-Please do **not** work directly on `main`.
+## Team Responsibilities
 
-## First Setup
+### Omar - Backend And Architecture
 
-Clone the project:
+Owns backend architecture, system design, engineering standards, scalability,
+and code review quality.
+
+Main areas:
+
+- Backend architecture and service boundaries
+- Runtime reliability and performance
+- API design and maintainability
+- GitHub workflow and pull request review standards
+
+### Mohammad - Computer Vision And Analytics
+
+Owns machine learning, computer vision, recognition quality, statistical
+thinking, and future behavior analysis.
+
+Main areas:
+
+- Face detection and recognition quality
+- Confidence thresholds and evaluation metrics
+- Recognition stability across frames
+- Future motion, activity, and anomaly analysis
+
+### Majd - Frontend And Product Experience
+
+Owns frontend experience, dashboard design, usability, visual feedback, and
+status presentation.
+
+Main areas:
+
+- Dashboard structure and user workflows
+- Live-view presentation and real-time UI states
+- Visual clarity for system status and recognition results
+- Frontend quality across desktop and mobile
+
+## Local Development Notes
+
+Run the backend from the backend directory:
 
 ```bash
-git clone https://github.com/MohammadDaghash/smart-camera-app.git
-cd smart-camera-app
-```
-
-Switch to the development branch:
-
-```bash
-git checkout dev
-git pull origin dev
-```
-
-## Run Locally
-
-```bash
-cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -56,154 +79,10 @@ On macOS, make sure Terminal, VS Code, or Python has Camera permission enabled:
 System Settings -> Privacy & Security -> Camera
 ```
 
-## Team Responsibilities
+## Collaboration Rules
 
-### Omar - Backend / Architecture Lead
-
-Feature branch:
-
-```bash
-git checkout dev
-git pull origin dev
-git checkout -b feature/backend-refactor
-```
-
-Focus:
-
-- Review backend architecture
-- Improve `camera_service.py`
-- Improve camera open, release, and reconnect logic
-- Review scalability of `/video` streaming
-- Improve backend structure and maintainability
-- Review pull requests and architecture decisions
-
-First issue:
-
-```text
-Refine backend camera pipeline boundaries
-```
-
-### Mohammad - ML / Computer Vision Lead
-
-Feature branch:
-
-```bash
-git checkout dev
-git pull origin dev
-git checkout -b feature/multi-photo-recognition
-```
-
-Focus:
-
-- Improve face recognition accuracy
-- Support multiple photos per person
-- Average embeddings per person
-- Tune `FACE_MATCH_THRESHOLD`
-- Add smoothing across frames
-- Improve recognition stability under different lighting and angles
-
-First issue:
-
-```text
-Support multiple known-face photos per person
-```
-
-### Majd - Frontend / Dashboard Lead
-
-Feature branch:
-
-```bash
-git checkout dev
-git pull origin dev
-git checkout -b feature/frontend-dashboard
-```
-
-Focus:
-
-- Improve frontend UI
-- Create a dashboard layout
-- Add camera status indicators
-- Improve recognition label styling
-- Improve anonymous and known-person overlays
-- Keep live stream as the main focus
-
-First issue:
-
-```text
-Build a simple frontend dashboard shell
-```
-
-## Team Git Workflow
-
-Before starting work, always update `dev` first:
-
-```bash
-git checkout dev
-git pull origin dev
-```
-
-Then create or update your feature branch.
-
-Before pushing code, check your local changes:
-
-```bash
-git status
-```
-
-Push a new feature branch:
-
-```bash
-git push -u origin feature/your-branch-name
-```
-
-After the first push, later pushes can use:
-
-```bash
-git push
-```
-
-## Pull Request Workflow
-
-When your feature is ready:
-
-1. Push your branch.
-2. Open a Pull Request from your feature branch into `dev`.
-3. Request review from the team.
-4. Merge only after review.
-
-## Important Rules
-
-- Never push directly to `main`.
-- Avoid pushing directly to `dev`.
-- Use feature branches for everything.
-- Keep commits clean and focused.
-- Test locally before opening PRs.
-- Do not commit local known-face photos.
-
-Known face images should stay local and are ignored by Git:
-
-```text
-backend/known_faces/
-```
-
-## Current Project Goal
-
-Current focus:
-
-```text
-Build a stable local computer-vision MVP.
-```
-
-Not yet:
-
-- Cloud deployment
-- Databases
-- Authentication
-- Mobile apps
-- Smart-home integrations
-
-Current priority:
-
-```text
-Accuracy + stability + clean architecture
-```
+- Keep pull requests focused and reviewable.
+- Request at least one teammate review before merging.
+- Keep architecture and product decisions documented.
+- Do not commit local known-face images or private biometric data.
+- Update [spec.md](spec.md) when a feature goal, priority, or requirement changes.
