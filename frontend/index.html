@@ -22,7 +22,7 @@
     }
 
     main {
-      width: min(900px, 100%);
+      width: min(1100px, 100%);
       background: #ffffff;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
@@ -41,6 +41,13 @@
       font-weight: 700;
     }
 
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
     img {
       display: block;
       width: 100%;
@@ -48,13 +55,264 @@
       border: 1px solid #d1d5db;
       background: #111827;
     }
+
+    .identity-panel {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 16px;
+    }
+
+    .identity-panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .identity-section {
+      margin-top: 16px;
+    }
+
+    .identity-section h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #4b5563;
+      text-transform: uppercase;
+    }
+
+    .identity-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .identity-row {
+      display: grid;
+      gap: 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 10px;
+      background: #f9fafb;
+    }
+
+    .identity-name {
+      font-weight: 700;
+    }
+
+    .identity-meta {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .promote-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    input {
+      min-width: 0;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 9px 10px;
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 9px 12px;
+      background: #2563eb;
+      color: #ffffff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+
+    .empty-state {
+      margin: 0;
+      color: #6b7280;
+    }
+
+    .panel-message {
+      min-height: 20px;
+      margin: 8px 0 0;
+      color: #4b5563;
+      font-size: 14px;
+    }
+
+    .panel-message.error {
+      color: #b91c1c;
+    }
+
+    @media (max-width: 820px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <main>
     <h1>Smart Camera Live View</h1>
     <p class="status">Camera is live</p>
-    <img src="/video" alt="Live webcam stream">
+    <div class="layout">
+      <img src="/video" alt="Live webcam stream">
+      <section class="identity-panel" aria-labelledby="identity-panel-title">
+        <h2 id="identity-panel-title">Identities</h2>
+        <div class="identity-section">
+          <h3>Anonymous</h3>
+          <div id="anonymous-identities" class="identity-list"></div>
+        </div>
+        <div class="identity-section">
+          <h3>Known</h3>
+          <div id="known-identities" class="identity-list"></div>
+        </div>
+        <p id="identity-message" class="panel-message"></p>
+      </section>
+    </div>
   </main>
+  <script>
+    const anonymousList = document.getElementById("anonymous-identities");
+    const knownList = document.getElementById("known-identities");
+    const message = document.getElementById("identity-message");
+
+    function setMessage(text, isError = false) {
+      message.textContent = text;
+      message.classList.toggle("error", isError);
+    }
+
+    function identityMeta(identity) {
+      const count = identity.match_count || 0;
+      const noun = count === 1 ? "match" : "matches";
+      return `${count} ${noun}`;
+    }
+
+    function emptyState(text) {
+      const element = document.createElement("p");
+      element.className = "empty-state";
+      element.textContent = text;
+      return element;
+    }
+
+    function renderKnownIdentity(identity) {
+      const row = document.createElement("div");
+      row.className = "identity-row";
+
+      const name = document.createElement("div");
+      name.className = "identity-name";
+      name.textContent = identity.label;
+
+      const meta = document.createElement("div");
+      meta.className = "identity-meta";
+      meta.textContent = identityMeta(identity);
+
+      row.append(name, meta);
+      return row;
+    }
+
+    function renderAnonymousIdentity(identity) {
+      const row = document.createElement("div");
+      row.className = "identity-row";
+
+      const name = document.createElement("div");
+      name.className = "identity-name";
+      name.textContent = identity.label;
+
+      const meta = document.createElement("div");
+      meta.className = "identity-meta";
+      meta.textContent = identityMeta(identity);
+
+      const form = document.createElement("form");
+      form.className = "promote-form";
+
+      const input = document.createElement("input");
+      input.name = "name";
+      input.placeholder = "Name";
+      input.autocomplete = "off";
+
+      const button = document.createElement("button");
+      button.type = "submit";
+      button.textContent = "Promote";
+
+      form.append(input, button);
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const promotedName = input.value.trim();
+
+        if (!promotedName) {
+          setMessage("Name is required.", true);
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          const response = await fetch(`/identities/${identity.id}/promote`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name: promotedName }),
+          });
+
+          if (!response.ok) {
+            const body = await response.json();
+            throw new Error(body.detail || "Promotion failed.");
+          }
+
+          setMessage(`${identity.label} promoted to ${promotedName}.`);
+          await loadIdentities();
+        } catch (error) {
+          setMessage(error.message, true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      row.append(name, meta, form);
+      return row;
+    }
+
+    function renderIdentities(identities) {
+      const anonymous = identities.filter((identity) => identity.status === "anonymous");
+      const known = identities.filter((identity) => identity.status === "known");
+
+      anonymousList.replaceChildren(
+        ...(anonymous.length
+          ? anonymous.map(renderAnonymousIdentity)
+          : [emptyState("No anonymous identities yet.")])
+      );
+
+      knownList.replaceChildren(
+        ...(known.length
+          ? known.map(renderKnownIdentity)
+          : [emptyState("No promoted identities yet.")])
+      );
+    }
+
+    async function loadIdentities() {
+      try {
+        const response = await fetch("/identities");
+
+        if (!response.ok) {
+          throw new Error("Could not load identities.");
+        }
+
+        const body = await response.json();
+        renderIdentities(body.identities || []);
+      } catch (error) {
+        setMessage(error.message, true);
+      }
+    }
+
+    loadIdentities();
+    setInterval(() => {
+      if (!document.querySelector(".promote-form input:focus")) {
+        loadIdentities();
+      }
+    }, 5000);
+  </script>
 </body>
 </html>

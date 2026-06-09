@@ -4,12 +4,15 @@ from insightface.app import FaceAnalysis
 from PIL import Image, ImageOps
 
 from app.config import (
+    ANONYMOUS_MATCH_THRESHOLD,
+    FACE_IDENTITIES_FILE,
     FACE_MATCH_THRESHOLD,
     INSIGHTFACE_DETECTION_SIZE,
     INSIGHTFACE_MODEL_NAME,
     KNOWN_FACE_EXTENSIONS,
     KNOWN_FACES_DIR,
 )
+from app.services.identity_store import FaceIdentityStore
 from app.utils.logging import logger
 
 
@@ -141,16 +144,8 @@ def load_known_faces():
     return loaded_faces
 
 
-def recognize_face(face):
-    if not known_faces:
-        return "Anonymous", 0.0
-
-    face_embedding = get_face_embedding(face)
-
-    if face_embedding is None:
-        return "Anonymous", 0.0
-
-    best_name = "Anonymous"
+def match_known_face(face_embedding):
+    best_name = None
     best_score = 0.0
 
     for known_face in known_faces:
@@ -160,15 +155,38 @@ def recognize_face(face):
             best_score = score
             best_name = known_face["name"]
 
-    if best_score >= FACE_MATCH_THRESHOLD:
+    if best_name is not None and best_score >= FACE_MATCH_THRESHOLD:
         return best_name, best_score
 
-    return "Anonymous", best_score
+    return None, best_score
+
+
+def recognize_face(face):
+    face_embedding = get_face_embedding(face)
+
+    if face_embedding is None:
+        return "Anonymous", 0.0
+
+    known_name, known_score = match_known_face(face_embedding)
+
+    if known_name is not None:
+        return known_name, known_score
+
+    promoted_name, promoted_score = identity_store.match_promoted_identity(face_embedding)
+
+    if promoted_name is not None:
+        return promoted_name, promoted_score
+
+    anonymous_label, anonymous_score = identity_store.match_or_create_anonymous_identity(
+        face_embedding
+    )
+
+    return anonymous_label, anonymous_score
 
 
 def draw_face_label(frame, face_box, label):
     x1, y1, x2, y2 = face_box
-    color = (34, 197, 94) if label != "Anonymous" else (0, 165, 255)
+    color = (0, 165, 255) if label.startswith("Anonymous") else (34, 197, 94)
 
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
@@ -213,3 +231,8 @@ def annotate_faces(frame):
 
 face_analyzer = create_face_analyzer()
 known_faces = load_known_faces()
+identity_store = FaceIdentityStore(
+    path=FACE_IDENTITIES_FILE,
+    known_threshold=FACE_MATCH_THRESHOLD,
+    anonymous_threshold=ANONYMOUS_MATCH_THRESHOLD,
+)

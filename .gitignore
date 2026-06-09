@@ -12,3 +12,7 @@ backend/.env
 # Keep personal face photos local unless you intentionally decide to upload them.
 backend/known_faces/*
 !backend/known_faces/.gitkeep
+
+# Keep local identity embeddings private.
+backend/local_data/*
+!backend/local_data/.gitkeep

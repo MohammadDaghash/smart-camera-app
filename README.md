@@ -158,6 +158,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 
 - Multi-photo recognition per person
 - Recognition smoothing across frames
+- Anonymous identity memory and promotion to known people
 - Confidence threshold tuning tools
 - Frontend dashboard and camera status indicators
 - Better overlays for labels, confidence, and unknown faces

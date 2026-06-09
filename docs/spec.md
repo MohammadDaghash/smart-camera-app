@@ -43,6 +43,7 @@ The current system does not yet include:
 | P0 | Face detection | Working | Detect faces and draw boxes on the stream. |
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Recognition quality | Planned | Improve stability using multiple photos, thresholds, and smoothing. |
+| P1 | Anonymous identity memory | Planned | Remember unknown people locally as stable anonymous identities. |
 | P1 | Dashboard experience | Planned | Improve status, layout, and user feedback around the live stream. |
 | P2 | Activity analysis | Planned | Detect motion or unusual behavior over time. |
 | P2 | Accounts and permissions | Planned | Add admin and lower-privilege user roles when remote or shared access is needed. |
@@ -85,6 +86,27 @@ Acceptance criteria:
 - Known people are recognized more consistently.
 - Unknown people remain labeled as `Anonymous`.
 - Recognition settings are easy to tune during testing.
+
+### Anonymous Identity Memory
+
+Goal:
+Remember unknown people locally so the same unrecognized person keeps the same
+anonymous label over time.
+
+Requirements:
+
+- Label new unrecognized people as `Anonymous 1`, `Anonymous 2`, and so on.
+- Match future appearances against stored anonymous embeddings.
+- Store local embeddings only, not face snapshots.
+- Allow a user to promote an anonymous identity into a known identity.
+- Keep all anonymous identity data local and out of Git.
+
+Acceptance criteria:
+
+- A new unknown person receives a stable anonymous label.
+- The same unknown person keeps the same anonymous label after app restart.
+- A different unknown person receives a different anonymous label.
+- Promoting `Anonymous X` to a name updates future video labels.
 
 ### Dashboard Experience
 
