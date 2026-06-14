@@ -24,7 +24,7 @@ Acceptance criteria:
 
 - Checklist is added to `docs/git-workflow.md` or a pull-request template.
 - Checklist includes route, service, logging, and resource cleanup items.
-- The team agrees to use the checklist before merging into `dev`.
+- The team agrees to use the checklist before merging into `main`.
 
 ## Mohammad
 
