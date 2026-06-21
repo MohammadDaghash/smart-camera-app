@@ -82,6 +82,34 @@ def name_from_file_path(path):
     return " ".join(part.capitalize() for part in name_parts if part)
 
 
+def name_from_directory_path(path):
+    return path.name.strip()
+
+
+def known_face_image_sources():
+    image_sources = []
+
+    for path in sorted(KNOWN_FACES_DIR.iterdir()):
+        if path.is_file() and path.suffix.lower() in KNOWN_FACE_EXTENSIONS:
+            image_sources.append((name_from_file_path(path), path))
+            continue
+
+        if not path.is_dir() or path.name.startswith("."):
+            continue
+
+        person_name = name_from_directory_path(path)
+
+        if not person_name:
+            logger.warning("Skipping known faces folder with empty name: %s", path)
+            continue
+
+        for image_path in sorted(path.iterdir()):
+            if image_path.is_file() and image_path.suffix.lower() in KNOWN_FACE_EXTENSIONS:
+                image_sources.append((person_name, image_path))
+
+    return image_sources
+
+
 def load_known_faces():
     loaded_faces = []
 
@@ -90,13 +118,9 @@ def load_known_faces():
         logger.info("Loaded 0 known face(s). All detected faces will be Anonymous.")
         return loaded_faces
 
-    image_paths = sorted(
-        path
-        for path in KNOWN_FACES_DIR.iterdir()
-        if path.is_file() and path.suffix.lower() in KNOWN_FACE_EXTENSIONS
-    )
+    image_sources = known_face_image_sources()
 
-    if not image_paths:
+    if not image_sources:
         logger.warning(
             "No known face images found in %s. All detected faces will be Anonymous.",
             KNOWN_FACES_DIR,
@@ -104,7 +128,7 @@ def load_known_faces():
         logger.info("Loaded 0 known face(s).")
         return loaded_faces
 
-    for image_path in image_paths:
+    for name, image_path in image_sources:
         image = read_known_face_image(image_path)
 
         if image is None:
@@ -118,7 +142,6 @@ def load_known_faces():
 
         largest_face = max(faces, key=face_area)
         embedding = get_face_embedding(largest_face)
-        name = name_from_file_path(image_path)
 
         if embedding is None:
             logger.warning("No face embedding was created for known face image: %s", image_path)
@@ -133,7 +156,13 @@ def load_known_faces():
 
         logger.info("Loaded known face image for %s: %s", name, image_path)
 
-    logger.info("Loaded %s known face(s)", len(loaded_faces))
+    loaded_names = sorted({face["name"] for face in loaded_faces})
+    logger.info(
+        "Loaded %s known face embedding(s) for %s person(s): %s",
+        len(loaded_faces),
+        len(loaded_names),
+        ", ".join(loaded_names) if loaded_names else "none",
+    )
 
     if not loaded_faces:
         logger.warning("No usable known faces were loaded. All detected faces will be Anonymous.")

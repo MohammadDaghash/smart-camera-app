@@ -101,24 +101,29 @@ For local development, place known faces in:
 backend/known_faces/
 ```
 
-Current simple format:
+Single-photo format is still supported:
 
 ```text
 backend/known_faces/mohammad.jpg
 backend/known_faces/omar.jpeg
 ```
 
-Future planned format:
+Recommended multi-photo format:
 
 ```text
 backend/known_faces/
   Mohammad/
     1.jpg
     2.jpg
+    3.jpg
   Omar/
     1.jpg
     2.jpg
 ```
+
+Folder names are used as the person labels. Every supported image file inside a
+person folder is loaded as a separate reference embedding, and recognition uses
+the best match score across all loaded embeddings.
 
 ## Git Workflow
 
