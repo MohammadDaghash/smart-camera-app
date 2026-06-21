@@ -35,3 +35,22 @@ SESSION_SECRET = os.getenv("SESSION_SECRET") or secrets.token_urlsafe(32)
 SESSION_SECRET_IS_EPHEMERAL = not os.getenv("SESSION_SECRET")
 SESSION_COOKIE_NAME = "smart_camera_session"
 SESSION_MAX_AGE_SECONDS = int(os.getenv("SESSION_MAX_AGE_SECONDS", str(24 * 60 * 60)))
+
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+
+    if raw is None:
+        return default
+
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+# Send the session cookie only over HTTPS. Keep False for local HTTP, enable
+# behind TLS when serving on a network.
+SESSION_HTTPS_ONLY = _env_flag("SESSION_HTTPS_ONLY", default=False)
+
+# Login rate limiting / lockout, tracked per client IP.
+LOGIN_MAX_ATTEMPTS = int(os.getenv("LOGIN_MAX_ATTEMPTS", "5"))
+LOGIN_ATTEMPT_WINDOW_SECONDS = int(os.getenv("LOGIN_ATTEMPT_WINDOW_SECONDS", "300"))
+LOGIN_LOCKOUT_SECONDS = int(os.getenv("LOGIN_LOCKOUT_SECONDS", "300"))

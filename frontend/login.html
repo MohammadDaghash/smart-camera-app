@@ -97,7 +97,7 @@
   <main>
     <h1>Smart Camera</h1>
     <p class="subtitle">Sign in to view the live camera feed.</p>
-    <p class="error" id="error">Invalid username or password.</p>
+    <p class="error" id="error"></p>
     <form method="post" action="/login">
       <label>
         Username
@@ -111,8 +111,14 @@
     </form>
   </main>
   <script>
-    if (new URLSearchParams(window.location.search).has("error")) {
-      document.getElementById("error").style.display = "block";
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    if (error) {
+      const banner = document.getElementById("error");
+      banner.textContent = error === "locked"
+        ? "Too many failed attempts. Please wait and try again."
+        : "Invalid username or password.";
+      banner.style.display = "block";
     }
   </script>
 </body>

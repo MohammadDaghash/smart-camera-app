@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import (
     AUTH_USING_DEFAULT_CREDENTIALS,
     SESSION_COOKIE_NAME,
+    SESSION_HTTPS_ONLY,
     SESSION_MAX_AGE_SECONDS,
     SESSION_SECRET,
     SESSION_SECRET_IS_EPHEMERAL,
@@ -20,7 +21,7 @@ app.add_middleware(
     session_cookie=SESSION_COOKIE_NAME,
     max_age=SESSION_MAX_AGE_SECONDS,
     same_site="lax",
-    https_only=False,
+    https_only=SESSION_HTTPS_ONLY,
 )
 
 app.include_router(auth.router)
