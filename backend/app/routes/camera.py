@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.config import CAMERA_INDEXES
 from app.services.camera_service import generate_frames, open_working_camera, release_camera
+from app.utils.auth import require_login
 
 
 router = APIRouter()
 
 
 @router.get("/camera-test")
-async def camera_test():
+async def camera_test(user: str = Depends(require_login)):
     camera, index, error = open_working_camera()
 
     if camera is None:
@@ -31,7 +32,7 @@ async def camera_test():
 
 
 @router.get("/video")
-async def video():
+async def video(user: str = Depends(require_login)):
     camera, index, error = open_working_camera()
 
     if camera is None:

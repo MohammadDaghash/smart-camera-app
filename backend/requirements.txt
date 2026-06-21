@@ -5,3 +5,9 @@ numpy
 insightface
 onnxruntime
 Pillow
+
+# Authentication and configuration
+passlib
+itsdangerous
+python-multipart
+python-dotenv

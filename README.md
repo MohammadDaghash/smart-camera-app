@@ -84,12 +84,54 @@ http://localhost:8000
 Useful backend routes:
 
 ```text
+http://localhost:8000/login
 http://localhost:8000/health
 http://localhost:8000/camera-test
 http://localhost:8000/video
 ```
 
 Note: the first run may download InsightFace model files into `~/.insightface`. The local `backend/main.py` still exists as a compatibility entrypoint, but `uvicorn app.main:app` is the recommended command.
+
+## Authentication
+
+The app requires a login before serving the camera UI or streams. Authentication
+uses a signed, HTTP-only session cookie (Starlette `SessionMiddleware`).
+
+Configure credentials in `backend/.env` (gitignored). Copy the template:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Windows:
+
+```bash
+copy backend\.env.example backend\.env
+```
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `AUTH_USERNAME` | Admin username | `admin` |
+| `AUTH_PASSWORD` | Admin password | `admin` |
+| `SESSION_SECRET` | Key used to sign session cookies | random per start |
+| `SESSION_MAX_AGE_SECONDS` | Session lifetime in seconds | `86400` |
+
+If `AUTH_USERNAME` / `AUTH_PASSWORD` are unset, the app falls back to `admin` /
+`admin` and logs a warning at startup. Set real values before exposing the server on
+a network. If `SESSION_SECRET` is unset, a random key is generated at startup and all
+sessions reset on restart; set it for stable logins.
+
+Auth routes:
+
+```text
+GET  /login     login page
+POST /login     submit credentials
+GET  /logout    clear the session
+```
+
+Protected routes (`/`, `/video`, `/camera-test`) redirect to `/login` when the user
+is not signed in. `/health` stays public.
+
 
 ## Known Faces
 
@@ -173,7 +215,7 @@ See [docs/git-workflow.md](docs/git-workflow.md) for the full workflow.
 - Add clear thresholds before sending alerts
 - Add audit logs for recognition and suspicious activity events
 - Add privacy controls before any cloud or smart-home integration
-- Add authentication only when remote access becomes necessary
+- Basic session login is in place; expand to multi-user accounts and tokens when remote access becomes necessary
 
 ## Development Practices
 
