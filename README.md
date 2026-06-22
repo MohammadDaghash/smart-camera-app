@@ -1,30 +1,39 @@
 # Smart Camera App
 
-Smart Camera App is a local smart-home camera MVP. The project currently streams a live webcam feed in the browser, detects faces, and labels known people using local InsightFace embeddings.
+Local-first computer-vision security app for real-time monitoring and privacy-conscious face recognition.
 
-The long-term goal is to grow this into a smart camera system that can recognize known people, detect suspicious activity, analyze movement, and eventually integrate with smart-home devices. The current focus is keeping the foundation simple, private, and reliable.
+This team project streams a local webcam feed through a FastAPI backend, detects faces with InsightFace, labels known people, and keeps unknown people as local anonymous identities. The long-term product direction is an AI-powered smart home/security platform with local recognition, event alerts, and privacy-first identity handling.
 
-## Current Features
+## What It Does
 
-- FastAPI backend
-- Browser live video stream at `/video`
-- Local webcam access through OpenCV
-- Face detection and bounding boxes
-- Basic known-face recognition with InsightFace
-- `Anonymous` label for unknown faces
-- Local known-face image folder
-- Health endpoint at `/health`
-- Camera access test endpoint at `/camera-test`
+- Streams live webcam video in the browser through an MJPEG endpoint.
+- Detects faces on each frame and draws bounding boxes/labels.
+- Matches known faces with local InsightFace embeddings.
+- Creates stable anonymous identities for unknown faces and stores embeddings locally.
+- Lets users promote anonymous identities into known identities from the browser UI.
+- Keeps personal face images and identity embeddings out of Git.
 
-## Team
+## Key Features
 
-| Team member | Background | Main responsibilities |
-| --- | --- | --- |
-| Omar | 5-year software engineer at Microsoft | Backend architecture, camera pipeline optimization, scalability, code review, GitHub workflow supervision |
-| Mohammad | BSc Mathematics and Computer Science, MSc student in Data Analysis and Statistics | Face recognition, computer vision, smoothing, confidence thresholds, ML logic, future movement analysis |
-| Majd | BSc Software Engineering, MSc student in Data Analysis and Statistics, full-stack focused | Frontend, dashboard UI, user experience, overlays, status indicators |
+- FastAPI backend with thin route modules
+- OpenCV webcam capture and reconnect handling
+- InsightFace face detection and recognition
+- ONNX Runtime CPU inference
+- Known/unknown identity matching with configurable thresholds
+- Local identity store for anonymous identity memory
+- `/identities` API and browser UI for identity promotion
+- `/health`, `/camera-test`, and `/video` endpoints
+- Simple HTML/CSS live-view frontend
 
-## Technologies
+## Team / My Contribution
+
+This is a collaborative team project.
+
+- Omar: backend architecture, camera pipeline optimization, scalability, code review, GitHub workflow supervision
+- Mohammad: face recognition, computer vision logic, embedding matching, thresholds, ML behavior, future movement-analysis direction
+- Majd: frontend/dashboard experience, overlays, status indicators, user experience
+
+## Tech Stack
 
 - Python
 - FastAPI
@@ -32,32 +41,50 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - OpenCV
 - InsightFace
 - ONNX Runtime
+- NumPy
 - Pillow
-- HTML/CSS frontend
+- HTML/CSS/JavaScript
 
-## Project Structure
+## Architecture / How It Works
 
 ```text
-smart-camera-app/
-├── backend/
-│   ├── app/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── vision/
-│   │   ├── models/
-│   │   ├── utils/
-│   │   └── main.py
-│   ├── known_faces/
-│   ├── tests/
-│   ├── requirements.txt
-│   └── README.md
-├── frontend/
-├── docs/
-├── .gitignore
-└── README.md
+Browser <img src="/video">
+        |
+        v
+FastAPI route
+        |
+        v
+Camera service opens local webcam and reads frames
+        |
+        v
+Vision module detects faces and creates embeddings
+        |
+        v
+Known-face matcher or local anonymous identity store
+        |
+        v
+Annotated JPEG frames streamed back to the browser
 ```
 
-## Running Locally
+Important modules:
+
+- `backend/app/main.py` registers route modules.
+- `backend/app/routes/camera.py` exposes `/camera-test` and `/video`.
+- `backend/app/routes/identities.py` exposes local identity listing and promotion.
+- `backend/app/services/camera_service.py` handles webcam opening, frame streaming, and reconnect behavior.
+- `backend/app/vision/face_recognition.py` loads InsightFace, extracts embeddings, matches known faces, and annotates frames.
+- `backend/app/services/identity_store.py` stores anonymous/known identity embeddings locally.
+
+## Screenshots
+
+Screenshots are not committed yet. Recommended captures:
+
+- Live webcam view with face overlay
+- Anonymous identity list
+- Identity promotion form
+- Camera health/test response
+
+## Setup
 
 From the project root:
 
@@ -69,119 +96,45 @@ pip install -r requirements.txt
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Windows activation:
-
-```bash
-venv\Scripts\activate
-```
-
 Open:
 
 ```text
 http://localhost:8000
 ```
 
-Useful backend routes:
+Useful routes:
 
 ```text
-http://localhost:8000/health
-http://localhost:8000/camera-test
-http://localhost:8000/video
+GET /health
+GET /camera-test
+GET /video
+GET /identities
+POST /identities/{identity_id}/promote
 ```
 
-Note: the first run may download InsightFace model files into `~/.insightface`. The local `backend/main.py` still exists as a compatibility entrypoint, but `uvicorn app.main:app` is the recommended command.
+The first InsightFace run may download model files into `~/.insightface`.
 
-## Known Faces
+## Privacy Defaults
 
-Personal face photos are intentionally ignored by Git.
-
-For local development, place known faces in:
-
-```text
-backend/known_faces/
-```
-
-Current simple format:
-
-```text
-backend/known_faces/mohammad.jpg
-backend/known_faces/omar.jpeg
-```
-
-Future planned format:
-
-```text
-backend/known_faces/
-  Mohammad/
-    1.jpg
-    2.jpg
-  Omar/
-    1.jpg
-    2.jpg
-```
-
-## Git Workflow
-
-Branch roles:
-
-- `main`: primary protected branch
-- `feature/*`: focused feature branches created from `main`
-
-Example feature branches:
-
-```text
-feature/multi-photo-recognition
-feature/frontend-dashboard
-feature/backend-refactor
-```
-
-Basic workflow:
-
-```bash
-git checkout main
-git pull origin main
-git checkout -b feature/my-feature
-
-# make changes
-git add .
-git commit -m "Describe the change"
-git push -u origin feature/my-feature
-```
-
-Open a pull request from the feature branch into `main`. Each pull request should be reviewed before merge.
-
-See [docs/git-workflow.md](docs/git-workflow.md) for the full workflow.
+- Known-face images stay local in `backend/known_faces/`.
+- Local identity embeddings stay in `backend/local_data/`.
+- `.gitignore` excludes personal face photos and local embedding data.
+- No cloud storage, database, authentication, or smart-home integration is required for the current local-first workflow.
 
 ## Roadmap
 
-See [docs/spec.md](docs/spec.md) for the living product spec and feature priorities.
-
-- Multi-photo recognition per person
+- Multi-reference known-person profiles
 - Recognition smoothing across frames
-- Anonymous identity memory and promotion to known people
 - Confidence threshold tuning tools
-- Frontend dashboard and camera status indicators
-- Better overlays for labels, confidence, and unknown faces
-- Camera pipeline performance improvements
-- Movement detection
-- Suspicious activity alerts
+- Activity/movement analysis
 - Local event history
-- Optional smart-home device integrations
+- Suspicious activity alert rules
+- Optional smart-home integrations after privacy rules are defined
 
-## Future AI And Security Goals
+## What This Demonstrates
 
-- Keep face recognition local by default
-- Avoid committing personal biometric images
-- Add clear thresholds before sending alerts
-- Add audit logs for recognition and suspicious activity events
-- Add privacy controls before any cloud or smart-home integration
-- Add authentication only when remote access becomes necessary
-
-## Development Practices
-
-- Work from feature branches, not directly on `main`
-- Keep pull requests small and reviewable
-- Do not commit `venv`, caches, `.env`, or personal face images
-- Prefer local modules under `backend/app/` over growing a single large file
-- Keep routes thin and move business logic into services or vision modules
-- Add tests as logic becomes stable enough to protect
+- Computer-vision pipeline design with OpenCV and InsightFace
+- Local ML inference with privacy-conscious storage
+- Face-embedding matching and unknown identity memory
+- FastAPI route/service/module separation
+- Practical team collaboration around an AI product direction
