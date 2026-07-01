@@ -2,28 +2,16 @@
 
 ## Branch Strategy
 
-- `main`: stable production-ready versions
-- `dev`: active development integration branch
-- `feature/*`: feature branches created from `dev`
+- `main`: primary protected branch
+- `feature/<feature-name>`: feature branches created from `main`
 
-## One-Time Setup
+## Creating Feature Branches
 
-If `dev` does not exist yet:
+Always branch from the latest `main`:
 
 ```bash
 git checkout main
 git pull origin main
-git checkout -b dev
-git push -u origin dev
-```
-
-## Creating Feature Branches
-
-Always branch from the latest `dev`:
-
-```bash
-git checkout dev
-git pull origin dev
 git checkout -b feature/multi-photo-recognition
 ```
 
@@ -47,43 +35,32 @@ git push -u origin feature/branch-name
 
 1. Push your feature branch.
 2. Open a pull request on GitHub.
-3. Set base branch to `dev`.
+3. Set base branch to `main`.
 4. Request review from at least one teammate.
 5. Merge only after the app still runs locally.
 
-## Releasing To Main
+## Main Branch Protection
 
-When `dev` is stable:
+The `main` branch should be protected in GitHub:
 
-```bash
-git checkout main
-git pull origin main
-git merge dev
-git push origin main
-```
-
-For GitHub pull-request flow, open a pull request from `dev` into `main`.
+- Direct pushes to `main` are blocked.
+- Pull requests are required before merging.
+- At least one approving review is required.
 
 ## Pulling Latest Updates
 
 ```bash
-git checkout dev
-git pull origin dev
+git checkout main
+git pull origin main
 ```
 
-If you are on a feature branch and want the newest development changes:
+If you are on a feature branch and want the newest main changes:
 
 ```bash
 git checkout feature/your-branch
 git fetch origin
-git merge origin/dev
+git merge origin/main
 ```
-
-## Team Assignments
-
-- Omar: `feature/backend-refactor`, `feature/camera-pipeline`
-- Mohammad: `feature/multi-photo-recognition`, `feature/recognition-smoothing`
-- Majd: `feature/frontend-dashboard`, `feature/status-overlays`
 
 ## Pull Request Checklist
 

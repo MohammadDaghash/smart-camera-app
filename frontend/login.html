@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Camera Sign In</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(380px, 100%);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+    }
+
+    p.subtitle {
+      margin: 0 0 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .error {
+      display: none;
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px 12px;
+      font-size: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      background: #2563eb;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Smart Camera</h1>
+    <p class="subtitle">Sign in to view the live camera feed.</p>
+    <p class="error" id="error"></p>
+    <form method="post" action="/login">
+      <label>
+        Username
+        <input type="text" name="username" autocomplete="username" required autofocus>
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit">Sign in</button>
+    </form>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    if (error) {
+      const banner = document.getElementById("error");
+      banner.textContent = error === "locked"
+        ? "Too many failed attempts. Please wait and try again."
+        : "Invalid username or password.";
+      banner.style.display = "block";
+    }
+  </script>
+</body>
+</html>
