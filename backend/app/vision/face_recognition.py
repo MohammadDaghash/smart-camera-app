@@ -201,14 +201,19 @@ def draw_face_label(frame, face_box, label):
 def annotate_faces(frame):
     faces = detect_faces(frame)
     labels = []
+    recognized = []
 
     for face in faces:
         face_box = face_box_from_detection(face, frame.shape)
         label, score = recognize_face(face)
         labels.append(f"{label}:{score:.2f}")
+
+        if label != "Anonymous":
+            recognized.append((label, score))
+
         draw_face_label(frame, face_box, label)
 
-    return frame, len(faces), labels
+    return frame, len(faces), labels, recognized
 
 
 face_analyzer = create_face_analyzer()

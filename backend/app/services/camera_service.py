@@ -4,6 +4,7 @@ import time
 import cv2
 
 from app.config import CAMERA_INDEXES, READ_ATTEMPTS, RECONNECT_AFTER_FAILURES
+from app.services.notification_service import notify_if_target_seen
 from app.utils.logging import logger
 from app.vision.face_recognition import annotate_faces
 
@@ -100,7 +101,9 @@ def generate_frames(camera, index):
             if frame_count == 1 or frame_count % 120 == 0:
                 logger.info("Streaming frame %s from camera index %s", frame_count, index)
 
-            frame, face_count, face_labels = annotate_faces(frame)
+            frame, face_count, face_labels, recognized = annotate_faces(frame)
+
+            notify_if_target_seen(recognized)
 
             if face_count != last_face_count or (face_count > 0 and frame_count % 60 == 0):
                 logger.info(
