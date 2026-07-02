@@ -84,12 +84,72 @@ http://localhost:8000
 Useful backend routes:
 
 ```text
+http://localhost:8000/login
 http://localhost:8000/health
 http://localhost:8000/camera-test
 http://localhost:8000/video
 ```
 
 Note: the first run may download InsightFace model files into `~/.insightface`. The local `backend/main.py` still exists as a compatibility entrypoint, but `uvicorn app.main:app` is the recommended command.
+
+## Authentication
+
+The app requires a login before serving the camera UI or streams. Authentication
+uses a signed, HTTP-only session cookie (Starlette `SessionMiddleware`).
+
+Configure credentials in `backend/.env` (gitignored). Copy the template:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Windows:
+
+```bash
+copy backend\.env.example backend\.env
+```
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `AUTH_USERNAME` | Admin username | `admin` |
+| `AUTH_PASSWORD` | Admin password | `admin` |
+| `SESSION_SECRET` | Key used to sign session cookies | random per start |
+| `SESSION_MAX_AGE_SECONDS` | Session lifetime in seconds | `86400` |
+| `SESSION_HTTPS_ONLY` | Send the session cookie only over HTTPS (enable behind TLS) | `false` |
+| `LOGIN_MAX_ATTEMPTS` | Failed logins (per client IP) before lockout | `5` |
+| `LOGIN_ATTEMPT_WINDOW_SECONDS` | Window in which failures are counted | `300` |
+| `LOGIN_LOCKOUT_SECONDS` | How long a client is locked out | `300` |
+
+If `AUTH_USERNAME` / `AUTH_PASSWORD` are unset, the app falls back to `admin` /
+`admin` and logs a warning at startup. Set real values before exposing the server on
+a network. If `SESSION_SECRET` is unset, a random key is generated at startup and all
+sessions reset on restart; set it for stable logins.
+
+Auth routes:
+
+```text
+GET  /login     login page
+POST /login     submit credentials
+GET  /logout    clear the session
+```
+
+Protected routes (`/`, `/video`, `/camera-test`) redirect to `/login` when the user
+is not signed in. `/health` stays public.
+
+### Session hardening
+
+- **Server-side sessions:** each login gets a server-tracked session id. Logout
+  revokes it immediately, so a captured cookie stops working even before it expires.
+  Sessions are held in memory, so a server restart logs everyone out (swap in a shared
+  store such as Redis when running multiple processes).
+- **Login lockout:** after `LOGIN_MAX_ATTEMPTS` failed logins from one client IP within
+  `LOGIN_ATTEMPT_WINDOW_SECONDS`, that client is locked out for `LOGIN_LOCKOUT_SECONDS`.
+- **Secure cookie:** set `SESSION_HTTPS_ONLY=true` once the server is behind TLS so the
+  session cookie is never sent over plain HTTP.
+
+Note: lockout is keyed on the direct client IP. Behind a reverse proxy you must forward
+and trust the real client IP for it to be effective.
+
 
 ## Known Faces
 
@@ -179,7 +239,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Add clear thresholds before sending alerts
 - Add audit logs for recognition and suspicious activity events
 - Add privacy controls before any cloud or smart-home integration
-- Add authentication only when remote access becomes necessary
+- Basic session login is in place; expand to multi-user accounts and tokens when remote access becomes necessary
 
 ## Development Practices
 
