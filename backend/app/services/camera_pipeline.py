@@ -1,16 +1,22 @@
 import time
 
-from app.config import RECONNECT_AFTER_FAILURES
+from app.config import FACE_ANALYSIS_INTERVAL_FRAMES, RECONNECT_AFTER_FAILURES
 from app.services.camera_source import open_working_camera, release_camera
+from app.services.frame_cadence import should_process_frame
 from app.services.mjpeg_streamer import encode_mjpeg_frame
 from app.utils.logging import logger
-from app.vision.face_recognition import annotate_faces
+from app.vision.face_recognition import (
+    build_face_annotations,
+    draw_face_annotations,
+    labels_from_annotations,
+)
 
 
 def generate_frames(camera, index):
     frame_count = 0
     failed_reads = 0
     last_face_count = None
+    latest_face_annotations = []
 
     try:
         while True:
@@ -43,16 +49,21 @@ def generate_frames(camera, index):
             if frame_count == 1 or frame_count % 120 == 0:
                 logger.info("Streaming frame %s from camera index %s", frame_count, index)
 
-            frame, face_count, face_labels = annotate_faces(frame)
+            if should_process_frame(frame_count, FACE_ANALYSIS_INTERVAL_FRAMES):
+                latest_face_annotations = build_face_annotations(frame)
+                face_count = len(latest_face_annotations)
+                face_labels = labels_from_annotations(latest_face_annotations)
 
-            if face_count != last_face_count or (face_count > 0 and frame_count % 60 == 0):
-                logger.info(
-                    "Detected %s face(s) on frame %s: %s",
-                    face_count,
-                    frame_count,
-                    ", ".join(face_labels) if face_labels else "none",
-                )
-                last_face_count = face_count
+                if face_count != last_face_count or (face_count > 0 and frame_count % 60 == 0):
+                    logger.info(
+                        "Detected %s face(s) on frame %s: %s",
+                        face_count,
+                        frame_count,
+                        ", ".join(face_labels) if face_labels else "none",
+                    )
+                    last_face_count = face_count
+
+            frame = draw_face_annotations(frame, latest_face_annotations)
 
             mjpeg_frame = encode_mjpeg_frame(frame)
 

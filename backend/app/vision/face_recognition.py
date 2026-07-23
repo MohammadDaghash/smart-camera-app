@@ -227,17 +227,42 @@ def draw_face_label(frame, face_box, label):
     )
 
 
-def annotate_faces(frame):
-    faces = detect_faces(frame)
-    labels = []
+def build_face_annotations(frame):
+    annotations = []
 
-    for face in faces:
+    for face in detect_faces(frame):
         face_box = face_box_from_detection(face, frame.shape)
         label, score = recognize_face(face)
-        labels.append(f"{label}:{score:.2f}")
-        draw_face_label(frame, face_box, label)
+        annotations.append(
+            {
+                "box": face_box,
+                "label": label,
+                "score": score,
+            }
+        )
 
-    return frame, len(faces), labels
+    return annotations
+
+
+def labels_from_annotations(annotations):
+    return [
+        f"{annotation['label']}:{annotation['score']:.2f}"
+        for annotation in annotations
+    ]
+
+
+def draw_face_annotations(frame, annotations):
+    for annotation in annotations:
+        draw_face_label(frame, annotation["box"], annotation["label"])
+
+    return frame
+
+
+def annotate_faces(frame):
+    annotations = build_face_annotations(frame)
+    frame = draw_face_annotations(frame, annotations)
+
+    return frame, len(annotations), labels_from_annotations(annotations)
 
 
 face_analyzer = create_face_analyzer()

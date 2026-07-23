@@ -10,6 +10,24 @@ PROJECT_DIR = BACKEND_DIR.parent
 
 load_dotenv(BACKEND_DIR / ".env")
 
+
+def _env_int(name: str, default: int, minimum: int | None = None) -> int:
+    raw = os.getenv(name)
+
+    if raw is None:
+        value = default
+    else:
+        try:
+            value = int(raw)
+        except ValueError:
+            value = default
+
+    if minimum is not None:
+        return max(minimum, value)
+
+    return value
+
+
 FRONTEND_FILE = PROJECT_DIR / "frontend" / "index.html"
 LOGIN_FILE = PROJECT_DIR / "frontend" / "login.html"
 KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
@@ -17,6 +35,7 @@ KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
 CAMERA_INDEXES = [0, 1, 2]
 READ_ATTEMPTS = 10
 RECONNECT_AFTER_FAILURES = 10
+FACE_ANALYSIS_INTERVAL_FRAMES = _env_int("FACE_ANALYSIS_INTERVAL_FRAMES", 1, minimum=1)
 
 INSIGHTFACE_MODEL_NAME = "buffalo_l"
 INSIGHTFACE_DETECTION_SIZE = (640, 640)

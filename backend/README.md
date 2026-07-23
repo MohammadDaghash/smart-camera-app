@@ -75,6 +75,27 @@ Backend test folder. Add tests as modules become more stable.
 - Do not commit personal face images.
 - The first InsightFace run may download model files into `~/.insightface`.
 
+## Camera Pipeline Notes
+
+The camera pipeline is split into small helpers:
+
+- `app/services/camera_source.py`: camera open, test, release, and reconnect logic.
+- `app/services/camera_pipeline.py`: frame read loop, face-analysis cadence, overlay drawing, and stream logs.
+- `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
+
+The pipeline follows the same high-level idea used in mature camera systems:
+capture frames continuously, but keep expensive analysis controllable.
+
+Optional tuning:
+
+```bash
+FACE_ANALYSIS_INTERVAL_FRAMES=1
+```
+
+`1` analyzes every frame. Higher values reuse the latest face annotations between
+analysis frames, which can reduce CPU usage but may make boxes feel slightly less
+responsive.
+
 ## Recommended Local Command
 
 Use this command for the live camera app:

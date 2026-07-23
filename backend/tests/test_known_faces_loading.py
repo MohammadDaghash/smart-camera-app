@@ -97,3 +97,34 @@ def test_recognize_face_uses_best_embedding_match(face_recognition_module, monke
 
     assert label == "Mohammad"
     assert score == pytest.approx(1.0)
+
+
+def test_build_face_annotations_returns_boxes_labels_and_scores(
+    face_recognition_module,
+    monkeypatch,
+):
+    face = SimpleNamespace(
+        bbox=np.array([2, 3, 12, 13], dtype=np.float32),
+        normed_embedding=np.array([1.0, 0.0], dtype=np.float32),
+    )
+    frame = np.zeros((20, 20, 3), dtype=np.uint8)
+
+    monkeypatch.setattr(face_recognition_module, "detect_faces", lambda image: [face])
+    monkeypatch.setattr(
+        face_recognition_module,
+        "recognize_face",
+        lambda detected_face: ("Mohammad", 0.87),
+    )
+
+    annotations = face_recognition_module.build_face_annotations(frame)
+
+    assert annotations == [
+        {
+            "box": (2, 3, 12, 13),
+            "label": "Mohammad",
+            "score": 0.87,
+        }
+    ]
+    assert face_recognition_module.labels_from_annotations(annotations) == [
+        "Mohammad:0.87"
+    ]

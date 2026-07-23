@@ -2,6 +2,10 @@
 
 Smart Camera App is currently a local monolith with a clear internal backend layout.
 
+The camera path is inspired by Frigate's high-level pipeline approach: acquire
+frames first, then apply heavier analysis at a controlled cadence before sending
+output to the viewer. We are not copying Frigate's full NVR architecture.
+
 ## Backend Boundaries
 
 - Routes handle HTTP requests and responses.
@@ -36,9 +40,15 @@ MJPEG stream is sent back to browser
 ## Camera Pipeline Helpers
 
 - `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
-- `backend/app/services/camera_pipeline.py`: coordinates frame reads, face annotation, reconnect handling, and streaming logs.
+- `backend/app/services/camera_pipeline.py`: coordinates frame reads, face-analysis cadence, overlay drawing, reconnect handling, and streaming logs.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
+
+## Performance Tuning
+
+- `FACE_ANALYSIS_INTERVAL_FRAMES=1` keeps current behavior by analyzing every frame.
+- Higher values reuse the latest annotations between analysis frames to reduce CPU usage.
+- Increase the interval only after checking that label boxes still feel responsive enough.
 
 ## Privacy Defaults
 
