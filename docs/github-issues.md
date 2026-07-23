@@ -5,7 +5,7 @@
 ### Issue: Refine backend camera pipeline boundaries
 
 Description:
-Review the `backend/app/services/camera_service.py` module and make sure camera opening, reconnection, frame reads, and stream cleanup are safe and maintainable.
+Review the camera pipeline helpers under `backend/app/services/` and make sure camera opening, reconnection, frame reads, MJPEG encoding, and stream cleanup are safe and maintainable.
 
 Acceptance criteria:
 

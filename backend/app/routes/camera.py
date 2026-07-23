@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.config import CAMERA_INDEXES
-from app.services.camera_service import generate_frames, open_working_camera, release_camera
+from app.services.camera_pipeline import generate_frames
+from app.services.camera_source import open_working_camera, release_camera
+from app.services.mjpeg_streamer import MJPEG_MEDIA_TYPE
 from app.utils.auth import require_login
 
 
@@ -40,5 +42,5 @@ async def video(user: str = Depends(require_login)):
 
     return StreamingResponse(
         generate_frames(camera, index),
-        media_type="multipart/x-mixed-replace; boundary=frame",
+        media_type=MJPEG_MEDIA_TYPE,
     )

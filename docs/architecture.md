@@ -18,27 +18,36 @@ Browser <img src="/video">
 FastAPI /video route
         |
         v
-Camera service opens webcam and reads frames
+Camera source opens webcam and reads frames
         |
         v
-Vision module detects and recognizes faces
+Camera pipeline sends frames to the vision module
         |
         v
-Frame is annotated and encoded as JPEG
+Frame is annotated
+        |
+        v
+MJPEG streamer encodes the frame as JPEG
         |
         v
 MJPEG stream is sent back to browser
 ```
 
+## Camera Pipeline Helpers
+
+- `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
+- `backend/app/services/camera_pipeline.py`: coordinates frame reads, face annotation, reconnect handling, and streaming logs.
+- `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
+- `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
+
 ## Privacy Defaults
 
 - Known-face images stay local.
 - `.gitignore` excludes `backend/known_faces/*`.
-- No database, cloud storage, authentication, or smart-home integration exists yet.
+- No database, cloud storage, or smart-home integration exists yet.
 
 ## Near-Term Architecture Goals
 
-- Add multi-photo known-face folders.
 - Add smoothing and confidence history without adding a database.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.
