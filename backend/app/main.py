@@ -18,6 +18,7 @@ from app.routes import (
     known_faces,
     recognition_debug,
     stats,
+    system_status,
 )
 from app.utils.logging import logger
 
@@ -41,6 +42,7 @@ app.include_router(stats.router)
 app.include_router(events.router)
 app.include_router(known_faces.router)
 app.include_router(recognition_debug.router)
+app.include_router(system_status.router)
 
 
 if AUTH_USING_DEFAULT_CREDENTIALS:

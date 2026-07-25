@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.services.event_log import event_log
 from app.services.pipeline_stats import pipeline_stats
+from app.services.system_status import build_system_status
 from app.utils.auth import require_login
 
 
@@ -16,5 +17,6 @@ async def stats(user: str = Depends(require_login)):
     snapshot["alerts"] = {
         "latest_alert": latest_alerts[0] if latest_alerts else None,
     }
+    snapshot["system"] = build_system_status(snapshot)
 
     return snapshot

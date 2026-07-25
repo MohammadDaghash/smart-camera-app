@@ -222,6 +222,10 @@
           <h2>Runtime</h2>
           <div class="metric-grid">
             <div class="metric">
+              <span class="metric-label">System</span>
+              <span class="metric-value" id="systemStatus">-</span>
+            </div>
+            <div class="metric">
               <span class="metric-label">Active streams</span>
               <span class="metric-value" id="activeStreams">0</span>
             </div>
@@ -327,6 +331,7 @@
 
   <script>
     const updatedAt = document.getElementById("updatedAt");
+    const systemStatus = document.getElementById("systemStatus");
     const activeStreams = document.getElementById("activeStreams");
     const analysisFrames = document.getElementById("analysisFrames");
     const framesRead = document.getElementById("framesRead");
@@ -356,6 +361,14 @@
 
     function setText(element, value) {
       element.textContent = value ?? "-";
+    }
+
+    function titleCase(value) {
+      if (!value) {
+        return "-";
+      }
+
+      return value.charAt(0).toUpperCase() + value.slice(1);
     }
 
     function formatDuration(seconds) {
@@ -438,6 +451,7 @@
       const performance = runtime.performance || {};
       const recognition = data.recognition || {};
 
+      setText(systemStatus, titleCase(data.system?.status));
       setText(activeStreams, runtime.active_streams);
       setText(analysisFrames, recognition.analysis_frames);
       setText(framesRead, runtime.frames_read);

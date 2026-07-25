@@ -7,6 +7,8 @@ frames first, then apply heavier analysis at a controlled cadence before sending
 output to the viewer. We are not copying Frigate's full NVR architecture.
 We also follow Frigate's observability pattern by exposing separate pipeline FPS
 metrics instead of one vague "working/not working" status.
+Those metrics feed a simple system status layer: `healthy`, `idle`, `degraded`,
+or `error`.
 
 ## Backend Boundaries
 
@@ -64,6 +66,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/recognition_debug.py`: returns safe recognition diagnostics for `/api/recognition-debug`.
+- `backend/app/services/system_status.py`: converts pipeline metrics into a concise health status.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
 - `backend/app/routes/known_faces.py`: exposes a protected known-face loading summary without embeddings or images.
 - `backend/app/vision/label_smoothing.py`: stabilizes recognition labels using face-box overlap and recent label votes.
@@ -80,6 +83,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - latest face count and labels
 - motion activity, score, changed area, and event count
 - 5-second rolling camera, stream, analysis, motion, and skipped-analysis FPS
+- system status derived from pipeline health checks
 - latest local motion and face events
 - latest face debug metadata for `/api/recognition-debug`
 - filterable local event history through `/api/events`

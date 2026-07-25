@@ -20,6 +20,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Camera access test endpoint at `/camera-test`
 - Pipeline stats endpoint at `/stats`
 - Pipeline performance FPS metrics
+- Frigate-inspired system health status
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`
 - Basic frontend status panel for camera, faces, labels, and motion
@@ -105,6 +106,7 @@ http://localhost:8000/health
 http://localhost:8000/camera-test
 http://localhost:8000/video
 http://localhost:8000/stats
+http://localhost:8000/api/system-status
 http://localhost:8000/known-faces
 http://localhost:8000/recognition-debug
 http://localhost:8000/api/recognition-debug
@@ -157,8 +159,9 @@ GET  /logout    clear the session
 ```
 
 Protected routes (`/`, `/history`, `/video`, `/camera-test`, `/stats`,
-`/known-faces`, `/recognition-debug`, `/api/recognition-debug`, `/api/events`,
-`/api/snapshots/*`) redirect to `/login` when the user is not signed in.
+`/known-faces`, `/recognition-debug`, `/api/system-status`,
+`/api/recognition-debug`, `/api/events`, `/api/snapshots/*`) redirect to
+`/login` when the user is not signed in.
 `/health` stays public.
 
 ### Session hardening
@@ -280,3 +283,4 @@ demo script and system-design explanation.
 - Prefer local modules under `backend/app/` over growing a single large file
 - Keep routes thin and move business logic into services or vision modules
 - Add tests as logic becomes stable enough to protect
+- Keep tracked files under 1000 lines

@@ -19,6 +19,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
+- `GET /api/system-status`: protected health summary based on pipeline metrics
 - `GET /known-faces`: protected debug summary of loaded known-face labels and counts
 - `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
 - `GET /api/events`: local event history with `type` and `limit` filters
@@ -98,6 +99,7 @@ The camera pipeline is split into small helpers:
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/services/recognition_debug.py`: builds the recognition debug API response from safe runtime metadata.
+- `app/services/system_status.py`: converts low-level pipeline metrics into `healthy`, `idle`, `degraded`, or `error`.
 - `app/vision/label_smoothing.py`: stabilizes recognition labels across nearby face boxes and recent frames.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
 
@@ -149,6 +151,13 @@ systems such as Frigate:
 - `motion_fps`: frames processed by motion detection
 - `skipped_analysis_fps`: camera frames not processed by face recognition
 - `uptime_seconds`: backend pipeline uptime since stats reset
+
+`/api/system-status` summarizes those low-level values into a simple status:
+
+- `healthy`: camera, stream, encoding, and analysis checks look good
+- `idle`: no browser is currently consuming `/video`
+- `degraded`: the pipeline is running, but warnings exist
+- `error`: an active stream is not reading or streaming frames correctly
 
 Pipeline stats reset when the backend restarts. Events are stored locally in
 SQLite and survive backend restarts.

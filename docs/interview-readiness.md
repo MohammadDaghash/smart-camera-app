@@ -31,6 +31,7 @@ architecture, but we are using its high-level ideas:
 
 - Capture video first, then process only what is needed.
 - Track separate FPS metrics instead of one vague health status.
+- Convert low-level metrics into a simple system health status.
 - Keep heavier analysis controllable by cadence.
 - Separate capture, processing, events, stats, and frontend views.
 
@@ -93,6 +94,7 @@ Show:
 - Analysis FPS
 - Motion FPS
 - Skipped analysis FPS
+- System status: healthy, idle, degraded, or error
 
 ## How To Explain The FPS Metrics
 
@@ -115,6 +117,23 @@ Meaning:
 - 15 frames per second are streamed without expensive face analysis.
 
 This is useful because the app can stay responsive while controlling CPU usage.
+
+## How To Explain System Status
+
+The app turns low-level metrics into a simple status:
+
+```text
+healthy  -> stream is active and core checks look good
+idle     -> no browser is currently consuming /video
+degraded -> the pipeline works, but warnings exist
+error    -> an active stream is not reading or streaming frames correctly
+```
+
+Example:
+
+If `camera_fps = 10` but `stream_fps = 2`, the system becomes `degraded`
+because the camera is producing frames faster than the browser stream is sending
+them. That tells us where to debug first.
 
 ## Key Technical Tradeoffs
 
@@ -159,6 +178,7 @@ or two.
 - Debug endpoints expose metadata, not embeddings or images.
 - Tests cover pure logic, route protection, event logging, recognition debug, and
   pipeline metrics.
+- A file-length guard keeps tracked files under 1000 lines.
 - Frigate influenced the pipeline and observability design, but this app remains
   a smaller MVP.
 

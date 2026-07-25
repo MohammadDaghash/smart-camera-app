@@ -23,6 +23,7 @@ The current system supports:
 - Basic local login protection
 - Basic motion detection stats
 - 5-second rolling pipeline FPS metrics
+- System health status derived from pipeline checks
 - Persistent local motion and face events
 - Event history page with simple filters
 - Local snapshots for saved motion and face events
@@ -59,7 +60,7 @@ The current system does not yet include:
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
 | P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
-| P1 | Pipeline observability | Started | Track camera, stream, analysis, motion, skipped-analysis FPS, and uptime. |
+| P1 | Pipeline observability | Started | Track FPS, uptime, and derived system health status. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
 | P2 | Accounts and permissions | Planned | Add admin and lower-privilege user roles when remote or shared access is needed. |
 | P2 | Local browser alert notifications | Started | Notify open browser sessions when new suspicious alerts are created. |
@@ -143,11 +144,14 @@ Requirements:
 - Track face-analysis FPS.
 - Track motion-processing FPS.
 - Track skipped-analysis FPS.
+- Derive a simple system status from pipeline metrics.
 - Show these metrics through `/stats` and `/recognition-debug`.
+- Expose the status through `/api/system-status`.
 
 Acceptance criteria:
 
 - `/stats` returns 5-second rolling performance metrics.
+- `/api/system-status` returns `healthy`, `idle`, `degraded`, or `error`.
 - `/recognition-debug` shows the same metrics while the live stream is open.
 - Metrics make it clear whether the camera, streaming, or analysis stage is slow.
 

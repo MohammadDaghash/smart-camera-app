@@ -54,3 +54,4 @@ def test_stats_returns_pipeline_snapshot_when_authenticated(monkeypatch, tmp_pat
     assert "motion" in response.json()
     assert response.json()["events"][0]["message"] == "Suspicious activity"
     assert response.json()["alerts"]["latest_alert"]["message"] == "Suspicious activity"
+    assert response.json()["system"]["status"] == "idle"

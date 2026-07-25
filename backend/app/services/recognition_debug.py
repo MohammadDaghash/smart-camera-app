@@ -8,6 +8,7 @@ from app.config import (
     FACE_TRACK_TTL_FRAMES,
 )
 from app.services.pipeline_stats import pipeline_stats
+from app.services.system_status import build_system_status
 
 
 def recognition_debug_snapshot():
@@ -15,6 +16,7 @@ def recognition_debug_snapshot():
     analysis = snapshot["analysis"]
 
     return {
+        "system": build_system_status(snapshot),
         "settings": {
             "face_match_threshold": FACE_MATCH_THRESHOLD,
             "face_analysis_interval_frames": FACE_ANALYSIS_INTERVAL_FRAMES,

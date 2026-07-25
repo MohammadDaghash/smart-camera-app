@@ -48,7 +48,7 @@
 
     .status-panel {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 12px;
       margin: 0 0 20px;
       padding: 16px 0;
@@ -290,6 +290,10 @@
     </section>
     <section class="status-panel" aria-label="Live camera status">
       <div class="status-item">
+        <span class="status-label">System</span>
+        <span class="status-value ok" id="systemStatus">Healthy</span>
+      </div>
+      <div class="status-item">
         <span class="status-label">Camera</span>
         <span class="status-value ok" id="cameraStatus">Live</span>
       </div>
@@ -321,6 +325,7 @@
   </main>
   <script>
     const cameraStatus = document.getElementById("cameraStatus");
+    const systemStatus = document.getElementById("systemStatus");
     const faceCount = document.getElementById("faceCount");
     const faceLabels = document.getElementById("faceLabels");
     const motionStatus = document.getElementById("motionStatus");
@@ -438,6 +443,26 @@
       setValue(alertStatus, "Suspicious activity", "error");
     }
 
+    function statusClass(status) {
+      if (status === "healthy") {
+        return "ok";
+      }
+
+      if (status === "error") {
+        return "error";
+      }
+
+      return "warn";
+    }
+
+    function statusText(status) {
+      if (!status) {
+        return "Unknown";
+      }
+
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
     function sendAlertNotification(latestAlert) {
       const alertKey = getAlertKey(latestAlert);
 
@@ -491,7 +516,9 @@
         const faces = stats.analysis?.last_face_count || 0;
         const labels = formatLabels(stats.analysis?.last_labels);
         const motionActive = Boolean(stats.motion?.motion_active);
+        const system = stats.system?.status || "idle";
 
+        setValue(systemStatus, statusText(system), statusClass(system));
         if (activeStreams > 0 || framesRead > 0) {
           setValue(cameraStatus, "Live", "ok");
         } else {
@@ -507,6 +534,7 @@
 
         statsUpdatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
       } catch (error) {
+        setValue(systemStatus, "Unknown", "error");
         setValue(cameraStatus, "Unknown", "error");
         setValue(motionStatus, "Unknown", "error");
         setValue(alertStatus, "Unknown", "error");
