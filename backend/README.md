@@ -16,7 +16,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /health`: simple API health check
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
-- `GET /stats`: current in-memory camera pipeline statistics
+- `GET /stats`: current in-memory camera pipeline statistics and latest events
 
 ## Folder Guide
 
@@ -82,6 +82,7 @@ The camera pipeline is split into small helpers:
 
 - `app/services/camera_source.py`: camera open, test, release, and reconnect logic.
 - `app/services/camera_pipeline.py`: frame read loop, face-analysis cadence, overlay drawing, and stream logs.
+- `app/services/event_log.py`: latest in-memory motion and face events.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
@@ -105,9 +106,9 @@ Stats are available at:
 GET /stats
 ```
 
-The stats include camera counters, face-analysis counters, and basic motion
+The stats include camera counters, face-analysis counters, basic motion
 detection values such as `motion_active`, `last_motion_score`, and
-`last_motion_area`.
+`last_motion_area`, plus the latest 10 in-memory events.
 
 The stats reset when the backend restarts. This is intentional for the local MVP;
 we will add persistent event history later when the event model is clear.

@@ -20,11 +20,12 @@ The current system supports:
 - Basic local face recognition labels
 - Basic local login protection
 - Basic motion detection stats
+- Latest in-memory motion and face events
 
 The current system does not yet include:
 
 - Role-based permissions
-- Databases or event history
+- Databases or persistent event history
 - Cloud deployment
 - Mobile apps
 - Smart-home device control
@@ -44,6 +45,7 @@ The current system does not yet include:
 | P0 | Face detection | Working | Detect faces and draw boxes on the stream. |
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
+| P1 | In-memory event log | Started | Show latest local motion and face events without persistence. |
 | P1 | Recognition quality | Planned | Improve stability using multiple photos, thresholds, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
@@ -125,6 +127,25 @@ Acceptance criteria:
 - `/stats` includes a motion score and changed-area value.
 - Motion settings can be tuned locally from `.env`.
 
+### In-Memory Event Log
+
+Goal:
+Show the latest local camera activity without adding a database yet.
+
+Requirements:
+
+- Record an event when motion starts.
+- Record an event when a detected face label appears.
+- Keep events in memory only for this MVP step.
+- Expose the latest events through `/stats`.
+- Show the latest events in the frontend.
+
+Acceptance criteria:
+
+- The dashboard shows recent motion and face events.
+- Events reset when the backend restarts.
+- No snapshots, alerts, or persistent storage are added yet.
+
 ### Accounts And Permissions
 
 Goal:
@@ -151,7 +172,7 @@ Acceptance criteria:
 ### Alerts And Event History
 
 Goal:
-Help users understand important activity without watching the camera constantly.
+Persist important activity and notify users without requiring constant watching.
 
 Future requirements:
 

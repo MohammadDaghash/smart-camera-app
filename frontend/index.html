@@ -35,6 +35,11 @@
       font-size: 28px;
     }
 
+    h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
     .status {
       margin: 0 0 20px;
       color: #15803d;
@@ -88,6 +93,41 @@
       margin: -8px 0 20px;
       color: #6b7280;
       font-size: 13px;
+    }
+
+    .events {
+      margin: 0 0 20px;
+    }
+
+    .event-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .event-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .event-message {
+      font-weight: 700;
+    }
+
+    .event-time {
+      color: #6b7280;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .event-empty {
+      padding: 10px 0;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     img {
@@ -168,6 +208,12 @@
       </div>
     </section>
     <p class="status-meta" id="statsUpdatedAt">Stats loading...</p>
+    <section class="events" aria-label="Recent camera events">
+      <h2>Recent Events</h2>
+      <ul class="event-list" id="eventList">
+        <li class="event-empty">No events yet</li>
+      </ul>
+    </section>
     <img src="/video" alt="Live webcam stream">
   </main>
   <script>
@@ -176,6 +222,7 @@
     const faceLabels = document.getElementById("faceLabels");
     const motionStatus = document.getElementById("motionStatus");
     const statsUpdatedAt = document.getElementById("statsUpdatedAt");
+    const eventList = document.getElementById("eventList");
 
     function setValue(element, text, stateClass) {
       element.textContent = text;
@@ -194,6 +241,42 @@
       return labels
         .map((label) => label.split(":")[0])
         .join(", ");
+    }
+
+    function formatEventTime(event) {
+      if (!event.created_at) {
+        return "";
+      }
+
+      return new Date(event.created_at * 1000).toLocaleTimeString();
+    }
+
+    function renderEvents(events) {
+      eventList.replaceChildren();
+
+      if (!events || events.length === 0) {
+        const emptyItem = document.createElement("li");
+        emptyItem.className = "event-empty";
+        emptyItem.textContent = "No events yet";
+        eventList.appendChild(emptyItem);
+        return;
+      }
+
+      for (const event of events.slice(0, 10)) {
+        const item = document.createElement("li");
+        item.className = "event-item";
+
+        const message = document.createElement("span");
+        message.className = "event-message";
+        message.textContent = event.message || "Event detected";
+
+        const time = document.createElement("span");
+        time.className = "event-time";
+        time.textContent = formatEventTime(event);
+
+        item.append(message, time);
+        eventList.appendChild(item);
+      }
     }
 
     async function updateStats() {
@@ -226,6 +309,7 @@
         setValue(faceCount, String(faces), faces > 0 ? "ok" : "");
         setValue(faceLabels, labels, labels === "None" ? "" : "ok");
         setValue(motionStatus, motionActive ? "Detected" : "No motion", motionActive ? "warn" : "ok");
+        renderEvents(stats.events || []);
 
         statsUpdatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
       } catch (error) {

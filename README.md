@@ -18,6 +18,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Camera access test endpoint at `/camera-test`
 - Pipeline stats endpoint at `/stats`
 - Basic frontend status panel for camera, faces, labels, and motion
+- Latest in-memory camera events in the dashboard
 
 ## Team
 
@@ -231,7 +232,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Fuller frontend dashboard and camera controls
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
-- Movement event history
+- Persistent movement and face event history
 - Suspicious activity alerts
 - Local event history
 - Optional smart-home device integrations

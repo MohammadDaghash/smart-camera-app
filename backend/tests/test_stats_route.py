@@ -5,6 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import AUTH_PASSWORD, AUTH_USERNAME
 from app.routes import auth, stats
 from app.services import login_throttle, session_store
+from app.services.event_log import event_log
 from app.services.pipeline_stats import pipeline_stats
 
 
@@ -36,14 +37,17 @@ def test_stats_returns_pipeline_snapshot_when_authenticated():
     session_store.revoke_all()
     login_throttle.clear()
     pipeline_stats.reset()
+    event_log.reset()
 
     client = TestClient(build_test_app(), follow_redirects=False)
     login(client)
     pipeline_stats.record_frame_read(camera_index=0, now=100.0)
     pipeline_stats.record_frame_streamed()
+    event_log.add_event("motion", "Motion detected", now=101.0)
 
     response = client.get("/stats")
 
     assert response.status_code == 200
     assert response.json()["camera"]["frames_streamed"] == 1
     assert "motion" in response.json()
+    assert response.json()["events"][0]["message"] == "Motion detected"

@@ -2,6 +2,7 @@ import time
 
 from app.config import FACE_ANALYSIS_INTERVAL_FRAMES, RECONNECT_AFTER_FAILURES
 from app.services.camera_source import open_working_camera, release_camera
+from app.services.event_log import event_log
 from app.services.frame_cadence import should_process_frame
 from app.services.mjpeg_streamer import encode_mjpeg_frame
 from app.services.pipeline_stats import pipeline_stats
@@ -19,6 +20,7 @@ def generate_frames(camera, index):
     failed_reads = 0
     last_face_count = None
     last_motion_detected = False
+    last_face_labels = set()
     latest_face_annotations = []
     motion_detector = MotionDetector()
     pipeline_stats.mark_stream_started(index)
@@ -75,13 +77,36 @@ def generate_frames(camera, index):
                     motion["motion_area"],
                 )
 
+            if motion["motion_detected"] and not last_motion_detected:
+                event_log.add_event(
+                    event_type="motion",
+                    message="Motion detected",
+                    metadata={
+                        "score": round(motion["motion_score"], 4),
+                        "area": motion["motion_area"],
+                    },
+                )
+
             last_motion_detected = motion["motion_detected"]
 
             if should_process_frame(frame_count, FACE_ANALYSIS_INTERVAL_FRAMES):
                 latest_face_annotations = build_face_annotations(frame)
                 face_count = len(latest_face_annotations)
                 face_labels = labels_from_annotations(latest_face_annotations)
+                current_face_labels = {
+                    annotation["label"]
+                    for annotation in latest_face_annotations
+                }
                 pipeline_stats.record_analysis(face_count, face_labels)
+
+                for label in sorted(current_face_labels - last_face_labels):
+                    event_log.add_event(
+                        event_type="face",
+                        message=f"{label} detected",
+                        metadata={"label": label},
+                    )
+
+                last_face_labels = current_face_labels
 
                 if face_count != last_face_count or (face_count > 0 and frame_count % 60 == 0):
                     logger.info(
