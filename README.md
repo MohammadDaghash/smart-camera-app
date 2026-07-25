@@ -19,6 +19,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Health endpoint at `/health`
 - Camera access test endpoint at `/camera-test`
 - Pipeline stats endpoint at `/stats`
+- Pipeline performance FPS metrics
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`
 - Basic frontend status panel for camera, faces, labels, and motion

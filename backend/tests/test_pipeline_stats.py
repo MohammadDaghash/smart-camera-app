@@ -3,10 +3,11 @@ from app.services.pipeline_stats import PipelineStats
 
 def test_pipeline_stats_tracks_camera_and_analysis_state():
     stats = PipelineStats(face_analysis_interval_frames=3)
+    stats.reset(now=99.0)
 
     stats.mark_stream_started(camera_index=1)
     stats.record_frame_read(camera_index=1, now=100.0)
-    stats.record_frame_streamed()
+    stats.record_frame_streamed(now=100.5)
     stats.record_frame_read_failed(camera_index=1)
     stats.record_reconnect(camera_index=2)
     stats.record_analysis(
@@ -32,7 +33,7 @@ def test_pipeline_stats_tracks_camera_and_analysis_state():
     )
     stats.record_encoding_failure()
 
-    snapshot = stats.snapshot()
+    snapshot = stats.snapshot(now=103.0)
 
     assert snapshot["camera"] == {
         "active_streams": 1,
@@ -68,6 +69,15 @@ def test_pipeline_stats_tracks_camera_and_analysis_state():
         "last_motion_score": 0.12,
         "last_motion_area": 4200,
     }
+    assert snapshot["performance"] == {
+        "fps_window_seconds": 5.0,
+        "camera_fps": 0.2,
+        "stream_fps": 0.2,
+        "analysis_fps": 0.2,
+        "motion_fps": 0.2,
+        "skipped_analysis_fps": 0.0,
+        "uptime_seconds": 4.0,
+    }
     assert snapshot["runtime"]["last_frame_at"] == 100.0
     assert snapshot["runtime"]["last_analysis_at"] == 101.0
     assert snapshot["runtime"]["last_motion_at"] == 102.0
@@ -98,3 +108,30 @@ def test_pipeline_stats_counts_motion_events_on_new_motion_only():
     assert snapshot["motion"]["motion_active"] is True
     assert snapshot["motion"]["last_motion_score"] == 0.3
     assert snapshot["motion"]["last_motion_area"] == 3000
+
+
+def test_pipeline_stats_calculates_rolling_fps_values():
+    stats = PipelineStats(face_analysis_interval_frames=2)
+    stats.reset(now=100.0)
+
+    for timestamp in [100.0, 101.0, 102.0, 103.0, 104.0]:
+        stats.record_frame_read(camera_index=0, now=timestamp)
+        stats.record_frame_streamed(now=timestamp)
+        stats.record_motion(
+            motion_detected=False,
+            motion_score=0.0,
+            motion_area=0,
+            now=timestamp,
+        )
+
+    for timestamp in [101.0, 103.0]:
+        stats.record_analysis(face_count=0, labels=[], now=timestamp)
+
+    performance = stats.snapshot(now=105.0)["performance"]
+
+    assert performance["camera_fps"] == 1.0
+    assert performance["stream_fps"] == 1.0
+    assert performance["analysis_fps"] == 0.4
+    assert performance["motion_fps"] == 1.0
+    assert performance["skipped_analysis_fps"] == 0.6
+    assert performance["uptime_seconds"] == 5.0

@@ -31,6 +31,7 @@ def recognition_debug_snapshot():
             "frames_read": snapshot["camera"]["frames_read"],
             "frames_streamed": snapshot["camera"]["frames_streamed"],
             "active_streams": snapshot["camera"]["active_streams"],
+            "performance": snapshot["performance"],
         },
         "recognition": {
             "analysis_frames": analysis["analysis_frames"],

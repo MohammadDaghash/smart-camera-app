@@ -5,6 +5,8 @@ Smart Camera App is currently a local monolith with a clear internal backend lay
 The camera path is inspired by Frigate's high-level pipeline approach: acquire
 frames first, then apply heavier analysis at a controlled cadence before sending
 output to the viewer. We are not copying Frigate's full NVR architecture.
+We also follow Frigate's observability pattern by exposing separate pipeline FPS
+metrics instead of one vague "working/not working" status.
 
 ## Backend Boundaries
 
@@ -77,6 +79,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - face-analysis interval and analysis-frame count
 - latest face count and labels
 - motion activity, score, changed area, and event count
+- 5-second rolling camera, stream, analysis, motion, and skipped-analysis FPS
 - latest local motion and face events
 - latest face debug metadata for `/api/recognition-debug`
 - filterable local event history through `/api/events`

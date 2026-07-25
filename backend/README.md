@@ -137,7 +137,18 @@ GET /stats
 
 The stats include camera counters, face-analysis counters, basic motion
 detection values such as `motion_active`, `last_motion_score`, and
-`last_motion_area`, the latest 10 local events, and the latest local alert.
+`last_motion_area`, 5-second rolling FPS metrics, the latest 10 local events,
+and the latest local alert.
+
+Performance metrics follow the same observability idea used by mature camera
+systems such as Frigate:
+
+- `camera_fps`: frames read from the camera
+- `stream_fps`: frames encoded and sent to the browser
+- `analysis_fps`: frames processed by face recognition
+- `motion_fps`: frames processed by motion detection
+- `skipped_analysis_fps`: camera frames not processed by face recognition
+- `uptime_seconds`: backend pipeline uptime since stats reset
 
 Pipeline stats reset when the backend restarts. Events are stored locally in
 SQLite and survive backend restarts.

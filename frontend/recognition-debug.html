@@ -237,6 +237,30 @@
               <span class="metric-label">Faces</span>
               <span class="metric-value" id="faceCount">0</span>
             </div>
+            <div class="metric">
+              <span class="metric-label">Camera FPS</span>
+              <span class="metric-value" id="cameraFps">0.00</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Stream FPS</span>
+              <span class="metric-value" id="streamFps">0.00</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Analysis FPS</span>
+              <span class="metric-value" id="analysisFps">0.00</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Motion FPS</span>
+              <span class="metric-value" id="motionFps">0.00</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Skipped analysis FPS</span>
+              <span class="metric-value" id="skippedAnalysisFps">0.00</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Uptime</span>
+              <span class="metric-value" id="uptime">0s</span>
+            </div>
           </div>
         </section>
 
@@ -307,6 +331,12 @@
     const analysisFrames = document.getElementById("analysisFrames");
     const framesRead = document.getElementById("framesRead");
     const faceCount = document.getElementById("faceCount");
+    const cameraFps = document.getElementById("cameraFps");
+    const streamFps = document.getElementById("streamFps");
+    const analysisFps = document.getElementById("analysisFps");
+    const motionFps = document.getElementById("motionFps");
+    const skippedAnalysisFps = document.getElementById("skippedAnalysisFps");
+    const uptime = document.getElementById("uptime");
     const matchThreshold = document.getElementById("matchThreshold");
     const analysisInterval = document.getElementById("analysisInterval");
     const smoothingStatus = document.getElementById("smoothingStatus");
@@ -326,6 +356,22 @@
 
     function setText(element, value) {
       element.textContent = value ?? "-";
+    }
+
+    function formatDuration(seconds) {
+      if (seconds === null || seconds === undefined) {
+        return "-";
+      }
+
+      const roundedSeconds = Math.round(Number(seconds));
+      const minutes = Math.floor(roundedSeconds / 60);
+      const remainingSeconds = roundedSeconds % 60;
+
+      if (minutes === 0) {
+        return `${remainingSeconds}s`;
+      }
+
+      return `${minutes}m ${remainingSeconds}s`;
     }
 
     function labelClass(label) {
@@ -389,12 +435,19 @@
       const settings = data.settings || {};
       const smoothing = settings.label_smoothing || {};
       const runtime = data.runtime || {};
+      const performance = runtime.performance || {};
       const recognition = data.recognition || {};
 
       setText(activeStreams, runtime.active_streams);
       setText(analysisFrames, recognition.analysis_frames);
       setText(framesRead, runtime.frames_read);
       setText(faceCount, recognition.last_face_count);
+      setText(cameraFps, score(performance.camera_fps));
+      setText(streamFps, score(performance.stream_fps));
+      setText(analysisFps, score(performance.analysis_fps));
+      setText(motionFps, score(performance.motion_fps));
+      setText(skippedAnalysisFps, score(performance.skipped_analysis_fps));
+      setText(uptime, formatDuration(performance.uptime_seconds));
       setText(matchThreshold, score(settings.face_match_threshold));
       setText(analysisInterval, settings.face_analysis_interval_frames);
       setText(smoothingStatus, smoothing.enabled ? "On" : "Off");
