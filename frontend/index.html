@@ -41,6 +41,55 @@
       font-weight: 700;
     }
 
+    .status-panel {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 16px 0;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .status-item {
+      min-width: 0;
+    }
+
+    .status-label {
+      display: block;
+      margin-bottom: 4px;
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-value {
+      display: block;
+      min-height: 24px;
+      font-size: 18px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .status-value.ok {
+      color: #15803d;
+    }
+
+    .status-value.warn {
+      color: #b45309;
+    }
+
+    .status-value.error {
+      color: #b91c1c;
+    }
+
+    .status-meta {
+      margin: -8px 0 20px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
     img {
       display: block;
       width: 100%;
@@ -67,6 +116,30 @@
     .logout:hover {
       text-decoration: underline;
     }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 16px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .header {
+        align-items: flex-start;
+      }
+
+      .status-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 460px) {
+      .status-panel {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -76,7 +149,95 @@
       <a class="logout" href="/logout">Log out</a>
     </div>
     <p class="status">Camera is live</p>
+    <section class="status-panel" aria-label="Live camera status">
+      <div class="status-item">
+        <span class="status-label">Camera</span>
+        <span class="status-value ok" id="cameraStatus">Live</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Faces</span>
+        <span class="status-value" id="faceCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Labels</span>
+        <span class="status-value" id="faceLabels">None</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Motion</span>
+        <span class="status-value" id="motionStatus">No motion</span>
+      </div>
+    </section>
+    <p class="status-meta" id="statsUpdatedAt">Stats loading...</p>
     <img src="/video" alt="Live webcam stream">
   </main>
+  <script>
+    const cameraStatus = document.getElementById("cameraStatus");
+    const faceCount = document.getElementById("faceCount");
+    const faceLabels = document.getElementById("faceLabels");
+    const motionStatus = document.getElementById("motionStatus");
+    const statsUpdatedAt = document.getElementById("statsUpdatedAt");
+
+    function setValue(element, text, stateClass) {
+      element.textContent = text;
+      element.classList.remove("ok", "warn", "error");
+
+      if (stateClass) {
+        element.classList.add(stateClass);
+      }
+    }
+
+    function formatLabels(labels) {
+      if (!labels || labels.length === 0) {
+        return "None";
+      }
+
+      return labels
+        .map((label) => label.split(":")[0])
+        .join(", ");
+    }
+
+    async function updateStats() {
+      try {
+        const response = await fetch("/stats", { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`Stats request failed: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+          throw new Error("Stats response was not JSON");
+        }
+
+        const stats = await response.json();
+        const activeStreams = stats.camera?.active_streams || 0;
+        const framesRead = stats.camera?.frames_read || 0;
+        const faces = stats.analysis?.last_face_count || 0;
+        const labels = formatLabels(stats.analysis?.last_labels);
+        const motionActive = Boolean(stats.motion?.motion_active);
+
+        if (activeStreams > 0 || framesRead > 0) {
+          setValue(cameraStatus, "Live", "ok");
+        } else {
+          setValue(cameraStatus, "Waiting", "warn");
+        }
+
+        setValue(faceCount, String(faces), faces > 0 ? "ok" : "");
+        setValue(faceLabels, labels, labels === "None" ? "" : "ok");
+        setValue(motionStatus, motionActive ? "Detected" : "No motion", motionActive ? "warn" : "ok");
+
+        statsUpdatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      } catch (error) {
+        setValue(cameraStatus, "Unknown", "error");
+        setValue(motionStatus, "Unknown", "error");
+        statsUpdatedAt.textContent = "Stats unavailable";
+        console.error(error);
+      }
+    }
+
+    updateStats();
+    setInterval(updateStats, 1000);
+  </script>
 </body>
 </html>
