@@ -163,6 +163,11 @@
       color: #166534;
     }
 
+    .event-type.alert {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
     .event-message {
       margin: 0;
       font-weight: 700;
@@ -215,7 +220,7 @@
     <div class="header">
       <div>
         <h1>Event History</h1>
-        <p class="subtitle">Saved local motion and face events</p>
+        <p class="subtitle">Saved local motion, face, and alert events</p>
       </div>
       <nav class="nav-links" aria-label="Main navigation">
         <a class="nav-link" href="/">Live View</a>
@@ -230,6 +235,7 @@
           <option value="all">All</option>
           <option value="motion">Motion</option>
           <option value="face">Face</option>
+          <option value="alert">Alert</option>
         </select>
       </label>
       <label>

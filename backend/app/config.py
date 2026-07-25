@@ -92,6 +92,14 @@ EVENT_SNAPSHOTS_ENABLED = _env_flag("EVENT_SNAPSHOTS_ENABLED", default=True)
 EVENT_SNAPSHOT_MAX_WIDTH = _env_int("EVENT_SNAPSHOT_MAX_WIDTH", 640, minimum=1)
 EVENT_SNAPSHOT_JPEG_QUALITY = _env_int("EVENT_SNAPSHOT_JPEG_QUALITY", 85, minimum=1)
 
+ALERTS_ENABLED = _env_flag("ALERTS_ENABLED", default=True)
+ALERT_ANONYMOUS_MOTION_WINDOW_SECONDS = _env_int(
+    "ALERT_ANONYMOUS_MOTION_WINDOW_SECONDS",
+    30,
+    minimum=1,
+)
+ALERT_COOLDOWN_SECONDS = _env_int("ALERT_COOLDOWN_SECONDS", 60, minimum=0)
+
 # Authentication / session configuration.
 # Real credentials and secrets belong in backend/.env (gitignored), never here.
 AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")

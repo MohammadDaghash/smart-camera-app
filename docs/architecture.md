@@ -28,6 +28,9 @@ Camera source opens webcam and reads frames
 Camera pipeline runs motion detection and face analysis
         |
         v
+Local alert rules evaluate accepted events
+        |
+        v
 Frame is annotated
         |
         v
@@ -53,6 +56,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 
 - `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
 - `backend/app/services/camera_pipeline.py`: coordinates frame reads, face-analysis cadence, overlay drawing, reconnect handling, and streaming logs.
+- `backend/app/services/alert_rules.py`: creates local alert events when simple suspicious-activity rules match.
 - `backend/app/services/event_log.py`: stores local SQLite motion and face events, with cooldowns to avoid repeated event spam.
 - `backend/app/services/event_snapshots.py`: stores local JPEG snapshots for accepted events.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
@@ -73,6 +77,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - latest local motion and face events
 - filterable local event history through `/api/events`
 - protected local event snapshots through `/api/snapshots/{filename}`
+- local alert events when motion and an anonymous face happen close together
 
 Pipeline stats are local memory only and reset on backend restart. Events persist
 in `backend/local_data/events.db`, which is gitignored. Event cleanup is controlled
@@ -92,11 +97,11 @@ gitignored.
 - Known-face images stay local.
 - `.gitignore` excludes `backend/known_faces/*`.
 - Local events and snapshots stay under `backend/local_data/`.
-- No cloud storage or smart-home integration exists yet.
+- No external notifications, cloud storage, or smart-home integration exists yet.
 
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding cloud services.
-- Add alert rules.
+- Add alert notification delivery only after local alert rules are stable.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

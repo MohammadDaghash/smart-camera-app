@@ -85,6 +85,7 @@ The camera pipeline is split into small helpers:
 
 - `app/services/camera_source.py`: camera open, test, release, and reconnect logic.
 - `app/services/camera_pipeline.py`: frame read loop, face-analysis cadence, overlay drawing, and stream logs.
+- `app/services/alert_rules.py`: local suspicious-activity rule evaluation.
 - `app/services/event_log.py`: SQLite-backed local motion and face events with cooldown support.
 - `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
@@ -148,12 +149,17 @@ EVENT_RETENTION_DAYS=30
 EVENT_SNAPSHOTS_ENABLED=true
 EVENT_SNAPSHOT_MAX_WIDTH=640
 EVENT_SNAPSHOT_JPEG_QUALITY=85
+ALERTS_ENABLED=true
+ALERT_ANONYMOUS_MOTION_WINDOW_SECONDS=30
+ALERT_COOLDOWN_SECONDS=60
 ```
 
 Cooldowns prevent the same motion or face label from filling the event list too
 quickly when detection flickers. Retention settings keep the local SQLite
 database bounded. `EVENT_RETENTION_DAYS=0` disables age-based cleanup.
 Snapshot settings control whether event images are saved and how large they are.
+Alert settings control the local rule that creates an `alert` event when motion
+and an anonymous face happen close together. No external notifications are sent.
 
 ## Recommended Local Command
 

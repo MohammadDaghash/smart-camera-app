@@ -52,6 +52,11 @@ def test_events_returns_filtered_events_when_authenticated(monkeypatch, tmp_path
         "max_events": 100,
         "retention_days": None,
     }
+    assert response.json()["alerts"] == {
+        "enabled": True,
+        "anonymous_motion_window_seconds": 30,
+        "cooldown_seconds": 60,
+    }
     assert response.json()["events"] == [
         {
             "id": 2,
@@ -75,7 +80,27 @@ def test_events_rejects_unknown_event_type(monkeypatch, tmp_path):
     response = client.get("/api/events?type=unknown")
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Event type must be one of: all, motion, face"
+    assert response.json()["detail"] == (
+        "Event type must be one of: all, motion, face, alert"
+    )
+
+
+def test_events_can_filter_alert_events(monkeypatch, tmp_path):
+    test_event_log = EventLog(database_path=tmp_path / "events.db")
+    monkeypatch.setattr(events, "event_log", test_event_log)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+    test_event_log.add_event("motion", "Motion detected", now=100.0)
+    test_event_log.add_event("alert", "Suspicious activity", now=101.0)
+
+    response = client.get("/api/events?type=alert")
+
+    assert response.status_code == 200
+    assert response.json()["filters"]["type"] == "alert"
+    assert response.json()["events"][0]["type"] == "alert"
 
 
 def test_snapshot_redirects_when_anonymous():

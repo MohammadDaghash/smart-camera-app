@@ -7,6 +7,7 @@ from app.config import (
     RECONNECT_AFTER_FAILURES,
 )
 from app.services.camera_source import open_working_camera, release_camera
+from app.services.alert_rules import alert_rule_engine
 from app.services.event_log import event_log
 from app.services.event_snapshots import event_snapshot_store
 from app.services.frame_cadence import should_process_frame
@@ -34,6 +35,12 @@ def attach_event_snapshot(event, frame):
 
     if snapshot_metadata:
         event_log.update_event_metadata(event["id"], snapshot_metadata)
+
+
+def evaluate_alert_rules(event, frame):
+    alert_event = alert_rule_engine.evaluate_event(event)
+    attach_event_snapshot(alert_event, frame)
+    return alert_event
 
 
 def generate_frames(camera, index):
@@ -110,6 +117,7 @@ def generate_frames(camera, index):
                     cooldown_seconds=EVENT_MOTION_COOLDOWN_SECONDS,
                 )
                 attach_event_snapshot(event, frame)
+                evaluate_alert_rules(event, frame)
 
             last_motion_detected = motion["motion_detected"]
 
@@ -132,6 +140,7 @@ def generate_frames(camera, index):
                         cooldown_seconds=EVENT_FACE_COOLDOWN_SECONDS,
                     )
                     attach_event_snapshot(event, frame)
+                    evaluate_alert_rules(event, frame)
 
                 last_face_labels = current_face_labels
 
