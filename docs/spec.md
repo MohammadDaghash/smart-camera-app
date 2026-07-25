@@ -25,6 +25,7 @@ The current system supports:
 - Local snapshots for saved motion and face events
 - Local suspicious-activity alert events
 - Live dashboard alert indicator
+- Local browser notifications for new suspicious alerts
 
 The current system does not yet include:
 
@@ -55,7 +56,7 @@ The current system does not yet include:
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
 | P2 | Accounts and permissions | Planned | Add admin and lower-privilege user roles when remote or shared access is needed. |
-| P2 | Alert notifications | Planned | Notify users about suspicious activity after local alert rules are stable. |
+| P2 | Local browser alert notifications | Started | Notify open browser sessions when new suspicious alerts are created. |
 | P3 | Smart-home integrations | Future | Connect events to smart-home devices after safety rules are defined. |
 
 ## Feature Specs
@@ -106,6 +107,7 @@ Requirements:
 - Show camera and recognition status clearly.
 - Show the current motion status clearly.
 - Show the latest suspicious alert clearly.
+- Allow local browser notifications for new suspicious alerts.
 - Present known and anonymous labels in a readable way.
 - Work well on desktop and mobile screens.
 
@@ -114,6 +116,7 @@ Acceptance criteria:
 - Users can tell whether the camera is connected.
 - Users can tell whether recognition is active.
 - Users can tell when suspicious activity was detected.
+- Users can enable browser notifications from the live dashboard.
 - UI changes do not break the live stream.
 
 ### Basic Activity Signal
@@ -163,7 +166,7 @@ Acceptance criteria:
 - The same event type does not repeat too quickly when detection flickers.
 - Events survive backend restarts.
 - Old events are cleaned up according to local retention settings.
-- No external notifications, cloud storage, or remote database are added yet.
+- No cloud storage, external notification service, or remote database is added yet.
 
 ### Accounts And Permissions
 
@@ -188,20 +191,25 @@ Acceptance criteria:
 - No account system is added until the team agrees it is needed.
 - Permission rules are documented before implementation starts.
 
-### Alert Notifications
+### Local Browser Alert Notifications
 
 Goal:
-Notify users about suspicious activity without requiring constant watching.
+Notify users about suspicious activity while the local dashboard is open.
 
-Future requirements:
+Requirements:
 
 - Reuse local alert events.
-- Notify users only when confidence and safety rules are satisfied.
+- Ask for browser notification permission from the live dashboard.
+- Send one browser notification per new alert.
+- Do not repeat notifications for old alerts already visible on page load.
 - Avoid noisy or excessive alerts.
+- Do not add cloud push notifications yet.
 
 Acceptance criteria:
 
-- Alert rules are documented before any notification system is added.
+- Browser notifications can be enabled from the live dashboard.
+- New suspicious alerts trigger a browser notification when permission is granted.
+- Existing historical alerts do not trigger a notification on page load.
 - Event storage avoids unnecessary personal or biometric data.
 
 ## Open Questions

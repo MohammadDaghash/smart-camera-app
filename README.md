@@ -24,6 +24,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Local event snapshots shown in history
 - Local suspicious-activity alert events
 - Live dashboard alert indicator
+- Local browser notifications for new suspicious alerts
 
 ## Team
 
@@ -242,7 +243,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Fuller frontend dashboard and camera controls
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
-- Alert notifications
+- Local browser alert notifications
 - Suspicious activity alerts
 - Local event history
 - Optional smart-home device integrations

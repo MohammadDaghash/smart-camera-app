@@ -136,6 +136,35 @@
       text-decoration: underline;
     }
 
+    .notification-button {
+      border: 1px solid #2563eb;
+      border-radius: 6px;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+
+    .notification-button:hover:not(:disabled) {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .notification-button:disabled {
+      border-color: #d1d5db;
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    .notification-button[hidden] {
+      display: none;
+    }
+
     .events {
       margin: 0 0 20px;
     }
@@ -217,6 +246,7 @@
 
       .header {
         align-items: flex-start;
+        flex-direction: column;
       }
 
       .status-panel {
@@ -242,6 +272,9 @@
       <h1>Smart Camera Live View</h1>
       <nav class="nav-links" aria-label="Main navigation">
         <a class="nav-link" href="/history">History</a>
+        <button class="notification-button" id="notificationButton" type="button" hidden>
+          Enable notifications
+        </button>
         <a class="logout" href="/logout">Log out</a>
       </nav>
     </div>
@@ -292,8 +325,12 @@
     const alertStatus = document.getElementById("alertStatus");
     const alertBanner = document.getElementById("alertBanner");
     const alertDetail = document.getElementById("alertDetail");
+    const notificationButton = document.getElementById("notificationButton");
     const statsUpdatedAt = document.getElementById("statsUpdatedAt");
     const eventList = document.getElementById("eventList");
+    const notificationsSupported = "Notification" in window;
+    let hasInitializedAlertNotifications = false;
+    let lastAlertNotificationKey = null;
 
     function setValue(element, text, stateClass) {
       element.textContent = text;
@@ -320,6 +357,42 @@
       }
 
       return new Date(event.created_at * 1000).toLocaleTimeString();
+    }
+
+    function getAlertKey(alert) {
+      if (!alert) {
+        return null;
+      }
+
+      return alert.id || `${alert.created_at}:${alert.message}`;
+    }
+
+    function syncNotificationButton() {
+      if (!notificationsSupported) {
+        notificationButton.hidden = true;
+        return;
+      }
+
+      notificationButton.hidden = false;
+      notificationButton.disabled = Notification.permission === "denied";
+
+      if (Notification.permission === "granted") {
+        notificationButton.textContent = "Notifications on";
+        notificationButton.disabled = true;
+      } else if (Notification.permission === "denied") {
+        notificationButton.textContent = "Notifications blocked";
+      } else {
+        notificationButton.textContent = "Enable notifications";
+      }
+    }
+
+    async function requestNotifications() {
+      if (!notificationsSupported) {
+        return;
+      }
+
+      await Notification.requestPermission();
+      syncNotificationButton();
     }
 
     function renderEvents(events) {
@@ -363,6 +436,39 @@
       setValue(alertStatus, "Suspicious activity", "error");
     }
 
+    function sendAlertNotification(latestAlert) {
+      const alertKey = getAlertKey(latestAlert);
+
+      if (!hasInitializedAlertNotifications) {
+        lastAlertNotificationKey = alertKey;
+        hasInitializedAlertNotifications = true;
+        return;
+      }
+
+      if (!alertKey || alertKey === lastAlertNotificationKey) {
+        return;
+      }
+
+      lastAlertNotificationKey = alertKey;
+
+      if (!notificationsSupported || Notification.permission !== "granted") {
+        return;
+      }
+
+      const message = latestAlert.message || "Suspicious activity";
+      const eventTime = formatEventTime(latestAlert);
+      const body = [message, eventTime].filter(Boolean).join(" ");
+
+      try {
+        new Notification("Suspicious activity detected", {
+          body,
+          tag: `smart-camera-alert-${alertKey}`,
+        });
+      } catch (error) {
+        console.error("Unable to send browser notification", error);
+      }
+    }
+
     async function updateStats() {
       try {
         const response = await fetch("/stats", { cache: "no-store" });
@@ -394,6 +500,7 @@
         setValue(faceLabels, labels, labels === "None" ? "" : "ok");
         setValue(motionStatus, motionActive ? "Detected" : "No motion", motionActive ? "warn" : "ok");
         renderAlert(stats.alerts?.latest_alert);
+        sendAlertNotification(stats.alerts?.latest_alert);
         renderEvents(stats.events || []);
 
         statsUpdatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
@@ -407,6 +514,8 @@
       }
     }
 
+    notificationButton.addEventListener("click", requestNotifications);
+    syncNotificationButton();
     updateStats();
     setInterval(updateStats, 1000);
   </script>

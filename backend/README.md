@@ -159,7 +159,9 @@ quickly when detection flickers. Retention settings keep the local SQLite
 database bounded. `EVENT_RETENTION_DAYS=0` disables age-based cleanup.
 Snapshot settings control whether event images are saved and how large they are.
 Alert settings control the local rule that creates an `alert` event when motion
-and an anonymous face happen close together. No external notifications are sent.
+and an anonymous face happen close together. The frontend can show local browser
+notifications for new alerts while the dashboard is open. No external
+notification service is used.
 
 ## Recommended Local Command
 

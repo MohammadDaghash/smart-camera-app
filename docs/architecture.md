@@ -98,11 +98,12 @@ gitignored.
 - Known-face images stay local.
 - `.gitignore` excludes `backend/known_faces/*`.
 - Local events and snapshots stay under `backend/local_data/`.
-- No external notifications, cloud storage, or smart-home integration exists yet.
+- Browser notifications are local to the open dashboard session.
+- No external notification service, cloud storage, or smart-home integration exists yet.
 
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding cloud services.
-- Add alert notification delivery only after local alert rules are stable.
+- Add notification preferences after local browser notifications are stable.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.
