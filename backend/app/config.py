@@ -11,7 +11,12 @@ PROJECT_DIR = BACKEND_DIR.parent
 load_dotenv(BACKEND_DIR / ".env")
 
 
-def _env_int(name: str, default: int, minimum: int | None = None) -> int:
+def _env_int(
+    name: str,
+    default: int,
+    minimum: int | None = None,
+    maximum: int | None = None,
+) -> int:
     raw = os.getenv(name)
 
     if raw is None:
@@ -23,12 +28,20 @@ def _env_int(name: str, default: int, minimum: int | None = None) -> int:
             value = default
 
     if minimum is not None:
-        return max(minimum, value)
+        value = max(minimum, value)
+
+    if maximum is not None:
+        value = min(maximum, value)
 
     return value
 
 
-def _env_float(name: str, default: float, minimum: float | None = None) -> float:
+def _env_float(
+    name: str,
+    default: float,
+    minimum: float | None = None,
+    maximum: float | None = None,
+) -> float:
     raw = os.getenv(name)
 
     if raw is None:
@@ -40,7 +53,10 @@ def _env_float(name: str, default: float, minimum: float | None = None) -> float
             value = default
 
     if minimum is not None:
-        return max(minimum, value)
+        value = max(minimum, value)
+
+    if maximum is not None:
+        value = min(maximum, value)
 
     return value
 
@@ -78,12 +94,22 @@ FACE_LABEL_SMOOTHING_MIN_VOTES = _env_int(
     2,
     minimum=1,
 )
-FACE_TRACK_IOU_THRESHOLD = _env_float("FACE_TRACK_IOU_THRESHOLD", 0.2, minimum=0.0)
+FACE_TRACK_IOU_THRESHOLD = _env_float(
+    "FACE_TRACK_IOU_THRESHOLD",
+    0.2,
+    minimum=0.0,
+    maximum=1.0,
+)
 FACE_TRACK_TTL_FRAMES = _env_int("FACE_TRACK_TTL_FRAMES", 5, minimum=1)
 
 INSIGHTFACE_MODEL_NAME = "buffalo_l"
 INSIGHTFACE_DETECTION_SIZE = (640, 640)
-FACE_MATCH_THRESHOLD = 0.45
+FACE_MATCH_THRESHOLD = _env_float(
+    "FACE_MATCH_THRESHOLD",
+    0.45,
+    minimum=0.0,
+    maximum=1.0,
+)
 KNOWN_FACE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
 MOTION_DETECTION_ENABLED = _env_flag("MOTION_DETECTION_ENABLED", default=True)

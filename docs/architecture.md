@@ -94,6 +94,7 @@ gitignored.
 ## Performance Tuning
 
 - `FACE_ANALYSIS_INTERVAL_FRAMES=1` keeps current behavior by analyzing every frame.
+- `FACE_MATCH_THRESHOLD=0.45` controls how strict known-face matching is.
 - Higher values reuse the latest annotations between analysis frames to reduce CPU usage.
 - Increase the interval only after checking that label boxes still feel responsive enough.
 - `FACE_LABEL_SMOOTHING_*` settings control how many recent labels are needed before the display switches names.

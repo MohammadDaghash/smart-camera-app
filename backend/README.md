@@ -108,6 +108,7 @@ Optional tuning:
 
 ```bash
 FACE_ANALYSIS_INTERVAL_FRAMES=1
+FACE_MATCH_THRESHOLD=0.45
 FACE_LABEL_SMOOTHING_ENABLED=true
 FACE_LABEL_SMOOTHING_HISTORY_SIZE=5
 FACE_LABEL_SMOOTHING_MIN_VOTES=2
@@ -118,6 +119,11 @@ FACE_TRACK_TTL_FRAMES=5
 `1` analyzes every frame. Higher values reuse the latest face annotations between
 analysis frames, which can reduce CPU usage but may make boxes feel slightly less
 responsive.
+
+`FACE_MATCH_THRESHOLD` controls how strict known-face recognition is. Lower it
+slightly if known people are often shown as `Anonymous`; raise it if the app
+labels the wrong person as known. Valid values are clamped between `0.0` and
+`1.0`. Restart the backend after changing `.env`.
 
 Label smoothing compares nearby face boxes across analysis frames and uses recent
 label votes before switching labels. This reduces one-frame flicker between a

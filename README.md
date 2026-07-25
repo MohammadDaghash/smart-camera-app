@@ -11,6 +11,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Local webcam access through OpenCV
 - Face detection and bounding boxes
 - Basic known-face recognition with InsightFace
+- Configurable face match threshold
 - Recognition label smoothing across recent frames
 - `Anonymous` label for unknown faces
 - Basic motion detection stats
@@ -251,7 +252,6 @@ See [docs/git-workflow.md](docs/git-workflow.md) for the full workflow.
 See [docs/spec.md](docs/spec.md) for the living product spec and feature priorities.
 
 - Multi-photo recognition per person
-- Confidence threshold tuning tools
 - Fuller frontend dashboard and camera controls
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
