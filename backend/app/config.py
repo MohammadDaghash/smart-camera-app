@@ -57,6 +57,8 @@ def _env_flag(name: str, default: bool = False) -> bool:
 FRONTEND_FILE = PROJECT_DIR / "frontend" / "index.html"
 LOGIN_FILE = PROJECT_DIR / "frontend" / "login.html"
 KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
+LOCAL_DATA_DIR = BACKEND_DIR / "local_data"
+EVENTS_DB_FILE = LOCAL_DATA_DIR / "events.db"
 
 CAMERA_INDEXES = [0, 1, 2]
 READ_ATTEMPTS = 10

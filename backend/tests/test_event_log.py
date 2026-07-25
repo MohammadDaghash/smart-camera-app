@@ -41,6 +41,29 @@ def test_event_log_drops_old_events_after_max_size():
     assert [event["message"] for event in events] == ["Motion 3", "Motion 2"]
 
 
+def test_event_log_persists_events_between_instances(tmp_path):
+    database_path = tmp_path / "events.db"
+    first_event_log = EventLog(database_path=database_path)
+
+    first_event_log.add_event(
+        "face",
+        "Mohammad detected",
+        metadata={"label": "Mohammad"},
+        now=100.0,
+    )
+    second_event_log = EventLog(database_path=database_path)
+
+    events = second_event_log.latest()
+
+    assert events[0] == {
+        "id": 1,
+        "type": "face",
+        "message": "Mohammad detected",
+        "created_at": 100.0,
+        "metadata": {"label": "Mohammad"},
+    }
+
+
 def test_event_log_reset_clears_events_and_resets_ids():
     event_log = EventLog()
 

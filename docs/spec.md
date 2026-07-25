@@ -20,12 +20,13 @@ The current system supports:
 - Basic local face recognition labels
 - Basic local login protection
 - Basic motion detection stats
-- Latest in-memory motion and face events
+- Persistent local motion and face events
 
 The current system does not yet include:
 
 - Role-based permissions
-- Databases or persistent event history
+- Cloud database storage
+- Searchable long-term event history
 - Cloud deployment
 - Mobile apps
 - Smart-home device control
@@ -45,7 +46,7 @@ The current system does not yet include:
 | P0 | Face detection | Working | Detect faces and draw boxes on the stream. |
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
-| P1 | In-memory event log | Started | Show latest local motion and face events with simple cooldowns. |
+| P1 | Local event history | Started | Store latest local motion and face events in SQLite with simple cooldowns. |
 | P1 | Recognition quality | Planned | Improve stability using multiple photos, thresholds, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
@@ -127,16 +128,17 @@ Acceptance criteria:
 - `/stats` includes a motion score and changed-area value.
 - Motion settings can be tuned locally from `.env`.
 
-### In-Memory Event Log
+### Local Event History
 
 Goal:
-Show the latest local camera activity without adding a database yet.
+Show recent camera activity using a local database that does not require a
+database server.
 
 Requirements:
 
 - Record an event when motion starts.
 - Record an event when a detected face label appears.
-- Keep events in memory only for this MVP step.
+- Store events locally in SQLite.
 - Expose the latest events through `/stats`.
 - Show the latest events in the frontend.
 - Apply simple cooldowns so repeated events do not flood the dashboard.
@@ -145,8 +147,8 @@ Acceptance criteria:
 
 - The dashboard shows recent motion and face events.
 - The same event type does not repeat too quickly when detection flickers.
-- Events reset when the backend restarts.
-- No snapshots, alerts, or persistent storage are added yet.
+- Events survive backend restarts.
+- No snapshots, alerts, cloud storage, or remote database are added yet.
 
 ### Accounts And Permissions
 

@@ -40,14 +40,14 @@ MJPEG stream is sent back to browser
 Pipeline stats can be inspected at /stats
         |
         v
-Latest in-memory events are shown in the browser
+Latest local SQLite events are shown in the browser
 ```
 
 ## Camera Pipeline Helpers
 
 - `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
 - `backend/app/services/camera_pipeline.py`: coordinates frame reads, face-analysis cadence, overlay drawing, reconnect handling, and streaming logs.
-- `backend/app/services/event_log.py`: stores the latest in-memory motion and face events, with cooldowns to avoid repeated event spam.
+- `backend/app/services/event_log.py`: stores local SQLite motion and face events, with cooldowns to avoid repeated event spam.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
@@ -63,9 +63,10 @@ Latest in-memory events are shown in the browser
 - face-analysis interval and analysis-frame count
 - latest face count and labels
 - motion activity, score, changed area, and event count
-- latest in-memory motion and face events
+- latest local motion and face events
 
-Stats and events are local memory only and reset on backend restart.
+Pipeline stats are local memory only and reset on backend restart. Events persist
+in `backend/local_data/events.db`, which is gitignored.
 
 ## Performance Tuning
 
@@ -82,6 +83,6 @@ Stats and events are local memory only and reset on backend restart.
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding a database.
-- Add persistent local event history.
+- Add event filtering, cleanup/retention settings, and snapshots.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

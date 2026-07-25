@@ -7,6 +7,7 @@ backend/app/**/__pycache__/
 .coverage
 .env
 backend/.env
+backend/local_data/
 .DS_Store
 
 # Keep personal face photos local unless you intentionally decide to upload them.
