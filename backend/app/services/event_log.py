@@ -119,6 +119,35 @@ class EventLog:
 
             return [self._row_to_event(row) for row in rows]
 
+    def update_event_metadata(self, event_id, metadata):
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT id, type, message, created_at, metadata_json
+                FROM events
+                WHERE id = ?
+                """,
+                (event_id,),
+            ).fetchone()
+
+            if row is None:
+                return None
+
+            event = self._row_to_event(row)
+            event["metadata"].update(metadata)
+
+            self._connection.execute(
+                """
+                UPDATE events
+                SET metadata_json = ?
+                WHERE id = ?
+                """,
+                (json.dumps(event["metadata"]), event_id),
+            )
+            self._connection.commit()
+
+            return event
+
     def reset(self):
         with self._lock:
             self._connection.execute("DELETE FROM events")

@@ -8,6 +8,7 @@ from app.config import (
 )
 from app.services.camera_source import open_working_camera, release_camera
 from app.services.event_log import event_log
+from app.services.event_snapshots import event_snapshot_store
 from app.services.frame_cadence import should_process_frame
 from app.services.mjpeg_streamer import encode_mjpeg_frame
 from app.services.pipeline_stats import pipeline_stats
@@ -18,6 +19,21 @@ from app.vision.face_recognition import (
     labels_from_annotations,
 )
 from app.vision.motion_detection import MotionDetector
+
+
+def attach_event_snapshot(event, frame):
+    if event is None:
+        return
+
+    snapshot_metadata = event_snapshot_store.save_snapshot(
+        frame=frame,
+        event_id=event["id"],
+        event_type=event["type"],
+        now=event["created_at"],
+    )
+
+    if snapshot_metadata:
+        event_log.update_event_metadata(event["id"], snapshot_metadata)
 
 
 def generate_frames(camera, index):
@@ -83,7 +99,7 @@ def generate_frames(camera, index):
                 )
 
             if motion["motion_detected"] and not last_motion_detected:
-                event_log.add_event(
+                event = event_log.add_event(
                     event_type="motion",
                     message="Motion detected",
                     metadata={
@@ -93,6 +109,7 @@ def generate_frames(camera, index):
                     cooldown_key="motion",
                     cooldown_seconds=EVENT_MOTION_COOLDOWN_SECONDS,
                 )
+                attach_event_snapshot(event, frame)
 
             last_motion_detected = motion["motion_detected"]
 
@@ -107,13 +124,14 @@ def generate_frames(camera, index):
                 pipeline_stats.record_analysis(face_count, face_labels)
 
                 for label in sorted(current_face_labels - last_face_labels):
-                    event_log.add_event(
+                    event = event_log.add_event(
                         event_type="face",
                         message=f"{label} detected",
                         metadata={"label": label},
                         cooldown_key=f"face:{label}",
                         cooldown_seconds=EVENT_FACE_COOLDOWN_SECONDS,
                     )
+                    attach_event_snapshot(event, frame)
 
                 last_face_labels = current_face_labels
 

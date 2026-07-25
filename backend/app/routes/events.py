@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import FileResponse
 
 from app.services.event_log import event_log
+from app.services.event_snapshots import event_snapshot_store
 from app.utils.auth import require_login
 
 
@@ -32,3 +34,13 @@ async def events(
         },
         "retention": event_log.retention_settings(),
     }
+
+
+@router.get("/api/snapshots/{filename}")
+async def snapshot(filename: str, user: str = Depends(require_login)):
+    snapshot_path = event_snapshot_store.get_snapshot_path(filename)
+
+    if snapshot_path is None:
+        raise HTTPException(status_code=404, detail="Snapshot not found")
+
+    return FileResponse(snapshot_path, media_type="image/jpeg")

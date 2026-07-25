@@ -22,6 +22,7 @@ The current system supports:
 - Basic motion detection stats
 - Persistent local motion and face events
 - Event history page with simple filters
+- Local snapshots for saved motion and face events
 
 The current system does not yet include:
 
@@ -47,7 +48,7 @@ The current system does not yet include:
 | P0 | Face detection | Working | Detect faces and draw boxes on the stream. |
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
-| P1 | Local event history | Started | Store local motion and face events in SQLite with filters, cooldowns, and retention cleanup. |
+| P1 | Local event history | Started | Store local motion and face events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
 | P1 | Recognition quality | Planned | Improve stability using multiple photos, thresholds, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
@@ -144,6 +145,7 @@ Requirements:
 - Expose filterable events through `/api/events`.
 - Show the latest events in the frontend.
 - Show a dedicated event history page.
+- Save a local JPEG snapshot when an event is recorded.
 - Apply simple cooldowns so repeated events do not flood the dashboard.
 - Keep the local event database bounded by count and age settings.
 
@@ -151,10 +153,11 @@ Acceptance criteria:
 
 - The dashboard shows recent motion and face events.
 - The history page can filter by all, motion, or face events.
+- The history page shows snapshots when they are available.
 - The same event type does not repeat too quickly when detection flickers.
 - Events survive backend restarts.
 - Old events are cleaned up according to local retention settings.
-- No snapshots, alerts, cloud storage, or remote database are added yet.
+- No alerts, cloud storage, or remote database are added yet.
 
 ### Accounts And Permissions
 

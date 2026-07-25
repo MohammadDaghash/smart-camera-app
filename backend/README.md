@@ -19,6 +19,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /video`: MJPEG live video stream with face overlays
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
 - `GET /api/events`: local event history with `type` and `limit` filters
+- `GET /api/snapshots/{filename}`: protected local event snapshot image
 
 ## Folder Guide
 
@@ -85,6 +86,7 @@ The camera pipeline is split into small helpers:
 - `app/services/camera_source.py`: camera open, test, release, and reconnect logic.
 - `app/services/camera_pipeline.py`: frame read loop, face-analysis cadence, overlay drawing, and stream logs.
 - `app/services/event_log.py`: SQLite-backed local motion and face events with cooldown support.
+- `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
@@ -119,9 +121,11 @@ Local event database:
 
 ```text
 backend/local_data/events.db
+backend/local_data/snapshots/
 ```
 
-`backend/local_data/` is gitignored. Do not commit local event history.
+`backend/local_data/` is gitignored. Do not commit local event history or
+snapshots.
 
 Optional motion tuning:
 
@@ -141,11 +145,15 @@ EVENT_MOTION_COOLDOWN_SECONDS=10
 EVENT_FACE_COOLDOWN_SECONDS=20
 EVENT_MAX_EVENTS=1000
 EVENT_RETENTION_DAYS=30
+EVENT_SNAPSHOTS_ENABLED=true
+EVENT_SNAPSHOT_MAX_WIDTH=640
+EVENT_SNAPSHOT_JPEG_QUALITY=85
 ```
 
 Cooldowns prevent the same motion or face label from filling the event list too
 quickly when detection flickers. Retention settings keep the local SQLite
 database bounded. `EVENT_RETENTION_DAYS=0` disables age-based cleanup.
+Snapshot settings control whether event images are saved and how large they are.
 
 ## Recommended Local Command
 

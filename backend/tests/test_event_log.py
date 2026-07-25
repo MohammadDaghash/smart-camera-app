@@ -112,6 +112,31 @@ def test_event_log_persists_events_between_instances(tmp_path):
     }
 
 
+def test_event_log_updates_event_metadata():
+    event_log = EventLog()
+    event = event_log.add_event(
+        "motion",
+        "Motion detected",
+        metadata={"area": 1200},
+        now=100.0,
+    )
+
+    updated_event = event_log.update_event_metadata(
+        event["id"],
+        {
+            "snapshot_filename": "100-1-motion.jpg",
+            "snapshot_url": "/api/snapshots/100-1-motion.jpg",
+        },
+    )
+
+    assert updated_event["metadata"] == {
+        "area": 1200,
+        "snapshot_filename": "100-1-motion.jpg",
+        "snapshot_url": "/api/snapshots/100-1-motion.jpg",
+    }
+    assert event_log.latest()[0]["metadata"] == updated_event["metadata"]
+
+
 def test_event_log_reset_clears_events_and_resets_ids():
     event_log = EventLog()
 

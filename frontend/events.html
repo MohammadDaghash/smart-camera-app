@@ -175,6 +175,15 @@
       overflow-wrap: anywhere;
     }
 
+    .event-snapshot {
+      display: block;
+      width: min(220px, 100%);
+      margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #111827;
+    }
+
     .empty {
       padding: 16px 0;
       color: #6b7280;
@@ -246,6 +255,7 @@
     const statusText = document.getElementById("statusText");
     const retentionText = document.getElementById("retentionText");
     const eventList = document.getElementById("eventList");
+    const hiddenMetadataKeys = new Set(["snapshot_filename", "snapshot_url"]);
 
     function formatTime(timestamp) {
       if (!timestamp) {
@@ -261,6 +271,7 @@
       }
 
       return Object.entries(metadata)
+        .filter(([key]) => !hiddenMetadataKeys.has(key))
         .map(([key, value]) => `${key}: ${value}`)
         .join(", ");
     }
@@ -302,6 +313,15 @@
           metadataElement.className = "event-metadata";
           metadataElement.textContent = metadata;
           detail.appendChild(metadataElement);
+        }
+
+        if (event.metadata?.snapshot_url) {
+          const snapshot = document.createElement("img");
+          snapshot.className = "event-snapshot";
+          snapshot.src = event.metadata.snapshot_url;
+          snapshot.alt = `${event.message || "Event"} snapshot`;
+          snapshot.loading = "lazy";
+          detail.appendChild(snapshot);
         }
 
         item.append(time, type, detail);

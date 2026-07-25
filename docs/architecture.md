@@ -44,6 +44,9 @@ Latest local SQLite events are shown in the browser
         |
         v
 Event history can be viewed at /history
+        |
+        v
+Event snapshots can be served through /api/snapshots/{filename}
 ```
 
 ## Camera Pipeline Helpers
@@ -51,6 +54,7 @@ Event history can be viewed at /history
 - `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
 - `backend/app/services/camera_pipeline.py`: coordinates frame reads, face-analysis cadence, overlay drawing, reconnect handling, and streaming logs.
 - `backend/app/services/event_log.py`: stores local SQLite motion and face events, with cooldowns to avoid repeated event spam.
+- `backend/app/services/event_snapshots.py`: stores local JPEG snapshots for accepted events.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
@@ -68,10 +72,14 @@ Event history can be viewed at /history
 - motion activity, score, changed area, and event count
 - latest local motion and face events
 - filterable local event history through `/api/events`
+- protected local event snapshots through `/api/snapshots/{filename}`
 
 Pipeline stats are local memory only and reset on backend restart. Events persist
 in `backend/local_data/events.db`, which is gitignored. Event cleanup is controlled
 by `EVENT_MAX_EVENTS` and `EVENT_RETENTION_DAYS`.
+
+Event snapshots are stored in `backend/local_data/snapshots/`, which is also
+gitignored.
 
 ## Performance Tuning
 
@@ -83,12 +91,12 @@ by `EVENT_MAX_EVENTS` and `EVENT_RETENTION_DAYS`.
 
 - Known-face images stay local.
 - `.gitignore` excludes `backend/known_faces/*`.
-- Local events stay in SQLite under `backend/local_data/`.
+- Local events and snapshots stay under `backend/local_data/`.
 - No cloud storage or smart-home integration exists yet.
 
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding cloud services.
-- Add event snapshots.
+- Add alert rules.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

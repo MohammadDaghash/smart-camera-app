@@ -21,6 +21,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Persistent local camera events with simple cooldowns
 - Event history page with type and limit filters
 - Configurable local event cleanup and retention
+- Local event snapshots shown in history
 
 ## Team
 
@@ -39,6 +40,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - InsightFace
 - ONNX Runtime
 - Pillow
+- SQLite
 - HTML/CSS frontend
 
 ## Project Structure
@@ -97,6 +99,7 @@ http://localhost:8000/video
 http://localhost:8000/stats
 http://localhost:8000/history
 http://localhost:8000/api/events
+http://localhost:8000/api/snapshots/<snapshot-filename>
 ```
 
 Note: the first run may download InsightFace model files into `~/.insightface`. The local `backend/main.py` still exists as a compatibility entrypoint, but `uvicorn app.main:app` is the recommended command.
@@ -143,8 +146,8 @@ GET  /logout    clear the session
 ```
 
 Protected routes (`/`, `/history`, `/video`, `/camera-test`, `/stats`,
-`/api/events`) redirect to `/login` when the user is not signed in. `/health`
-stays public.
+`/api/events`, `/api/snapshots/*`) redirect to `/login` when the user is not
+signed in. `/health` stays public.
 
 ### Session hardening
 
@@ -237,7 +240,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Fuller frontend dashboard and camera controls
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
-- Event snapshots and alert rules
+- Alert rules
 - Suspicious activity alerts
 - Local event history
 - Optional smart-home device integrations

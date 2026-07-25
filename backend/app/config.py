@@ -60,6 +60,7 @@ EVENTS_FILE = PROJECT_DIR / "frontend" / "events.html"
 KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
 LOCAL_DATA_DIR = BACKEND_DIR / "local_data"
 EVENTS_DB_FILE = LOCAL_DATA_DIR / "events.db"
+EVENT_SNAPSHOTS_DIR = LOCAL_DATA_DIR / "snapshots"
 
 CAMERA_INDEXES = [0, 1, 2]
 READ_ATTEMPTS = 10
@@ -87,6 +88,9 @@ EVENT_FACE_COOLDOWN_SECONDS = _env_int(
 )
 EVENT_MAX_EVENTS = _env_int("EVENT_MAX_EVENTS", 1000, minimum=1)
 EVENT_RETENTION_DAYS = _env_int("EVENT_RETENTION_DAYS", 30, minimum=0)
+EVENT_SNAPSHOTS_ENABLED = _env_flag("EVENT_SNAPSHOTS_ENABLED", default=True)
+EVENT_SNAPSHOT_MAX_WIDTH = _env_int("EVENT_SNAPSHOT_MAX_WIDTH", 640, minimum=1)
+EVENT_SNAPSHOT_JPEG_QUALITY = _env_int("EVENT_SNAPSHOT_JPEG_QUALITY", 85, minimum=1)
 
 # Authentication / session configuration.
 # Real credentials and secrets belong in backend/.env (gitignored), never here.

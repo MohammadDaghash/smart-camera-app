@@ -6,6 +6,7 @@ from app.config import AUTH_PASSWORD, AUTH_USERNAME
 from app.routes import auth, events
 from app.services import login_throttle, session_store
 from app.services.event_log import EventLog
+from app.services.event_snapshots import EventSnapshotStore
 
 
 def build_test_app() -> FastAPI:
@@ -75,3 +76,44 @@ def test_events_rejects_unknown_event_type(monkeypatch, tmp_path):
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Event type must be one of: all, motion, face"
+
+
+def test_snapshot_redirects_when_anonymous():
+    client = TestClient(build_test_app(), follow_redirects=False)
+
+    response = client.get("/api/snapshots/100-1-motion.jpg")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_snapshot_returns_file_when_authenticated(monkeypatch, tmp_path):
+    test_snapshot_store = EventSnapshotStore(snapshots_dir=tmp_path)
+    monkeypatch.setattr(events, "event_snapshot_store", test_snapshot_store)
+    snapshot_path = tmp_path / "100-1-motion.jpg"
+    snapshot_path.write_bytes(b"snapshot-bytes")
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.get("/api/snapshots/100-1-motion.jpg")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/jpeg"
+    assert response.content == b"snapshot-bytes"
+
+
+def test_snapshot_rejects_invalid_filename(monkeypatch, tmp_path):
+    test_snapshot_store = EventSnapshotStore(snapshots_dir=tmp_path)
+    monkeypatch.setattr(events, "event_snapshot_store", test_snapshot_store)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.get("/api/snapshots/not-a-generated-name.jpg")
+
+    assert response.status_code == 404
