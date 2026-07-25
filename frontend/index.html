@@ -145,6 +145,13 @@
       gap: 12px;
     }
 
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-link,
     .logout {
       font-size: 14px;
       font-weight: 700;
@@ -153,6 +160,7 @@
       white-space: nowrap;
     }
 
+    .nav-link:hover,
     .logout:hover {
       text-decoration: underline;
     }
@@ -186,7 +194,10 @@
   <main>
     <div class="header">
       <h1>Smart Camera Live View</h1>
-      <a class="logout" href="/logout">Log out</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="/history">History</a>
+        <a class="logout" href="/logout">Log out</a>
+      </nav>
     </div>
     <p class="status">Camera is live</p>
     <section class="status-panel" aria-label="Live camera status">

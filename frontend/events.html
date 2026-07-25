@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Camera Event History</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+      padding: 24px;
+    }
+
+    main {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: #6b7280;
+    }
+
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-link,
+    .logout {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover,
+    .logout:hover {
+      text-decoration: underline;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 16px 0;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    select,
+    button {
+      min-height: 40px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: #1f2937;
+      font: inherit;
+    }
+
+    select {
+      min-width: 140px;
+      padding: 0 10px;
+    }
+
+    button {
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: #f9fafb;
+    }
+
+    .status {
+      margin: 0 0 12px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .event-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .event-item {
+      display: grid;
+      grid-template-columns: 160px 90px 1fr;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+      align-items: start;
+    }
+
+    .event-time {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .event-type {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 3px 10px;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .event-type.motion {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .event-type.face {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .event-message {
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .event-metadata {
+      margin: 4px 0 0;
+      color: #6b7280;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      padding: 16px 0;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 16px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .header {
+        align-items: flex-start;
+      }
+
+      .event-item {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <div>
+        <h1>Event History</h1>
+        <p class="subtitle">Saved local motion and face events</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="/">Live View</a>
+        <a class="logout" href="/logout">Log out</a>
+      </nav>
+    </div>
+
+    <section class="filters" aria-label="Event filters">
+      <label>
+        Type
+        <select id="eventType">
+          <option value="all">All</option>
+          <option value="motion">Motion</option>
+          <option value="face">Face</option>
+        </select>
+      </label>
+      <label>
+        Limit
+        <select id="eventLimit">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <button id="refreshButton" type="button">Refresh</button>
+    </section>
+
+    <p class="status" id="statusText">Loading events...</p>
+    <ul class="event-list" id="eventList"></ul>
+  </main>
+
+  <script>
+    const eventType = document.getElementById("eventType");
+    const eventLimit = document.getElementById("eventLimit");
+    const refreshButton = document.getElementById("refreshButton");
+    const statusText = document.getElementById("statusText");
+    const eventList = document.getElementById("eventList");
+
+    function formatTime(timestamp) {
+      if (!timestamp) {
+        return "";
+      }
+
+      return new Date(timestamp * 1000).toLocaleString();
+    }
+
+    function formatMetadata(metadata) {
+      if (!metadata || Object.keys(metadata).length === 0) {
+        return "";
+      }
+
+      return Object.entries(metadata)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(", ");
+    }
+
+    function renderEvents(events) {
+      eventList.replaceChildren();
+
+      if (!events || events.length === 0) {
+        const emptyItem = document.createElement("li");
+        emptyItem.className = "empty";
+        emptyItem.textContent = "No events match the selected filters.";
+        eventList.appendChild(emptyItem);
+        return;
+      }
+
+      for (const event of events) {
+        const item = document.createElement("li");
+        item.className = "event-item";
+
+        const time = document.createElement("span");
+        time.className = "event-time";
+        time.textContent = formatTime(event.created_at);
+
+        const type = document.createElement("span");
+        type.className = `event-type ${event.type || ""}`;
+        type.textContent = event.type || "event";
+
+        const detail = document.createElement("div");
+
+        const message = document.createElement("p");
+        message.className = "event-message";
+        message.textContent = event.message || "Event detected";
+        detail.appendChild(message);
+
+        const metadata = formatMetadata(event.metadata);
+
+        if (metadata) {
+          const metadataElement = document.createElement("p");
+          metadataElement.className = "event-metadata";
+          metadataElement.textContent = metadata;
+          detail.appendChild(metadataElement);
+        }
+
+        item.append(time, type, detail);
+        eventList.appendChild(item);
+      }
+    }
+
+    async function loadEvents() {
+      const params = new URLSearchParams({
+        type: eventType.value,
+        limit: eventLimit.value,
+      });
+
+      try {
+        statusText.textContent = "Loading events...";
+        const response = await fetch(`/api/events?${params}`, { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`Events request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderEvents(data.events || []);
+        statusText.textContent = `Showing ${data.events?.length || 0} event(s). Updated ${new Date().toLocaleTimeString()}`;
+      } catch (error) {
+        eventList.replaceChildren();
+        statusText.textContent = "Events unavailable";
+        console.error(error);
+      }
+    }
+
+    refreshButton.addEventListener("click", loadEvents);
+    eventType.addEventListener("change", loadEvents);
+    eventLimit.addEventListener("change", loadEvents);
+
+    loadEvents();
+  </script>
+</body>
+</html>

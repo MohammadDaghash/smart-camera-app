@@ -29,6 +29,21 @@ def test_event_log_respects_limit():
     assert [event["message"] for event in events] == ["Motion 3", "Motion 2"]
 
 
+def test_event_log_filters_by_type():
+    event_log = EventLog()
+
+    event_log.add_event("motion", "Motion detected", now=100.0)
+    event_log.add_event("face", "Mohammad detected", now=101.0)
+    event_log.add_event("motion", "Motion detected again", now=102.0)
+
+    events = event_log.latest(event_type="motion")
+
+    assert [event["message"] for event in events] == [
+        "Motion detected again",
+        "Motion detected",
+    ]
+
+
 def test_event_log_drops_old_events_after_max_size():
     event_log = EventLog(max_events=2)
 

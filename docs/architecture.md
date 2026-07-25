@@ -41,6 +41,9 @@ Pipeline stats can be inspected at /stats
         |
         v
 Latest local SQLite events are shown in the browser
+        |
+        v
+Event history can be viewed at /history
 ```
 
 ## Camera Pipeline Helpers
@@ -64,6 +67,7 @@ Latest local SQLite events are shown in the browser
 - latest face count and labels
 - motion activity, score, changed area, and event count
 - latest local motion and face events
+- filterable local event history through `/api/events`
 
 Pipeline stats are local memory only and reset on backend restart. Events persist
 in `backend/local_data/events.db`, which is gitignored.
@@ -78,11 +82,12 @@ in `backend/local_data/events.db`, which is gitignored.
 
 - Known-face images stay local.
 - `.gitignore` excludes `backend/known_faces/*`.
-- No database, cloud storage, or smart-home integration exists yet.
+- Local events stay in SQLite under `backend/local_data/`.
+- No cloud storage or smart-home integration exists yet.
 
 ## Near-Term Architecture Goals
 
-- Add smoothing and confidence history without adding a database.
-- Add event filtering, cleanup/retention settings, and snapshots.
+- Add smoothing and confidence history without adding cloud services.
+- Add event cleanup/retention settings and snapshots.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

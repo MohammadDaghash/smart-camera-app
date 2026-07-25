@@ -19,6 +19,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Pipeline stats endpoint at `/stats`
 - Basic frontend status panel for camera, faces, labels, and motion
 - Persistent local camera events with simple cooldowns
+- Event history page with type and limit filters
 
 ## Team
 
@@ -93,6 +94,8 @@ http://localhost:8000/health
 http://localhost:8000/camera-test
 http://localhost:8000/video
 http://localhost:8000/stats
+http://localhost:8000/history
+http://localhost:8000/api/events
 ```
 
 Note: the first run may download InsightFace model files into `~/.insightface`. The local `backend/main.py` still exists as a compatibility entrypoint, but `uvicorn app.main:app` is the recommended command.
@@ -138,8 +141,9 @@ POST /login     submit credentials
 GET  /logout    clear the session
 ```
 
-Protected routes (`/`, `/video`, `/camera-test`, `/stats`) redirect to `/login`
-when the user is not signed in. `/health` stays public.
+Protected routes (`/`, `/history`, `/video`, `/camera-test`, `/stats`,
+`/api/events`) redirect to `/login` when the user is not signed in. `/health`
+stays public.
 
 ### Session hardening
 
@@ -232,7 +236,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Fuller frontend dashboard and camera controls
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
-- Event history filtering and cleanup tools
+- Event cleanup tools and retention settings
 - Suspicious activity alerts
 - Local event history
 - Optional smart-home device integrations

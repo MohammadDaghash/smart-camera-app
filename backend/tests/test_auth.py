@@ -79,6 +79,13 @@ def test_home_redirects_when_anonymous(client: TestClient):
     assert response.headers["location"] == "/login"
 
 
+def test_history_redirects_when_anonymous(client: TestClient):
+    response = client.get("/history")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
 def test_login_with_valid_credentials_grants_access(client: TestClient):
     response = login(client, AUTH_USERNAME, AUTH_PASSWORD)
 
@@ -91,6 +98,10 @@ def test_login_with_valid_credentials_grants_access(client: TestClient):
 
     home = client.get("/")
     assert home.status_code == 200
+
+    history = client.get("/history")
+    assert history.status_code == 200
+    assert "Event History" in history.text
 
 
 def test_login_with_invalid_credentials_is_rejected(client: TestClient):

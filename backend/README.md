@@ -13,10 +13,12 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 ## Routes
 
 - `GET /`: serves `frontend/index.html`
+- `GET /history`: serves `frontend/events.html`
 - `GET /health`: simple API health check
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
+- `GET /api/events`: local event history with `type` and `limit` filters
 
 ## Folder Guide
 

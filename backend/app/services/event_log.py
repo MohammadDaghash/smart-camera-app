@@ -87,17 +87,29 @@ class EventLog:
                 "metadata": dict(metadata),
             }
 
-    def latest(self, limit=10):
+    def latest(self, limit=10, event_type=None):
         with self._lock:
-            rows = self._connection.execute(
-                """
-                SELECT id, type, message, created_at, metadata_json
-                FROM events
-                ORDER BY created_at DESC, id DESC
-                LIMIT ?
-                """,
-                (limit,),
-            ).fetchall()
+            if event_type is None:
+                rows = self._connection.execute(
+                    """
+                    SELECT id, type, message, created_at, metadata_json
+                    FROM events
+                    ORDER BY created_at DESC, id DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
+            else:
+                rows = self._connection.execute(
+                    """
+                    SELECT id, type, message, created_at, metadata_json
+                    FROM events
+                    WHERE type = ?
+                    ORDER BY created_at DESC, id DESC
+                    LIMIT ?
+                    """,
+                    (event_type, limit),
+                ).fetchall()
 
             return [self._row_to_event(row) for row in rows]
 
