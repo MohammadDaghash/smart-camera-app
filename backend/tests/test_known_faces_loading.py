@@ -81,6 +81,48 @@ def test_load_known_faces_supports_person_folders_and_flat_files(
     assert len(loaded_faces) == 4
 
 
+def test_known_faces_summary_counts_sources_and_loaded_embeddings(
+    face_recognition_module,
+    monkeypatch,
+    tmp_path,
+):
+    _create_image_file(tmp_path / "Mohammad" / "1.jpg")
+    _create_image_file(tmp_path / "Mohammad" / "2.png")
+    _create_image_file(tmp_path / "Omar" / "1.jpeg")
+
+    monkeypatch.setattr(face_recognition_module, "KNOWN_FACES_DIR", tmp_path)
+    monkeypatch.setattr(
+        face_recognition_module,
+        "known_faces",
+        [
+            {"name": "Mohammad", "embedding": np.array([1.0, 0.0], dtype=np.float32)},
+            {"name": "Mohammad", "embedding": np.array([0.9, 0.1], dtype=np.float32)},
+            {"name": "Omar", "embedding": np.array([0.0, 1.0], dtype=np.float32)},
+        ],
+    )
+
+    summary = face_recognition_module.known_faces_summary()
+
+    assert summary == {
+        "known_faces_dir": "backend/known_faces",
+        "known_faces_dir_exists": True,
+        "loaded_embeddings": 3,
+        "supported_extensions": [".jpeg", ".jpg", ".png"],
+        "people": [
+            {
+                "name": "Mohammad",
+                "source_images": 2,
+                "loaded_embeddings": 2,
+            },
+            {
+                "name": "Omar",
+                "source_images": 1,
+                "loaded_embeddings": 1,
+            },
+        ],
+    }
+
+
 def test_recognize_face_uses_best_embedding_match(face_recognition_module, monkeypatch):
     monkeypatch.setattr(
         face_recognition_module,

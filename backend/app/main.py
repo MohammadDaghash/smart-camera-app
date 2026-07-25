@@ -9,7 +9,7 @@ from app.config import (
     SESSION_SECRET,
     SESSION_SECRET_IS_EPHEMERAL,
 )
-from app.routes import auth, camera, events, frontend, health, stats
+from app.routes import auth, camera, events, frontend, health, known_faces, stats
 from app.utils.logging import logger
 
 
@@ -30,6 +30,7 @@ app.include_router(health.router)
 app.include_router(camera.router)
 app.include_router(stats.router)
 app.include_router(events.router)
+app.include_router(known_faces.router)
 
 
 if AUTH_USING_DEFAULT_CREDENTIALS:

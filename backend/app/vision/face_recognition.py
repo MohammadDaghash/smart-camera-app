@@ -1,3 +1,5 @@
+from collections import Counter
+
 import cv2
 import numpy as np
 from insightface.app import FaceAnalysis
@@ -108,6 +110,18 @@ def known_face_image_sources():
                 image_sources.append((person_name, image_path))
 
     return image_sources
+
+
+def known_face_source_counts():
+    if not KNOWN_FACES_DIR.exists():
+        return {}
+
+    counts = Counter()
+
+    for name, _image_path in known_face_image_sources():
+        counts[name] += 1
+
+    return dict(counts)
 
 
 def load_known_faces():
@@ -249,6 +263,27 @@ def labels_from_annotations(annotations):
         f"{annotation['label']}:{annotation['score']:.2f}"
         for annotation in annotations
     ]
+
+
+def known_faces_summary():
+    loaded_counts = Counter(face["name"] for face in known_faces)
+    source_counts = known_face_source_counts()
+    person_names = sorted(set(loaded_counts) | set(source_counts))
+
+    return {
+        "known_faces_dir": "backend/known_faces",
+        "known_faces_dir_exists": KNOWN_FACES_DIR.exists(),
+        "loaded_embeddings": len(known_faces),
+        "supported_extensions": sorted(KNOWN_FACE_EXTENSIONS),
+        "people": [
+            {
+                "name": name,
+                "source_images": source_counts.get(name, 0),
+                "loaded_embeddings": loaded_counts.get(name, 0),
+            }
+            for name in person_names
+        ],
+    }
 
 
 def draw_face_annotations(frame, annotations):

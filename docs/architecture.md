@@ -62,6 +62,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
+- `backend/app/routes/known_faces.py`: exposes a protected known-face loading summary without embeddings or images.
 - `backend/app/vision/motion_detection.py`: compares consecutive frames and reports basic motion signals.
 
 ## Pipeline Stats
@@ -105,5 +106,4 @@ gitignored.
 
 - Add smoothing and confidence history without adding cloud services.
 - Add notification preferences after local browser notifications are stable.
-- Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

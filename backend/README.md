@@ -18,6 +18,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
+- `GET /known-faces`: protected debug summary of loaded known-face labels and counts
 - `GET /api/events`: local event history with `type` and `limit` filters
 - `GET /api/snapshots/{filename}`: protected local event snapshot image
 
@@ -46,6 +47,10 @@ app/vision/
 ```
 
 Computer-vision and ML logic, including InsightFace loading, known-face embeddings, detection, recognition, motion detection, and drawing overlays.
+
+`GET /known-faces` exposes a safe summary for debugging known-face loading. It
+returns labels, source image counts, and loaded embedding counts. It does not
+return embeddings, image files, or snapshots.
 
 ```text
 app/models/

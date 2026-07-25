@@ -26,6 +26,7 @@ The current system supports:
 - Local suspicious-activity alert events
 - Live dashboard alert indicator
 - Local browser notifications for new suspicious alerts
+- Protected known-face loading debug endpoint
 
 The current system does not yet include:
 
@@ -52,7 +53,7 @@ The current system does not yet include:
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
-| P1 | Recognition quality | Planned | Improve stability using multiple photos, thresholds, and smoothing. |
+| P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
 | P2 | Accounts and permissions | Planned | Add admin and lower-privilege user roles when remote or shared access is needed. |
@@ -87,6 +88,7 @@ Requirements:
 
 - Support multiple reference photos per person.
 - Compare faces using stable embeddings.
+- Expose a protected debug endpoint for loaded known-face labels and counts.
 - Tune confidence thresholds.
 - Smooth recognition labels across several frames.
 
@@ -94,6 +96,7 @@ Acceptance criteria:
 
 - Known people are recognized more consistently.
 - Unknown people remain labeled as `Anonymous`.
+- `/known-faces` shows source image counts and loaded embedding counts.
 - Recognition settings are easy to tune during testing.
 
 ### Dashboard Experience
