@@ -251,6 +251,8 @@ See [docs/git-workflow.md](docs/git-workflow.md) for the full workflow.
 ## Roadmap
 
 See [docs/spec.md](docs/spec.md) for the living product spec and feature priorities.
+See [docs/interview-readiness.md](docs/interview-readiness.md) for a concise
+demo script and system-design explanation.
 
 - Multi-photo recognition per person
 - Fuller frontend dashboard and camera controls
