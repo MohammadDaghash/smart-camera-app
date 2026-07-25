@@ -1,6 +1,11 @@
 import time
 
-from app.config import FACE_ANALYSIS_INTERVAL_FRAMES, RECONNECT_AFTER_FAILURES
+from app.config import (
+    EVENT_FACE_COOLDOWN_SECONDS,
+    EVENT_MOTION_COOLDOWN_SECONDS,
+    FACE_ANALYSIS_INTERVAL_FRAMES,
+    RECONNECT_AFTER_FAILURES,
+)
 from app.services.camera_source import open_working_camera, release_camera
 from app.services.event_log import event_log
 from app.services.frame_cadence import should_process_frame
@@ -85,6 +90,8 @@ def generate_frames(camera, index):
                         "score": round(motion["motion_score"], 4),
                         "area": motion["motion_area"],
                     },
+                    cooldown_key="motion",
+                    cooldown_seconds=EVENT_MOTION_COOLDOWN_SECONDS,
                 )
 
             last_motion_detected = motion["motion_detected"]
@@ -104,6 +111,8 @@ def generate_frames(camera, index):
                         event_type="face",
                         message=f"{label} detected",
                         metadata={"label": label},
+                        cooldown_key=f"face:{label}",
+                        cooldown_seconds=EVENT_FACE_COOLDOWN_SECONDS,
                     )
 
                 last_face_labels = current_face_labels

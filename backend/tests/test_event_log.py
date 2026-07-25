@@ -50,3 +50,83 @@ def test_event_log_reset_clears_events_and_resets_ids():
 
     assert event["id"] == 1
     assert event_log.latest()[0]["message"] == "Anonymous detected"
+
+
+def test_event_log_skips_same_cooldown_key_inside_window():
+    event_log = EventLog()
+
+    first_event = event_log.add_event(
+        "motion",
+        "Motion detected",
+        now=100.0,
+        cooldown_key="motion",
+        cooldown_seconds=10,
+    )
+    skipped_event = event_log.add_event(
+        "motion",
+        "Motion detected",
+        now=105.0,
+        cooldown_key="motion",
+        cooldown_seconds=10,
+    )
+    next_event = event_log.add_event(
+        "motion",
+        "Motion detected",
+        now=111.0,
+        cooldown_key="motion",
+        cooldown_seconds=10,
+    )
+
+    assert first_event is not None
+    assert skipped_event is None
+    assert next_event is not None
+    assert len(event_log.latest()) == 2
+
+
+def test_event_log_allows_different_cooldown_keys():
+    event_log = EventLog()
+
+    event_log.add_event(
+        "face",
+        "Mohammad detected",
+        now=100.0,
+        cooldown_key="face:Mohammad",
+        cooldown_seconds=20,
+    )
+    event_log.add_event(
+        "face",
+        "Omar detected",
+        now=101.0,
+        cooldown_key="face:Omar",
+        cooldown_seconds=20,
+    )
+
+    events = event_log.latest()
+
+    assert [event["message"] for event in events] == [
+        "Omar detected",
+        "Mohammad detected",
+    ]
+
+
+def test_event_log_reset_clears_cooldowns():
+    event_log = EventLog()
+
+    event_log.add_event(
+        "motion",
+        "Motion detected",
+        now=100.0,
+        cooldown_key="motion",
+        cooldown_seconds=10,
+    )
+    event_log.reset()
+    event = event_log.add_event(
+        "motion",
+        "Motion detected",
+        now=105.0,
+        cooldown_key="motion",
+        cooldown_seconds=10,
+    )
+
+    assert event is not None
+    assert event["id"] == 1

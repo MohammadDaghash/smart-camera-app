@@ -9,11 +9,31 @@ class EventLog:
         self._events = deque(maxlen=max_events)
         self._lock = Lock()
         self._next_id = 1
+        self._last_event_times = {}
 
-    def add_event(self, event_type, message, metadata=None, now=None):
+    def add_event(
+        self,
+        event_type,
+        message,
+        metadata=None,
+        now=None,
+        cooldown_key=None,
+        cooldown_seconds=0,
+    ):
         created_at = now if now is not None else time.time()
 
         with self._lock:
+            if cooldown_key and cooldown_seconds > 0:
+                last_event_at = self._last_event_times.get(cooldown_key)
+
+                if (
+                    last_event_at is not None
+                    and created_at - last_event_at < cooldown_seconds
+                ):
+                    return None
+
+                self._last_event_times[cooldown_key] = created_at
+
             event = {
                 "id": self._next_id,
                 "type": event_type,
@@ -34,6 +54,7 @@ class EventLog:
         with self._lock:
             self._events.clear()
             self._next_id = 1
+            self._last_event_times.clear()
 
 
 event_log = EventLog()

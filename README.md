@@ -18,7 +18,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Camera access test endpoint at `/camera-test`
 - Pipeline stats endpoint at `/stats`
 - Basic frontend status panel for camera, faces, labels, and motion
-- Latest in-memory camera events in the dashboard
+- Latest in-memory camera events with simple cooldowns
 
 ## Team
 

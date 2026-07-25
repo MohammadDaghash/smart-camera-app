@@ -72,6 +72,17 @@ MOTION_DETECTION_ENABLED = _env_flag("MOTION_DETECTION_ENABLED", default=True)
 MOTION_MIN_AREA = _env_int("MOTION_MIN_AREA", 500, minimum=1)
 MOTION_SCORE_THRESHOLD = _env_float("MOTION_SCORE_THRESHOLD", 0.02, minimum=0.0)
 
+EVENT_MOTION_COOLDOWN_SECONDS = _env_int(
+    "EVENT_MOTION_COOLDOWN_SECONDS",
+    10,
+    minimum=0,
+)
+EVENT_FACE_COOLDOWN_SECONDS = _env_int(
+    "EVENT_FACE_COOLDOWN_SECONDS",
+    20,
+    minimum=0,
+)
+
 # Authentication / session configuration.
 # Real credentials and secrets belong in backend/.env (gitignored), never here.
 AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")

@@ -82,7 +82,7 @@ The camera pipeline is split into small helpers:
 
 - `app/services/camera_source.py`: camera open, test, release, and reconnect logic.
 - `app/services/camera_pipeline.py`: frame read loop, face-analysis cadence, overlay drawing, and stream logs.
-- `app/services/event_log.py`: latest in-memory motion and face events.
+- `app/services/event_log.py`: latest in-memory motion and face events with cooldown support.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
@@ -123,6 +123,16 @@ MOTION_SCORE_THRESHOLD=0.02
 
 Lower values make motion detection more sensitive. Higher values ignore more
 small movement and camera noise.
+
+Optional event tuning:
+
+```bash
+EVENT_MOTION_COOLDOWN_SECONDS=10
+EVENT_FACE_COOLDOWN_SECONDS=20
+```
+
+Cooldowns prevent the same motion or face label from filling the event list too
+quickly when detection flickers.
 
 ## Recommended Local Command
 

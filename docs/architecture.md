@@ -47,7 +47,7 @@ Latest in-memory events are shown in the browser
 
 - `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
 - `backend/app/services/camera_pipeline.py`: coordinates frame reads, face-analysis cadence, overlay drawing, reconnect handling, and streaming logs.
-- `backend/app/services/event_log.py`: stores the latest in-memory motion and face events.
+- `backend/app/services/event_log.py`: stores the latest in-memory motion and face events, with cooldowns to avoid repeated event spam.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
@@ -82,6 +82,6 @@ Stats and events are local memory only and reset on backend restart.
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding a database.
-- Add motion-event cooldowns and persistent local event history.
+- Add persistent local event history.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.
