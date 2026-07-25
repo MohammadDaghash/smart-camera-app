@@ -15,6 +15,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Local known-face image folder
 - Health endpoint at `/health`
 - Camera access test endpoint at `/camera-test`
+- Pipeline stats endpoint at `/stats`
 
 ## Team
 
@@ -88,6 +89,7 @@ http://localhost:8000/login
 http://localhost:8000/health
 http://localhost:8000/camera-test
 http://localhost:8000/video
+http://localhost:8000/stats
 ```
 
 Note: the first run may download InsightFace model files into `~/.insightface`. The local `backend/main.py` still exists as a compatibility entrypoint, but `uvicorn app.main:app` is the recommended command.
@@ -133,8 +135,8 @@ POST /login     submit credentials
 GET  /logout    clear the session
 ```
 
-Protected routes (`/`, `/video`, `/camera-test`) redirect to `/login` when the user
-is not signed in. `/health` stays public.
+Protected routes (`/`, `/video`, `/camera-test`, `/stats`) redirect to `/login`
+when the user is not signed in. `/health` stays public.
 
 ### Session hardening
 

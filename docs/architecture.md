@@ -35,6 +35,9 @@ MJPEG streamer encodes the frame as JPEG
         |
         v
 MJPEG stream is sent back to browser
+        |
+        v
+Pipeline stats can be inspected at /stats
 ```
 
 ## Camera Pipeline Helpers
@@ -42,7 +45,20 @@ MJPEG stream is sent back to browser
 - `backend/app/services/camera_source.py`: opens, tests, releases, and reopens camera devices.
 - `backend/app/services/camera_pipeline.py`: coordinates frame reads, face-analysis cadence, overlay drawing, reconnect handling, and streaming logs.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
+- `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
+
+## Pipeline Stats
+
+`GET /stats` returns a protected JSON snapshot with:
+
+- camera frame reads and streamed frames
+- failed frame reads and reconnect count
+- encoding failures
+- face-analysis interval and analysis-frame count
+- latest face count and labels
+
+Stats are local memory only and reset on backend restart.
 
 ## Performance Tuning
 
