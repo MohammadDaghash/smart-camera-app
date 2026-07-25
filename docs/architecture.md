@@ -63,6 +63,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
 - `backend/app/routes/known_faces.py`: exposes a protected known-face loading summary without embeddings or images.
+- `backend/app/vision/label_smoothing.py`: stabilizes recognition labels using face-box overlap and recent label votes.
 - `backend/app/vision/motion_detection.py`: compares consecutive frames and reports basic motion signals.
 
 ## Pipeline Stats
@@ -93,6 +94,7 @@ gitignored.
 - `FACE_ANALYSIS_INTERVAL_FRAMES=1` keeps current behavior by analyzing every frame.
 - Higher values reuse the latest annotations between analysis frames to reduce CPU usage.
 - Increase the interval only after checking that label boxes still feel responsive enough.
+- `FACE_LABEL_SMOOTHING_*` settings control how many recent labels are needed before the display switches names.
 
 ## Privacy Defaults
 
@@ -104,6 +106,6 @@ gitignored.
 
 ## Near-Term Architecture Goals
 
-- Add smoothing and confidence history without adding cloud services.
+- Add confidence history without adding cloud services.
 - Add notification preferences after local browser notifications are stable.
 - Add minimal tests for pure logic and route availability.

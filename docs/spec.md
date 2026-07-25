@@ -18,6 +18,7 @@ The current system supports:
 - Camera availability testing
 - Face detection on the live stream
 - Basic local face recognition labels
+- Recognition label smoothing across recent frames
 - Basic local login protection
 - Basic motion detection stats
 - Persistent local motion and face events
@@ -97,6 +98,7 @@ Acceptance criteria:
 - Known people are recognized more consistently.
 - Unknown people remain labeled as `Anonymous`.
 - `/known-faces` shows source image counts and loaded embedding counts.
+- One weak frame should not immediately flip a stable known label to `Anonymous`.
 - Recognition settings are easy to tune during testing.
 
 ### Dashboard Experience

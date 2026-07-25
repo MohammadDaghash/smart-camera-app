@@ -95,6 +95,7 @@ The camera pipeline is split into small helpers:
 - `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
+- `app/vision/label_smoothing.py`: stabilizes recognition labels across nearby face boxes and recent frames.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
 
 The pipeline follows the same high-level idea used in mature camera systems:
@@ -104,11 +105,20 @@ Optional tuning:
 
 ```bash
 FACE_ANALYSIS_INTERVAL_FRAMES=1
+FACE_LABEL_SMOOTHING_ENABLED=true
+FACE_LABEL_SMOOTHING_HISTORY_SIZE=5
+FACE_LABEL_SMOOTHING_MIN_VOTES=2
+FACE_TRACK_IOU_THRESHOLD=0.2
+FACE_TRACK_TTL_FRAMES=5
 ```
 
 `1` analyzes every frame. Higher values reuse the latest face annotations between
 analysis frames, which can reduce CPU usage but may make boxes feel slightly less
 responsive.
+
+Label smoothing compares nearby face boxes across analysis frames and uses recent
+label votes before switching labels. This reduces one-frame flicker between a
+known person and `Anonymous`.
 
 Stats are available at:
 

@@ -4,6 +4,11 @@ from app.config import (
     EVENT_FACE_COOLDOWN_SECONDS,
     EVENT_MOTION_COOLDOWN_SECONDS,
     FACE_ANALYSIS_INTERVAL_FRAMES,
+    FACE_LABEL_SMOOTHING_ENABLED,
+    FACE_LABEL_SMOOTHING_HISTORY_SIZE,
+    FACE_LABEL_SMOOTHING_MIN_VOTES,
+    FACE_TRACK_IOU_THRESHOLD,
+    FACE_TRACK_TTL_FRAMES,
     RECONNECT_AFTER_FAILURES,
 )
 from app.services.camera_source import open_working_camera, release_camera
@@ -19,6 +24,7 @@ from app.vision.face_recognition import (
     draw_face_annotations,
     labels_from_annotations,
 )
+from app.vision.label_smoothing import FaceLabelSmoother
 from app.vision.motion_detection import MotionDetector
 
 
@@ -51,6 +57,13 @@ def generate_frames(camera, index):
     last_face_labels = set()
     latest_face_annotations = []
     motion_detector = MotionDetector()
+    label_smoother = FaceLabelSmoother(
+        enabled=FACE_LABEL_SMOOTHING_ENABLED,
+        history_size=FACE_LABEL_SMOOTHING_HISTORY_SIZE,
+        min_votes=FACE_LABEL_SMOOTHING_MIN_VOTES,
+        iou_threshold=FACE_TRACK_IOU_THRESHOLD,
+        ttl_frames=FACE_TRACK_TTL_FRAMES,
+    )
     pipeline_stats.mark_stream_started(index)
 
     try:
@@ -122,7 +135,10 @@ def generate_frames(camera, index):
             last_motion_detected = motion["motion_detected"]
 
             if should_process_frame(frame_count, FACE_ANALYSIS_INTERVAL_FRAMES):
-                latest_face_annotations = build_face_annotations(frame)
+                latest_face_annotations = label_smoother.smooth(
+                    build_face_annotations(frame),
+                    frame_count,
+                )
                 face_count = len(latest_face_annotations)
                 face_labels = labels_from_annotations(latest_face_annotations)
                 current_face_labels = {
