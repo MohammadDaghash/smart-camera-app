@@ -14,11 +14,13 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 - `GET /`: serves `frontend/index.html`
 - `GET /history`: serves `frontend/events.html`
+- `GET /recognition-debug`: serves `frontend/recognition-debug.html`
 - `GET /health`: simple API health check
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
 - `GET /known-faces`: protected debug summary of loaded known-face labels and counts
+- `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
 - `GET /api/events`: local event history with `type` and `limit` filters
 - `GET /api/snapshots/{filename}`: protected local event snapshot image
 
@@ -95,6 +97,7 @@ The camera pipeline is split into small helpers:
 - `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
+- `app/services/recognition_debug.py`: builds the recognition debug API response from safe runtime metadata.
 - `app/vision/label_smoothing.py`: stabilizes recognition labels across nearby face boxes and recent frames.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
 

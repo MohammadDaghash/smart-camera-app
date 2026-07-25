@@ -145,7 +145,11 @@ def generate_frames(camera, index):
                     annotation["label"]
                     for annotation in latest_face_annotations
                 }
-                pipeline_stats.record_analysis(face_count, face_labels)
+                pipeline_stats.record_analysis(
+                    face_count,
+                    face_labels,
+                    faces=latest_face_annotations,
+                )
 
                 for label in sorted(current_face_labels - last_face_labels):
                     event = event_log.add_event(

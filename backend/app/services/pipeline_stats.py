@@ -24,6 +24,7 @@ class PipelineStats:
             self.analysis_frames = 0
             self.last_face_count = 0
             self.last_labels = []
+            self.last_faces = []
             self.motion_frames = 0
             self.motion_events = 0
             self.motion_active = False
@@ -72,11 +73,12 @@ class PipelineStats:
         with self._lock:
             self.encoding_failures += 1
 
-    def record_analysis(self, face_count, labels, now=None):
+    def record_analysis(self, face_count, labels, faces=None, now=None):
         with self._lock:
             self.analysis_frames += 1
             self.last_face_count = face_count
             self.last_labels = list(labels)
+            self.last_faces = [self._serialize_face(face) for face in faces or []]
             self.last_analysis_at = now if now is not None else time.time()
 
     def record_motion(self, motion_detected, motion_score, motion_area, now=None):
@@ -109,6 +111,7 @@ class PipelineStats:
                     "analysis_frames": self.analysis_frames,
                     "last_face_count": self.last_face_count,
                     "last_labels": list(self.last_labels),
+                    "last_faces": [dict(face) for face in self.last_faces],
                 },
                 "motion": {
                     "enabled": self.motion_detection_enabled,
@@ -124,6 +127,21 @@ class PipelineStats:
                     "last_motion_at": self.last_motion_at,
                 },
             }
+
+    def _serialize_face(self, face):
+        box = face.get("box", ())
+
+        return {
+            "track_id": face.get("track_id"),
+            "box": [int(value) for value in box],
+            "label": str(face.get("label", "Anonymous")),
+            "score": round(float(face.get("score", 0.0)), 4),
+            "raw_label": str(face.get("raw_label", face.get("label", "Anonymous"))),
+            "raw_score": round(
+                float(face.get("raw_score", face.get("score", 0.0))),
+                4,
+            ),
+        }
 
 
 pipeline_stats = PipelineStats(

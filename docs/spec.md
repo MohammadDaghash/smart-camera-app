@@ -28,6 +28,7 @@ The current system supports:
 - Live dashboard alert indicator
 - Local browser notifications for new suspicious alerts
 - Protected known-face loading debug endpoint
+- Recognition debug page for scores, thresholds, and label reasons
 
 The current system does not yet include:
 
@@ -90,6 +91,7 @@ Requirements:
 - Support multiple reference photos per person.
 - Compare faces using stable embeddings.
 - Expose a protected debug endpoint for loaded known-face labels and counts.
+- Expose a protected debug page for recent raw and smoothed recognition results.
 - Tune confidence thresholds.
 - Smooth recognition labels across several frames.
 
@@ -98,6 +100,7 @@ Acceptance criteria:
 - Known people are recognized more consistently.
 - Unknown people remain labeled as `Anonymous`.
 - `/known-faces` shows source image counts and loaded embedding counts.
+- `/recognition-debug` shows current raw score, smoothed label, and reason.
 - One weak frame should not immediately flip a stable known label to `Anonymous`.
 - Recognition settings are easy to tune during testing.
 

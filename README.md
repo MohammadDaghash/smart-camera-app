@@ -19,6 +19,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Camera access test endpoint at `/camera-test`
 - Pipeline stats endpoint at `/stats`
 - Known-face debug endpoint at `/known-faces`
+- Recognition debug page at `/recognition-debug`
 - Basic frontend status panel for camera, faces, labels, and motion
 - Persistent local camera events with simple cooldowns
 - Event history page with type and limit filters
@@ -103,6 +104,8 @@ http://localhost:8000/camera-test
 http://localhost:8000/video
 http://localhost:8000/stats
 http://localhost:8000/known-faces
+http://localhost:8000/recognition-debug
+http://localhost:8000/api/recognition-debug
 http://localhost:8000/history
 http://localhost:8000/api/events
 http://localhost:8000/api/snapshots/<snapshot-filename>
@@ -152,8 +155,9 @@ GET  /logout    clear the session
 ```
 
 Protected routes (`/`, `/history`, `/video`, `/camera-test`, `/stats`,
-`/known-faces`, `/api/events`, `/api/snapshots/*`) redirect to `/login` when
-the user is not signed in. `/health` stays public.
+`/known-faces`, `/recognition-debug`, `/api/recognition-debug`, `/api/events`,
+`/api/snapshots/*`) redirect to `/login` when the user is not signed in.
+`/health` stays public.
 
 ### Session hardening
 

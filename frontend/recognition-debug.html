@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recognition Debug</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+      padding: 24px;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .subtitle,
+    .status {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-link,
+    .logout {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover,
+    .logout:hover {
+      text-decoration: underline;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .video {
+      display: block;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #111827;
+    }
+
+    .panel {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 16px;
+      margin-top: 20px;
+    }
+
+    .panel:first-child {
+      margin-top: 0;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      min-width: 0;
+    }
+
+    .metric-label {
+      display: block;
+      margin-bottom: 4px;
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      display: block;
+      min-height: 22px;
+      font-size: 16px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .label-known {
+      color: #15803d;
+      font-weight: 700;
+    }
+
+    .label-anonymous {
+      color: #b45309;
+      font-weight: 700;
+    }
+
+    .reason {
+      min-width: 220px;
+      color: #374151;
+    }
+
+    .empty {
+      padding: 12px 0;
+      color: #6b7280;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 16px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <div>
+        <h1>Recognition Debug</h1>
+        <p class="subtitle" id="updatedAt">Loading...</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="/">Live View</a>
+        <a class="nav-link" href="/history">History</a>
+        <a class="logout" href="/logout">Log out</a>
+      </nav>
+    </div>
+
+    <div class="layout">
+      <section aria-label="Live camera stream">
+        <img class="video" src="/video" alt="Live webcam stream">
+      </section>
+
+      <section aria-label="Recognition diagnostics">
+        <section class="panel" aria-label="Runtime">
+          <h2>Runtime</h2>
+          <div class="metric-grid">
+            <div class="metric">
+              <span class="metric-label">Active streams</span>
+              <span class="metric-value" id="activeStreams">0</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Analysis frames</span>
+              <span class="metric-value" id="analysisFrames">0</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Frames read</span>
+              <span class="metric-value" id="framesRead">0</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Faces</span>
+              <span class="metric-value" id="faceCount">0</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Settings">
+          <h2>Settings</h2>
+          <div class="metric-grid">
+            <div class="metric">
+              <span class="metric-label">Match threshold</span>
+              <span class="metric-value" id="matchThreshold">-</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Analysis interval</span>
+              <span class="metric-value" id="analysisInterval">-</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Smoothing</span>
+              <span class="metric-value" id="smoothingStatus">-</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Votes</span>
+              <span class="metric-value" id="smoothingVotes">-</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Known faces">
+          <h2>Known Faces</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Images</th>
+                  <th>Embeddings</th>
+                </tr>
+              </thead>
+              <tbody id="knownFacesBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <section class="panel" aria-label="Current faces">
+      <h2>Current Faces</h2>
+      <div class="table-wrap" id="facesTableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Track</th>
+              <th>Label</th>
+              <th>Score</th>
+              <th>Raw label</th>
+              <th>Raw score</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="facesBody"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="facesEmpty" hidden>No faces detected.</p>
+    </section>
+  </main>
+
+  <script>
+    const updatedAt = document.getElementById("updatedAt");
+    const activeStreams = document.getElementById("activeStreams");
+    const analysisFrames = document.getElementById("analysisFrames");
+    const framesRead = document.getElementById("framesRead");
+    const faceCount = document.getElementById("faceCount");
+    const matchThreshold = document.getElementById("matchThreshold");
+    const analysisInterval = document.getElementById("analysisInterval");
+    const smoothingStatus = document.getElementById("smoothingStatus");
+    const smoothingVotes = document.getElementById("smoothingVotes");
+    const knownFacesBody = document.getElementById("knownFacesBody");
+    const facesBody = document.getElementById("facesBody");
+    const facesTableWrap = document.getElementById("facesTableWrap");
+    const facesEmpty = document.getElementById("facesEmpty");
+
+    function score(value) {
+      if (value === null || value === undefined) {
+        return "-";
+      }
+
+      return Number(value).toFixed(2);
+    }
+
+    function setText(element, value) {
+      element.textContent = value ?? "-";
+    }
+
+    function labelClass(label) {
+      return label === "Anonymous" ? "label-anonymous" : "label-known";
+    }
+
+    function cell(text, className) {
+      const element = document.createElement("td");
+      element.textContent = text ?? "-";
+
+      if (className) {
+        element.className = className;
+      }
+
+      return element;
+    }
+
+    function renderKnownFaces(knownFaces) {
+      knownFacesBody.replaceChildren();
+
+      for (const person of knownFaces?.people || []) {
+        const row = document.createElement("tr");
+        row.append(
+          cell(person.name),
+          cell(person.source_images),
+          cell(person.loaded_embeddings)
+        );
+        knownFacesBody.appendChild(row);
+      }
+
+      if (knownFacesBody.children.length === 0) {
+        const row = document.createElement("tr");
+        const emptyCell = cell("No known faces loaded.");
+        emptyCell.colSpan = 3;
+        row.appendChild(emptyCell);
+        knownFacesBody.appendChild(row);
+      }
+    }
+
+    function renderFaces(faces) {
+      facesBody.replaceChildren();
+      const currentFaces = faces || [];
+      facesTableWrap.hidden = currentFaces.length === 0;
+      facesEmpty.hidden = currentFaces.length > 0;
+
+      for (const face of currentFaces) {
+        const row = document.createElement("tr");
+        row.append(
+          cell(face.track_id),
+          cell(face.label, labelClass(face.label)),
+          cell(score(face.score)),
+          cell(face.raw_label, labelClass(face.raw_label)),
+          cell(score(face.raw_score)),
+          cell(face.reason, "reason")
+        );
+        facesBody.appendChild(row);
+      }
+    }
+
+    function renderDebug(data) {
+      const settings = data.settings || {};
+      const smoothing = settings.label_smoothing || {};
+      const runtime = data.runtime || {};
+      const recognition = data.recognition || {};
+
+      setText(activeStreams, runtime.active_streams);
+      setText(analysisFrames, recognition.analysis_frames);
+      setText(framesRead, runtime.frames_read);
+      setText(faceCount, recognition.last_face_count);
+      setText(matchThreshold, score(settings.face_match_threshold));
+      setText(analysisInterval, settings.face_analysis_interval_frames);
+      setText(smoothingStatus, smoothing.enabled ? "On" : "Off");
+      setText(
+        smoothingVotes,
+        `${smoothing.min_votes || "-"} / ${smoothing.history_size || "-"}`
+      );
+
+      renderKnownFaces(data.known_faces);
+      renderFaces(recognition.faces);
+      updatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+    }
+
+    async function loadDebug() {
+      try {
+        const response = await fetch("/api/recognition-debug", { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`Recognition debug request failed: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+          throw new Error("Recognition debug response was not JSON");
+        }
+
+        renderDebug(await response.json());
+      } catch (error) {
+        updatedAt.textContent = "Recognition debug unavailable";
+        console.error(error);
+      }
+    }
+
+    loadDebug();
+    setInterval(loadDebug, 1000);
+  </script>
+</body>
+</html>
