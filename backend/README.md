@@ -113,7 +113,7 @@ GET /stats
 
 The stats include camera counters, face-analysis counters, basic motion
 detection values such as `motion_active`, `last_motion_score`, and
-`last_motion_area`, plus the latest 10 local events.
+`last_motion_area`, the latest 10 local events, and the latest local alert.
 
 Pipeline stats reset when the backend restarts. Events are stored locally in
 SQLite and survive backend restarts.

@@ -48,7 +48,7 @@
 
     .status-panel {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 12px;
       margin: 0 0 20px;
       padding: 16px 0;
@@ -93,6 +93,47 @@
       margin: -8px 0 20px;
       color: #6b7280;
       font-size: 13px;
+    }
+
+    .alert-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 20px;
+      padding: 14px 16px;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .alert-banner[hidden] {
+      display: none;
+    }
+
+    .alert-title {
+      display: block;
+      font-weight: 700;
+    }
+
+    .alert-detail {
+      display: block;
+      margin-top: 3px;
+      color: #7f1d1d;
+      font-size: 13px;
+    }
+
+    .alert-link {
+      color: #991b1b;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .alert-link:hover {
+      text-decoration: underline;
     }
 
     .events {
@@ -181,6 +222,11 @@
       .status-panel {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .alert-banner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
 
     @media (max-width: 460px) {
@@ -200,6 +246,13 @@
       </nav>
     </div>
     <p class="status">Camera is live</p>
+    <section class="alert-banner" id="alertBanner" aria-live="polite" hidden>
+      <div>
+        <span class="alert-title" id="alertTitle">Suspicious activity detected</span>
+        <span class="alert-detail" id="alertDetail"></span>
+      </div>
+      <a class="alert-link" href="/history">View history</a>
+    </section>
     <section class="status-panel" aria-label="Live camera status">
       <div class="status-item">
         <span class="status-label">Camera</span>
@@ -217,6 +270,10 @@
         <span class="status-label">Motion</span>
         <span class="status-value" id="motionStatus">No motion</span>
       </div>
+      <div class="status-item">
+        <span class="status-label">Alert</span>
+        <span class="status-value ok" id="alertStatus">No alert</span>
+      </div>
     </section>
     <p class="status-meta" id="statsUpdatedAt">Stats loading...</p>
     <section class="events" aria-label="Recent camera events">
@@ -232,6 +289,9 @@
     const faceCount = document.getElementById("faceCount");
     const faceLabels = document.getElementById("faceLabels");
     const motionStatus = document.getElementById("motionStatus");
+    const alertStatus = document.getElementById("alertStatus");
+    const alertBanner = document.getElementById("alertBanner");
+    const alertDetail = document.getElementById("alertDetail");
     const statsUpdatedAt = document.getElementById("statsUpdatedAt");
     const eventList = document.getElementById("eventList");
 
@@ -290,6 +350,19 @@
       }
     }
 
+    function renderAlert(latestAlert) {
+      if (!latestAlert) {
+        alertBanner.hidden = true;
+        alertDetail.textContent = "";
+        setValue(alertStatus, "No alert", "ok");
+        return;
+      }
+
+      alertBanner.hidden = false;
+      alertDetail.textContent = `${latestAlert.message || "Suspicious activity"} ${formatEventTime(latestAlert)}`;
+      setValue(alertStatus, "Suspicious activity", "error");
+    }
+
     async function updateStats() {
       try {
         const response = await fetch("/stats", { cache: "no-store" });
@@ -320,12 +393,15 @@
         setValue(faceCount, String(faces), faces > 0 ? "ok" : "");
         setValue(faceLabels, labels, labels === "None" ? "" : "ok");
         setValue(motionStatus, motionActive ? "Detected" : "No motion", motionActive ? "warn" : "ok");
+        renderAlert(stats.alerts?.latest_alert);
         renderEvents(stats.events || []);
 
         statsUpdatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
       } catch (error) {
         setValue(cameraStatus, "Unknown", "error");
         setValue(motionStatus, "Unknown", "error");
+        setValue(alertStatus, "Unknown", "error");
+        alertBanner.hidden = true;
         statsUpdatedAt.textContent = "Stats unavailable";
         console.error(error);
       }

@@ -24,6 +24,7 @@ The current system supports:
 - Event history page with simple filters
 - Local snapshots for saved motion and face events
 - Local suspicious-activity alert events
+- Live dashboard alert indicator
 
 The current system does not yet include:
 
@@ -104,6 +105,7 @@ Requirements:
 - Keep the live view as the primary experience.
 - Show camera and recognition status clearly.
 - Show the current motion status clearly.
+- Show the latest suspicious alert clearly.
 - Present known and anonymous labels in a readable way.
 - Work well on desktop and mobile screens.
 
@@ -111,6 +113,7 @@ Acceptance criteria:
 
 - Users can tell whether the camera is connected.
 - Users can tell whether recognition is active.
+- Users can tell when suspicious activity was detected.
 - UI changes do not break the live stream.
 
 ### Basic Activity Signal

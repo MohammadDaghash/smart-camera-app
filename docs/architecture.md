@@ -78,6 +78,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - filterable local event history through `/api/events`
 - protected local event snapshots through `/api/snapshots/{filename}`
 - local alert events when motion and an anonymous face happen close together
+- latest alert for the live dashboard indicator
 
 Pipeline stats are local memory only and reset on backend restart. Events persist
 in `backend/local_data/events.db`, which is gitignored. Event cleanup is controlled

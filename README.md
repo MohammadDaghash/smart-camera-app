@@ -23,6 +23,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Configurable local event cleanup and retention
 - Local event snapshots shown in history
 - Local suspicious-activity alert events
+- Live dashboard alert indicator
 
 ## Team
 

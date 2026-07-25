@@ -45,10 +45,12 @@ def test_stats_returns_pipeline_snapshot_when_authenticated(monkeypatch, tmp_pat
     pipeline_stats.record_frame_read(camera_index=0, now=100.0)
     pipeline_stats.record_frame_streamed()
     test_event_log.add_event("motion", "Motion detected", now=101.0)
+    test_event_log.add_event("alert", "Suspicious activity", now=102.0)
 
     response = client.get("/stats")
 
     assert response.status_code == 200
     assert response.json()["camera"]["frames_streamed"] == 1
     assert "motion" in response.json()
-    assert response.json()["events"][0]["message"] == "Motion detected"
+    assert response.json()["events"][0]["message"] == "Suspicious activity"
+    assert response.json()["alerts"]["latest_alert"]["message"] == "Suspicious activity"
