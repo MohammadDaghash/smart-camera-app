@@ -10,6 +10,12 @@ def test_pipeline_stats_tracks_camera_and_analysis_state():
     stats.record_frame_read_failed(camera_index=1)
     stats.record_reconnect(camera_index=2)
     stats.record_analysis(face_count=1, labels=["Mohammad:0.81"], now=101.0)
+    stats.record_motion(
+        motion_detected=True,
+        motion_score=0.12,
+        motion_area=4200,
+        now=102.0,
+    )
     stats.record_encoding_failure()
 
     snapshot = stats.snapshot()
@@ -30,8 +36,17 @@ def test_pipeline_stats_tracks_camera_and_analysis_state():
         "last_face_count": 1,
         "last_labels": ["Mohammad:0.81"],
     }
+    assert snapshot["motion"] == {
+        "enabled": True,
+        "motion_frames": 1,
+        "motion_events": 1,
+        "motion_active": True,
+        "last_motion_score": 0.12,
+        "last_motion_area": 4200,
+    }
     assert snapshot["runtime"]["last_frame_at"] == 100.0
     assert snapshot["runtime"]["last_analysis_at"] == 101.0
+    assert snapshot["runtime"]["last_motion_at"] == 102.0
 
 
 def test_pipeline_stats_marks_stream_stopped_without_negative_count():
@@ -42,3 +57,20 @@ def test_pipeline_stats_marks_stream_stopped_without_negative_count():
     stats.mark_stream_stopped()
 
     assert stats.snapshot()["camera"]["active_streams"] == 0
+
+
+def test_pipeline_stats_counts_motion_events_on_new_motion_only():
+    stats = PipelineStats(face_analysis_interval_frames=1)
+
+    stats.record_motion(motion_detected=True, motion_score=0.1, motion_area=1000)
+    stats.record_motion(motion_detected=True, motion_score=0.2, motion_area=2000)
+    stats.record_motion(motion_detected=False, motion_score=0.0, motion_area=0)
+    stats.record_motion(motion_detected=True, motion_score=0.3, motion_area=3000)
+
+    snapshot = stats.snapshot()
+
+    assert snapshot["motion"]["motion_frames"] == 4
+    assert snapshot["motion"]["motion_events"] == 2
+    assert snapshot["motion"]["motion_active"] is True
+    assert snapshot["motion"]["last_motion_score"] == 0.3
+    assert snapshot["motion"]["last_motion_area"] == 3000

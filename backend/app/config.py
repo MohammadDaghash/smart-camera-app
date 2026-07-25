@@ -28,6 +28,32 @@ def _env_int(name: str, default: int, minimum: int | None = None) -> int:
     return value
 
 
+def _env_float(name: str, default: float, minimum: float | None = None) -> float:
+    raw = os.getenv(name)
+
+    if raw is None:
+        value = default
+    else:
+        try:
+            value = float(raw)
+        except ValueError:
+            value = default
+
+    if minimum is not None:
+        return max(minimum, value)
+
+    return value
+
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+
+    if raw is None:
+        return default
+
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 FRONTEND_FILE = PROJECT_DIR / "frontend" / "index.html"
 LOGIN_FILE = PROJECT_DIR / "frontend" / "login.html"
 KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
@@ -42,6 +68,10 @@ INSIGHTFACE_DETECTION_SIZE = (640, 640)
 FACE_MATCH_THRESHOLD = 0.45
 KNOWN_FACE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
+MOTION_DETECTION_ENABLED = _env_flag("MOTION_DETECTION_ENABLED", default=True)
+MOTION_MIN_AREA = _env_int("MOTION_MIN_AREA", 500, minimum=1)
+MOTION_SCORE_THRESHOLD = _env_float("MOTION_SCORE_THRESHOLD", 0.02, minimum=0.0)
+
 # Authentication / session configuration.
 # Real credentials and secrets belong in backend/.env (gitignored), never here.
 AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")
@@ -54,15 +84,6 @@ SESSION_SECRET = os.getenv("SESSION_SECRET") or secrets.token_urlsafe(32)
 SESSION_SECRET_IS_EPHEMERAL = not os.getenv("SESSION_SECRET")
 SESSION_COOKIE_NAME = "smart_camera_session"
 SESSION_MAX_AGE_SECONDS = int(os.getenv("SESSION_MAX_AGE_SECONDS", str(24 * 60 * 60)))
-
-
-def _env_flag(name: str, default: bool = False) -> bool:
-    raw = os.getenv(name)
-
-    if raw is None:
-        return default
-
-    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 # Send the session cookie only over HTTPS. Keep False for local HTTP, enable

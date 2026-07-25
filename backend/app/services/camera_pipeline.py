@@ -11,13 +11,16 @@ from app.vision.face_recognition import (
     draw_face_annotations,
     labels_from_annotations,
 )
+from app.vision.motion_detection import MotionDetector
 
 
 def generate_frames(camera, index):
     frame_count = 0
     failed_reads = 0
     last_face_count = None
+    last_motion_detected = False
     latest_face_annotations = []
+    motion_detector = MotionDetector()
     pipeline_stats.mark_stream_started(index)
 
     try:
@@ -54,6 +57,25 @@ def generate_frames(camera, index):
 
             if frame_count == 1 or frame_count % 120 == 0:
                 logger.info("Streaming frame %s from camera index %s", frame_count, index)
+
+            motion = motion_detector.detect(frame)
+            pipeline_stats.record_motion(
+                motion_detected=motion["motion_detected"],
+                motion_score=motion["motion_score"],
+                motion_area=motion["motion_area"],
+            )
+
+            if motion["motion_detected"] and (
+                not last_motion_detected or frame_count % 120 == 0
+            ):
+                logger.info(
+                    "Motion detected on frame %s: score %.4f, area %s",
+                    frame_count,
+                    motion["motion_score"],
+                    motion["motion_area"],
+                )
+
+            last_motion_detected = motion["motion_detected"]
 
             if should_process_frame(frame_count, FACE_ANALYSIS_INTERVAL_FRAMES):
                 latest_face_annotations = build_face_annotations(frame)

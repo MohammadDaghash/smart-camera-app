@@ -12,6 +12,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Face detection and bounding boxes
 - Basic known-face recognition with InsightFace
 - `Anonymous` label for unknown faces
+- Basic motion detection stats
 - Local known-face image folder
 - Health endpoint at `/health`
 - Camera access test endpoint at `/camera-test`
@@ -229,7 +230,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Frontend dashboard and camera status indicators
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
-- Movement detection
+- Movement event history
 - Suspicious activity alerts
 - Local event history
 - Optional smart-home device integrations

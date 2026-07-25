@@ -25,7 +25,7 @@ FastAPI /video route
 Camera source opens webcam and reads frames
         |
         v
-Camera pipeline sends frames to the vision module
+Camera pipeline runs motion detection and face analysis
         |
         v
 Frame is annotated
@@ -47,6 +47,7 @@ Pipeline stats can be inspected at /stats
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
+- `backend/app/vision/motion_detection.py`: compares consecutive frames and reports basic motion signals.
 
 ## Pipeline Stats
 
@@ -57,6 +58,7 @@ Pipeline stats can be inspected at /stats
 - encoding failures
 - face-analysis interval and analysis-frame count
 - latest face count and labels
+- motion activity, score, changed area, and event count
 
 Stats are local memory only and reset on backend restart.
 
@@ -75,5 +77,6 @@ Stats are local memory only and reset on backend restart.
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding a database.
+- Add motion-event cooldowns and persistent local event history.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

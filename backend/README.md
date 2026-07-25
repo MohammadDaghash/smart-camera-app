@@ -42,7 +42,7 @@ Application services such as camera open/read/reconnect and stream generation.
 app/vision/
 ```
 
-Computer-vision and ML logic, including InsightFace loading, known-face embeddings, detection, recognition, and drawing overlays.
+Computer-vision and ML logic, including InsightFace loading, known-face embeddings, detection, recognition, motion detection, and drawing overlays.
 
 ```text
 app/models/
@@ -84,6 +84,7 @@ The camera pipeline is split into small helpers:
 - `app/services/camera_pipeline.py`: frame read loop, face-analysis cadence, overlay drawing, and stream logs.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
+- `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
 
 The pipeline follows the same high-level idea used in mature camera systems:
 capture frames continuously, but keep expensive analysis controllable.
@@ -104,8 +105,23 @@ Stats are available at:
 GET /stats
 ```
 
+The stats include camera counters, face-analysis counters, and basic motion
+detection values such as `motion_active`, `last_motion_score`, and
+`last_motion_area`.
+
 The stats reset when the backend restarts. This is intentional for the local MVP;
 we will add persistent event history later when the event model is clear.
+
+Optional motion tuning:
+
+```bash
+MOTION_DETECTION_ENABLED=true
+MOTION_MIN_AREA=500
+MOTION_SCORE_THRESHOLD=0.02
+```
+
+Lower values make motion detection more sensitive. Higher values ignore more
+small movement and camera noise.
 
 ## Recommended Local Command
 

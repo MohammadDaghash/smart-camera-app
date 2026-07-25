@@ -1,12 +1,13 @@
 import time
 from threading import Lock
 
-from app.config import FACE_ANALYSIS_INTERVAL_FRAMES
+from app.config import FACE_ANALYSIS_INTERVAL_FRAMES, MOTION_DETECTION_ENABLED
 
 
 class PipelineStats:
-    def __init__(self, face_analysis_interval_frames):
+    def __init__(self, face_analysis_interval_frames, motion_detection_enabled=True):
         self.face_analysis_interval_frames = face_analysis_interval_frames
+        self.motion_detection_enabled = motion_detection_enabled
         self._lock = Lock()
         self.reset()
 
@@ -23,8 +24,14 @@ class PipelineStats:
             self.analysis_frames = 0
             self.last_face_count = 0
             self.last_labels = []
+            self.motion_frames = 0
+            self.motion_events = 0
+            self.motion_active = False
+            self.last_motion_score = 0.0
+            self.last_motion_area = 0
             self.last_frame_at = None
             self.last_analysis_at = None
+            self.last_motion_at = None
 
     def mark_stream_started(self, camera_index):
         with self._lock:
@@ -72,6 +79,18 @@ class PipelineStats:
             self.last_labels = list(labels)
             self.last_analysis_at = now if now is not None else time.time()
 
+    def record_motion(self, motion_detected, motion_score, motion_area, now=None):
+        with self._lock:
+            was_motion_active = self.motion_active
+            self.motion_frames += 1
+            self.motion_active = motion_detected
+            self.last_motion_score = motion_score
+            self.last_motion_area = motion_area
+
+            if motion_detected and not was_motion_active:
+                self.motion_events += 1
+                self.last_motion_at = now if now is not None else time.time()
+
     def snapshot(self):
         with self._lock:
             return {
@@ -91,13 +110,23 @@ class PipelineStats:
                     "last_face_count": self.last_face_count,
                     "last_labels": list(self.last_labels),
                 },
+                "motion": {
+                    "enabled": self.motion_detection_enabled,
+                    "motion_frames": self.motion_frames,
+                    "motion_events": self.motion_events,
+                    "motion_active": self.motion_active,
+                    "last_motion_score": self.last_motion_score,
+                    "last_motion_area": self.last_motion_area,
+                },
                 "runtime": {
                     "last_frame_at": self.last_frame_at,
                     "last_analysis_at": self.last_analysis_at,
+                    "last_motion_at": self.last_motion_at,
                 },
             }
 
 
 pipeline_stats = PipelineStats(
     face_analysis_interval_frames=FACE_ANALYSIS_INTERVAL_FRAMES,
+    motion_detection_enabled=MOTION_DETECTION_ENABLED,
 )

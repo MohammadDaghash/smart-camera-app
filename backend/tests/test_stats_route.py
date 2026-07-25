@@ -46,3 +46,4 @@ def test_stats_returns_pipeline_snapshot_when_authenticated():
 
     assert response.status_code == 200
     assert response.json()["camera"]["frames_streamed"] == 1
+    assert "motion" in response.json()
