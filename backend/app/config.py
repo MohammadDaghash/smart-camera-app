@@ -85,6 +85,8 @@ EVENT_FACE_COOLDOWN_SECONDS = _env_int(
     20,
     minimum=0,
 )
+EVENT_MAX_EVENTS = _env_int("EVENT_MAX_EVENTS", 1000, minimum=1)
+EVENT_RETENTION_DAYS = _env_int("EVENT_RETENTION_DAYS", 30, minimum=0)
 
 # Authentication / session configuration.
 # Real credentials and secrets belong in backend/.env (gitignored), never here.

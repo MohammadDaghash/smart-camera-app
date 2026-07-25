@@ -47,6 +47,10 @@ def test_events_returns_filtered_events_when_authenticated(monkeypatch, tmp_path
 
     assert response.status_code == 200
     assert response.json()["filters"] == {"limit": 25, "type": "face"}
+    assert response.json()["retention"] == {
+        "max_events": 100,
+        "retention_days": None,
+    }
     assert response.json()["events"] == [
         {
             "id": 2,

@@ -30,4 +30,5 @@ async def events(
             "limit": limit,
             "type": event_type or "all",
         },
+        "retention": event_log.retention_settings(),
     }

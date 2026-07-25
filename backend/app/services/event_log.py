@@ -4,17 +4,22 @@ import time
 from pathlib import Path
 from threading import Lock
 
-from app.config import EVENTS_DB_FILE
+from app.config import EVENT_MAX_EVENTS, EVENT_RETENTION_DAYS, EVENTS_DB_FILE
+
+
+SECONDS_PER_DAY = 24 * 60 * 60
 
 
 class EventLog:
-    def __init__(self, database_path=":memory:", max_events=100):
+    def __init__(self, database_path=":memory:", max_events=100, retention_seconds=None):
         self.database_path = database_path
         self.max_events = max_events
+        self.retention_seconds = retention_seconds
         self._lock = Lock()
         self._last_event_times = {}
         self._connection = self._connect()
         self._create_schema()
+        self.cleanup()
 
     def _connect(self):
         if self.database_path != ":memory:":
@@ -76,6 +81,7 @@ class EventLog:
                 """,
                 (event_type, message, created_at, json.dumps(metadata)),
             )
+            self._delete_expired_events(created_at)
             self._prune_old_events()
             self._connection.commit()
 
@@ -119,8 +125,44 @@ class EventLog:
             self._connection.commit()
             self._last_event_times.clear()
 
+    def cleanup(self, now=None):
+        cleanup_at = now if now is not None else time.time()
+
+        with self._lock:
+            deleted_expired = self._delete_expired_events(cleanup_at)
+            deleted_over_limit = self._prune_old_events()
+            self._connection.commit()
+
+            return {
+                "deleted_expired": deleted_expired,
+                "deleted_over_limit": deleted_over_limit,
+            }
+
+    def retention_settings(self):
+        retention_days = None
+
+        if self.retention_seconds is not None:
+            retention_days = self.retention_seconds / SECONDS_PER_DAY
+
+        return {
+            "max_events": self.max_events,
+            "retention_days": retention_days,
+        }
+
+    def _delete_expired_events(self, now):
+        if not self.retention_seconds:
+            return 0
+
+        cutoff = now - self.retention_seconds
+        cursor = self._connection.execute(
+            "DELETE FROM events WHERE created_at < ?",
+            (cutoff,),
+        )
+
+        return cursor.rowcount
+
     def _prune_old_events(self):
-        self._connection.execute(
+        cursor = self._connection.execute(
             """
             DELETE FROM events
             WHERE id NOT IN (
@@ -132,6 +174,8 @@ class EventLog:
             """,
             (self.max_events,),
         )
+
+        return cursor.rowcount
 
     def _row_to_event(self, row):
         try:
@@ -148,4 +192,13 @@ class EventLog:
         }
 
 
-event_log = EventLog(database_path=EVENTS_DB_FILE)
+event_retention_seconds = None
+
+if EVENT_RETENTION_DAYS > 0:
+    event_retention_seconds = EVENT_RETENTION_DAYS * SECONDS_PER_DAY
+
+event_log = EventLog(
+    database_path=EVENTS_DB_FILE,
+    max_events=EVENT_MAX_EVENTS,
+    retention_seconds=event_retention_seconds,
+)

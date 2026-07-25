@@ -1,4 +1,4 @@
-from app.services.event_log import EventLog
+from app.services.event_log import EventLog, SECONDS_PER_DAY
 
 
 def test_event_log_returns_latest_events_first():
@@ -54,6 +54,39 @@ def test_event_log_drops_old_events_after_max_size():
     events = event_log.latest()
 
     assert [event["message"] for event in events] == ["Motion 3", "Motion 2"]
+
+
+def test_event_log_removes_expired_events_after_new_insert():
+    event_log = EventLog(retention_seconds=10)
+
+    event_log.add_event("motion", "Old motion", now=100.0)
+    event_log.add_event("motion", "New motion", now=111.0)
+
+    events = event_log.latest()
+
+    assert [event["message"] for event in events] == ["New motion"]
+
+
+def test_event_log_manual_cleanup_reports_deleted_counts():
+    event_log = EventLog(retention_seconds=10)
+
+    event_log.add_event("motion", "Old motion", now=100.0)
+    event_log.add_event("face", "Old face", now=101.0)
+
+    result = event_log.cleanup(now=112.0)
+
+    assert result["deleted_expired"] == 2
+    assert result["deleted_over_limit"] == 0
+    assert event_log.latest() == []
+
+
+def test_event_log_returns_retention_settings():
+    event_log = EventLog(max_events=7, retention_seconds=2 * SECONDS_PER_DAY)
+
+    assert event_log.retention_settings() == {
+        "max_events": 7,
+        "retention_days": 2.0,
+    }
 
 
 def test_event_log_persists_events_between_instances(tmp_path):

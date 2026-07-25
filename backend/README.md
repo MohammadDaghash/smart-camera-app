@@ -139,10 +139,13 @@ Optional event tuning:
 ```bash
 EVENT_MOTION_COOLDOWN_SECONDS=10
 EVENT_FACE_COOLDOWN_SECONDS=20
+EVENT_MAX_EVENTS=1000
+EVENT_RETENTION_DAYS=30
 ```
 
 Cooldowns prevent the same motion or face label from filling the event list too
-quickly when detection flickers.
+quickly when detection flickers. Retention settings keep the local SQLite
+database bounded. `EVENT_RETENTION_DAYS=0` disables age-based cleanup.
 
 ## Recommended Local Command
 

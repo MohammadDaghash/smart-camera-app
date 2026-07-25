@@ -115,6 +115,12 @@
       font-size: 13px;
     }
 
+    .retention {
+      margin: -4px 0 16px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
     .event-list {
       margin: 0;
       padding: 0;
@@ -229,6 +235,7 @@
     </section>
 
     <p class="status" id="statusText">Loading events...</p>
+    <p class="retention" id="retentionText"></p>
     <ul class="event-list" id="eventList"></ul>
   </main>
 
@@ -237,6 +244,7 @@
     const eventLimit = document.getElementById("eventLimit");
     const refreshButton = document.getElementById("refreshButton");
     const statusText = document.getElementById("statusText");
+    const retentionText = document.getElementById("retentionText");
     const eventList = document.getElementById("eventList");
 
     function formatTime(timestamp) {
@@ -301,6 +309,18 @@
       }
     }
 
+    function renderRetention(settings) {
+      if (!settings) {
+        retentionText.textContent = "";
+        return;
+      }
+
+      const maxEvents = settings.max_events || "unknown";
+      const retentionDays = settings.retention_days;
+      const ageText = retentionDays ? `${retentionDays} day(s)` : "disabled";
+      retentionText.textContent = `Cleanup: keeps up to ${maxEvents} events; age retention ${ageText}.`;
+    }
+
     async function loadEvents() {
       const params = new URLSearchParams({
         type: eventType.value,
@@ -317,9 +337,11 @@
 
         const data = await response.json();
         renderEvents(data.events || []);
+        renderRetention(data.retention);
         statusText.textContent = `Showing ${data.events?.length || 0} event(s). Updated ${new Date().toLocaleTimeString()}`;
       } catch (error) {
         eventList.replaceChildren();
+        retentionText.textContent = "";
         statusText.textContent = "Events unavailable";
         console.error(error);
       }

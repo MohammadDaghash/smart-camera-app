@@ -70,7 +70,8 @@ Event history can be viewed at /history
 - filterable local event history through `/api/events`
 
 Pipeline stats are local memory only and reset on backend restart. Events persist
-in `backend/local_data/events.db`, which is gitignored.
+in `backend/local_data/events.db`, which is gitignored. Event cleanup is controlled
+by `EVENT_MAX_EVENTS` and `EVENT_RETENTION_DAYS`.
 
 ## Performance Tuning
 
@@ -88,6 +89,6 @@ in `backend/local_data/events.db`, which is gitignored.
 ## Near-Term Architecture Goals
 
 - Add smoothing and confidence history without adding cloud services.
-- Add event cleanup/retention settings and snapshots.
+- Add event snapshots.
 - Add a `/known-faces` debug endpoint.
 - Add minimal tests for pure logic and route availability.

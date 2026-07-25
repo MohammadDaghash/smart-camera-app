@@ -20,6 +20,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Basic frontend status panel for camera, faces, labels, and motion
 - Persistent local camera events with simple cooldowns
 - Event history page with type and limit filters
+- Configurable local event cleanup and retention
 
 ## Team
 
@@ -236,7 +237,7 @@ See [docs/spec.md](docs/spec.md) for the living product spec and feature priorit
 - Fuller frontend dashboard and camera controls
 - Better overlays for labels, confidence, and unknown faces
 - Camera pipeline performance improvements
-- Event cleanup tools and retention settings
+- Event snapshots and alert rules
 - Suspicious activity alerts
 - Local event history
 - Optional smart-home device integrations
