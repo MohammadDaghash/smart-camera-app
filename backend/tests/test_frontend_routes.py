@@ -40,6 +40,15 @@ def test_diagnostics_page_redirects_when_anonymous():
     assert response.headers["location"] == "/login"
 
 
+def test_settings_page_redirects_when_anonymous():
+    client = TestClient(build_test_app(), follow_redirects=False)
+
+    response = client.get("/settings")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
 def test_home_page_loads_diagnostics_summary_when_authenticated():
     session_store.revoke_all()
     login_throttle.clear()
@@ -78,3 +87,16 @@ def test_diagnostics_page_loads_when_authenticated():
 
     assert response.status_code == 200
     assert "Camera Diagnostics" in response.text
+
+
+def test_settings_page_loads_when_authenticated():
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.get("/settings")
+
+    assert response.status_code == 200
+    assert "Camera Settings" in response.text

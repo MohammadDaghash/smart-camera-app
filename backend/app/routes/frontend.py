@@ -6,6 +6,7 @@ from app.config import (
     EVENTS_FILE,
     FRONTEND_FILE,
     RECOGNITION_DEBUG_FILE,
+    SETTINGS_FILE,
 )
 from app.utils.auth import require_login
 
@@ -31,3 +32,8 @@ def recognition_debug(user: str = Depends(require_login)):
 @router.get("/diagnostics")
 def diagnostics(user: str = Depends(require_login)):
     return FileResponse(DIAGNOSTICS_FILE)
+
+
+@router.get("/settings")
+def settings(user: str = Depends(require_login)):
+    return FileResponse(SETTINGS_FILE)

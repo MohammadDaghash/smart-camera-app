@@ -23,6 +23,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Frigate-inspired system health status
 - Camera diagnostics page with readable health checks and recommendations
 - Live dashboard diagnostics summary with the top recommended action
+- Read-only camera settings page for local tuning values
 - Local system status change events
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`
@@ -112,6 +113,8 @@ http://localhost:8000/stats
 http://localhost:8000/api/system-status
 http://localhost:8000/diagnostics
 http://localhost:8000/api/diagnostics
+http://localhost:8000/settings
+http://localhost:8000/api/settings
 http://localhost:8000/known-faces
 http://localhost:8000/recognition-debug
 http://localhost:8000/api/recognition-debug
@@ -164,8 +167,9 @@ GET  /logout    clear the session
 ```
 
 Protected routes (`/`, `/history`, `/diagnostics`, `/video`, `/camera-test`,
-`/stats`, `/known-faces`, `/recognition-debug`, `/api/system-status`,
-`/api/diagnostics`, `/api/recognition-debug`, `/api/events`,
+`/settings`, `/stats`, `/known-faces`, `/recognition-debug`,
+`/api/system-status`, `/api/diagnostics`, `/api/settings`,
+`/api/recognition-debug`, `/api/events`,
 `/api/snapshots/*`) redirect to
 `/login` when the user is not signed in.
 `/health` stays public.

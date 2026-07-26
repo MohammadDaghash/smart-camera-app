@@ -15,6 +15,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /`: serves `frontend/index.html`
 - `GET /history`: serves `frontend/events.html`
 - `GET /diagnostics`: serves `frontend/diagnostics.html`
+- `GET /settings`: serves `frontend/settings.html`
 - `GET /recognition-debug`: serves `frontend/recognition-debug.html`
 - `GET /health`: simple API health check
 - `GET /camera-test`: checks whether OpenCV can open the webcam
@@ -22,6 +23,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
 - `GET /api/system-status`: protected health summary based on pipeline metrics
 - `GET /api/diagnostics`: protected readable health checks and recommended actions
+- `GET /api/settings`: protected read-only tuning settings summary
 - `GET /known-faces`: protected debug summary of loaded known-face labels and counts
 - `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
 - `GET /api/events`: local event history with `type` and `limit` filters
@@ -102,6 +104,7 @@ The camera pipeline is split into small helpers:
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/services/diagnostics.py`: readable health checks and recommended actions from pipeline metrics.
+- `app/services/settings_summary.py`: read-only non-secret tuning settings for `/api/settings`.
 - `app/services/status_events.py`: records local events when the overall system status changes.
 - `app/services/recognition_debug.py`: builds the recognition debug API response from safe runtime metadata.
 - `app/services/system_status.py`: converts low-level pipeline metrics into `healthy`, `idle`, `degraded`, or `error`.
@@ -168,6 +171,10 @@ systems such as Frigate:
 each health check includes what happened and the next local action to try.
 When the status changes, the backend records a local `system` event so the
 transition is visible in history.
+
+`/settings` and `/api/settings` show current non-secret `.env` tuning values.
+Editing settings still happens locally in `backend/.env`, followed by a backend
+restart.
 
 Pipeline stats reset when the backend restarts. Events are stored locally in
 SQLite and survive backend restarts.

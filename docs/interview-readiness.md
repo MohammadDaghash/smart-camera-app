@@ -110,6 +110,19 @@ Show:
 - Recommended local actions
 - Pipeline metrics in one place
 
+6. Open camera settings:
+
+```text
+http://localhost:8000/settings
+```
+
+Show:
+
+- Face-recognition thresholds
+- Motion-detection thresholds
+- Event and alert cooldowns
+- Which values came from `.env` versus defaults
+
 ## How To Explain The FPS Metrics
 
 The app tracks 5-second rolling performance metrics.
@@ -172,6 +185,16 @@ System status changed from healthy to degraded
 
 That makes operational problems visible in the same history as motion, face,
 and alert events.
+
+## How To Explain Settings
+
+Settings are read-only in the browser for this MVP. The app exposes the current
+non-secret tuning values so the team can debug behavior and discuss tradeoffs.
+
+Example:
+
+Increasing `FACE_ANALYSIS_INTERVAL_FRAMES` reduces CPU work because fewer frames
+go through face recognition. The tradeoff is that labels update less often.
 
 ## Key Technical Tradeoffs
 

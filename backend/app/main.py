@@ -18,6 +18,7 @@ from app.routes import (
     health,
     known_faces,
     recognition_debug,
+    settings,
     stats,
     system_status,
 )
@@ -44,6 +45,7 @@ app.include_router(stats.router)
 app.include_router(events.router)
 app.include_router(known_faces.router)
 app.include_router(recognition_debug.router)
+app.include_router(settings.router)
 app.include_router(system_status.router)
 
 

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      color: #172033;
+      background: #f4f7fb;
+    }
+
+    main {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+
+    .subtitle {
+      margin-bottom: 0;
+      color: #64748b;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav-link,
+    .logout {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      color: #172033;
+      text-decoration: none;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .logout {
+      color: #ffffff;
+      border-color: #172033;
+      background: #172033;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0 0 18px;
+      padding: 16px;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .summary-label {
+      display: block;
+      margin-bottom: 4px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .summary-value {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .group-list {
+      display: grid;
+      gap: 18px;
+    }
+
+    .settings-group {
+      padding: 18px;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .settings-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      color: #64748b;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    code {
+      display: inline-block;
+      max-width: 100%;
+      color: #0f172a;
+      overflow-wrap: anywhere;
+    }
+
+    .value {
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: #1e40af;
+      background: #dbeafe;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .description {
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .effect {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .empty,
+    .error {
+      padding: 16px;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #64748b;
+    }
+
+    .error {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    @media (max-width: 820px) {
+      body {
+        padding: 16px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .header {
+        flex-direction: column;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-table,
+      .settings-table thead,
+      .settings-table tbody,
+      .settings-table th,
+      .settings-table td,
+      .settings-table tr {
+        display: block;
+      }
+
+      .settings-table thead {
+        display: none;
+      }
+
+      .settings-table tr {
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .settings-table td {
+        padding: 5px 0;
+        border-bottom: 0;
+      }
+
+      .settings-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 3px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <div>
+        <h1>Camera Settings</h1>
+        <p class="subtitle" id="updatedAt">Loading current tuning values...</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="/">Live View</a>
+        <a class="nav-link" href="/diagnostics">Diagnostics</a>
+        <a class="nav-link" href="/recognition-debug">Recognition Debug</a>
+        <a class="nav-link" href="/history">History</a>
+        <a class="logout" href="/logout">Log out</a>
+      </nav>
+    </div>
+
+    <section class="summary" aria-label="Settings summary">
+      <div>
+        <span class="summary-label">Mode</span>
+        <span class="summary-value" id="settingsMode">-</span>
+      </div>
+      <div>
+        <span class="summary-label">Apply Changes</span>
+        <span class="summary-value" id="restartRequired">-</span>
+      </div>
+      <div>
+        <span class="summary-label">Config File</span>
+        <span class="summary-value">backend/.env</span>
+      </div>
+    </section>
+
+    <div class="group-list" id="groupList">
+      <div class="empty">Loading settings...</div>
+    </div>
+  </main>
+
+  <script>
+    const updatedAt = document.getElementById("updatedAt");
+    const settingsMode = document.getElementById("settingsMode");
+    const restartRequired = document.getElementById("restartRequired");
+    const groupList = document.getElementById("groupList");
+
+    function titleCase(value) {
+      if (!value) {
+        return "-";
+      }
+
+      return value
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+    }
+
+    function formatValue(value) {
+      if (value === null || value === undefined) {
+        return "-";
+      }
+
+      if (typeof value === "boolean") {
+        return value ? "true" : "false";
+      }
+
+      return String(value);
+    }
+
+    function renderSettings(data) {
+      settingsMode.textContent = titleCase(data.mode);
+      restartRequired.textContent = data.restart_required ? "Restart backend" : "Live";
+      groupList.replaceChildren();
+
+      if (!data.groups || data.groups.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No settings available.";
+        groupList.appendChild(empty);
+        return;
+      }
+
+      data.groups.forEach((group) => {
+        groupList.appendChild(renderGroup(group));
+      });
+
+      updatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+    }
+
+    function renderGroup(group) {
+      const section = document.createElement("section");
+      const title = document.createElement("h2");
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      section.className = "settings-group";
+      title.textContent = group.title;
+      table.className = "settings-table";
+      thead.innerHTML = `
+        <tr>
+          <th>Variable</th>
+          <th>Value</th>
+          <th>Source</th>
+          <th>Effect</th>
+        </tr>
+      `;
+
+      group.settings.forEach((setting) => {
+        tbody.appendChild(renderSetting(setting));
+      });
+
+      table.append(thead, tbody);
+      section.append(title, table);
+
+      return section;
+    }
+
+    function renderSetting(setting) {
+      const row = document.createElement("tr");
+      const variable = document.createElement("td");
+      const value = document.createElement("td");
+      const source = document.createElement("td");
+      const effect = document.createElement("td");
+      const variableCode = document.createElement("code");
+      const valueSpan = document.createElement("span");
+      const sourcePill = document.createElement("span");
+      const description = document.createElement("div");
+      const effectText = document.createElement("div");
+
+      variable.dataset.label = "Variable";
+      value.dataset.label = "Value";
+      source.dataset.label = "Source";
+      effect.dataset.label = "Effect";
+
+      variableCode.textContent = setting.env_var;
+      valueSpan.className = "value";
+      valueSpan.textContent = formatValue(setting.value);
+      sourcePill.className = "pill";
+      sourcePill.textContent = setting.source;
+      description.className = "description";
+      description.textContent = setting.description;
+      effectText.className = "effect";
+      effectText.textContent = setting.effect;
+
+      variable.appendChild(variableCode);
+      value.appendChild(valueSpan);
+      source.appendChild(sourcePill);
+      effect.append(description, effectText);
+      row.append(variable, value, source, effect);
+
+      return row;
+    }
+
+    async function loadSettings() {
+      try {
+        const response = await fetch("/api/settings", { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`Settings request failed: ${response.status}`);
+        }
+
+        renderSettings(await response.json());
+      } catch (error) {
+        groupList.replaceChildren();
+        const message = document.createElement("div");
+        message.className = "error";
+        message.textContent = "Settings unavailable. Check the backend terminal.";
+        groupList.appendChild(message);
+        updatedAt.textContent = "Unable to load settings";
+        console.error(error);
+      }
+    }
+
+    loadSettings();
+  </script>
+</body>
+</html>
