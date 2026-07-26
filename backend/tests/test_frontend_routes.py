@@ -40,6 +40,20 @@ def test_diagnostics_page_redirects_when_anonymous():
     assert response.headers["location"] == "/login"
 
 
+def test_home_page_loads_diagnostics_summary_when_authenticated():
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Smart Camera Live View" in response.text
+    assert "Top action:" in response.text
+
+
 def test_recognition_debug_page_loads_when_authenticated():
     session_store.revoke_all()
     login_throttle.clear()

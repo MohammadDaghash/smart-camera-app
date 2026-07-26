@@ -22,6 +22,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Pipeline performance FPS metrics
 - Frigate-inspired system health status
 - Camera diagnostics page with readable health checks and recommendations
+- Live dashboard diagnostics summary with the top recommended action
 - Local system status change events
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`

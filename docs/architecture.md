@@ -87,6 +87,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - 5-second rolling camera, stream, analysis, motion, and skipped-analysis FPS
 - system status derived from pipeline health checks
 - readable camera diagnostics through `/api/diagnostics`
+- dashboard summary showing the top recommended diagnostic action
 - local system status transition events
 - latest local motion and face events
 - latest face debug metadata for `/api/recognition-debug`

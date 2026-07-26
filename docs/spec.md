@@ -148,6 +148,7 @@ Requirements:
 - Show these metrics through `/stats` and `/recognition-debug`.
 - Expose the status through `/api/system-status`.
 - Expose readable diagnostics and recommendations through `/api/diagnostics`.
+- Show the top diagnostics recommendation on the live dashboard.
 - Record a local `system` event when the overall status changes.
 
 Acceptance criteria:
@@ -155,6 +156,7 @@ Acceptance criteria:
 - `/stats` returns 5-second rolling performance metrics.
 - `/api/system-status` returns `healthy`, `idle`, `degraded`, or `error`.
 - `/diagnostics` explains which pipeline stage needs attention.
+- The live dashboard shows the top recommended local action.
 - Status changes such as `healthy -> degraded` appear in event history.
 - `/recognition-debug` shows the same metrics while the live stream is open.
 - Metrics make it clear whether the camera, streaming, or analysis stage is slow.

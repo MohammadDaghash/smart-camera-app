@@ -63,6 +63,7 @@ Show:
 - Motion status
 - Recent events
 - Suspicious alert banner
+- Diagnostics summary with top recommended action
 - System status changes in history
 
 3. Open known-face debug:
@@ -151,6 +152,8 @@ them. That tells us where to debug first.
 ## How To Explain Diagnostics
 
 The diagnostics page is the human-readable layer above `/stats`.
+The live dashboard shows the top recommendation so the operator can see the
+next action without opening the full diagnostics page.
 
 Example:
 

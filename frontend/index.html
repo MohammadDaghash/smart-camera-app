@@ -95,6 +95,66 @@
       font-size: 13px;
     }
 
+    .diagnostics-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin: 0 0 20px;
+      padding: 14px 16px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #eff6ff;
+    }
+
+    .diagnostics-summary.warn {
+      border-color: #fed7aa;
+      background: #fff7ed;
+    }
+
+    .diagnostics-summary.error {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .diagnostics-summary.ok {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .diagnostics-summary h2 {
+      margin-bottom: 6px;
+    }
+
+    .diagnostics-message {
+      margin: 0 0 8px;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    .diagnostics-action {
+      margin: 0;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .diagnostics-label {
+      color: #1f2937;
+      font-weight: 700;
+    }
+
+    .diagnostics-link {
+      color: #2563eb;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .diagnostics-link:hover {
+      text-decoration: underline;
+    }
+
     .alert-banner {
       display: flex;
       align-items: center;
@@ -258,6 +318,10 @@
         align-items: flex-start;
         flex-direction: column;
       }
+
+      .diagnostics-summary {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 460px) {
@@ -316,6 +380,17 @@
       </div>
     </section>
     <p class="status-meta" id="statsUpdatedAt">Stats loading...</p>
+    <section class="diagnostics-summary" id="diagnosticsSummary" aria-label="Diagnostics summary">
+      <div>
+        <h2>Diagnostics</h2>
+        <p class="diagnostics-message" id="diagnosticsMessage">Loading diagnostics...</p>
+        <p class="diagnostics-action">
+          <span class="diagnostics-label">Top action:</span>
+          <span id="diagnosticsAction">Checking pipeline...</span>
+        </p>
+      </div>
+      <a class="diagnostics-link" href="/diagnostics">Open diagnostics</a>
+    </section>
     <section class="events" aria-label="Recent camera events">
       <h2>Recent Events</h2>
       <ul class="event-list" id="eventList">
@@ -335,6 +410,9 @@
     const alertDetail = document.getElementById("alertDetail");
     const notificationButton = document.getElementById("notificationButton");
     const statsUpdatedAt = document.getElementById("statsUpdatedAt");
+    const diagnosticsSummary = document.getElementById("diagnosticsSummary");
+    const diagnosticsMessage = document.getElementById("diagnosticsMessage");
+    const diagnosticsAction = document.getElementById("diagnosticsAction");
     const eventList = document.getElementById("eventList");
     const notificationsSupported = "Notification" in window;
     let hasInitializedAlertNotifications = false;
@@ -464,6 +542,55 @@
       return status.charAt(0).toUpperCase() + status.slice(1);
     }
 
+    function diagnosticsClass(status) {
+      if (status === "healthy") {
+        return "ok";
+      }
+
+      if (status === "error") {
+        return "error";
+      }
+
+      return "warn";
+    }
+
+    function setDiagnosticsSummary(message, action, stateClass) {
+      diagnosticsMessage.textContent = message;
+      diagnosticsAction.textContent = action;
+      diagnosticsSummary.classList.remove("ok", "warn", "error");
+
+      if (stateClass) {
+        diagnosticsSummary.classList.add(stateClass);
+      }
+    }
+
+    async function updateDiagnosticsSummary() {
+      try {
+        const response = await fetch("/api/diagnostics", { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`Diagnostics request failed: ${response.status}`);
+        }
+
+        const diagnostics = await response.json();
+        const status = diagnostics.system?.status || "idle";
+        const action = diagnostics.recommendations?.[0] || "No action needed.";
+
+        setDiagnosticsSummary(
+          diagnostics.system?.message || "No diagnostics message available.",
+          action,
+          diagnosticsClass(status)
+        );
+      } catch (error) {
+        setDiagnosticsSummary(
+          "Diagnostics unavailable.",
+          "Check the backend terminal logs.",
+          "error"
+        );
+        console.error(error);
+      }
+    }
+
     function sendAlertNotification(latestAlert) {
       const alertKey = getAlertKey(latestAlert);
 
@@ -548,7 +675,9 @@
     notificationButton.addEventListener("click", requestNotifications);
     syncNotificationButton();
     updateStats();
+    updateDiagnosticsSummary();
     setInterval(updateStats, 1000);
+    setInterval(updateDiagnosticsSummary, 2000);
   </script>
 </body>
 </html>
