@@ -137,6 +137,7 @@ Show:
 - Severity: `alert`, `detection`, or `info`
 - Labels involved in the activity
 - Source events that explain why the review item exists
+- Filters by label and local time range
 
 ## How To Explain The FPS Metrics
 
@@ -236,6 +237,13 @@ source events: motion, face, alert
 This is closer to how mature camera systems present activity: the product should
 help the user decide what to review, not just dump logs.
 
+Filtering works at both levels:
+
+```text
+History filter "Mohammad" -> individual Mohammad event rows
+Review filter "Mohammad"  -> incidents involving Mohammad, with motion/alert context kept
+```
+
 ## Key Technical Tradeoffs
 
 ### Local-first privacy
@@ -288,6 +296,6 @@ or two.
 ## Next High-Value Improvements
 
 - Add confidence history charts for recognition tuning.
-- Add event search by label and time.
+- Add saved review status: new, reviewed, false positive.
 - Add a camera health badge on the live dashboard.
 - Add a clear architecture diagram to the README.

@@ -44,6 +44,39 @@ def test_event_log_filters_by_type():
     ]
 
 
+def test_event_log_filters_by_label():
+    event_log = EventLog()
+
+    event_log.add_event(
+        "face",
+        "Mohammad detected",
+        metadata={"label": "Mohammad"},
+        now=100.0,
+    )
+    event_log.add_event(
+        "face",
+        "Omar detected",
+        metadata={"label": "Omar"},
+        now=101.0,
+    )
+
+    events = event_log.latest(label="moh")
+
+    assert [event["message"] for event in events] == ["Mohammad detected"]
+
+
+def test_event_log_filters_by_time_range():
+    event_log = EventLog()
+
+    event_log.add_event("motion", "Too old", now=100.0)
+    event_log.add_event("face", "In range", now=150.0)
+    event_log.add_event("alert", "Too new", now=200.0)
+
+    events = event_log.latest(start_at=125.0, end_at=175.0)
+
+    assert [event["message"] for event in events] == ["In range"]
+
+
 def test_event_log_drops_old_events_after_max_size():
     event_log = EventLog(max_events=2)
 

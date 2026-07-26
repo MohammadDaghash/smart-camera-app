@@ -32,6 +32,19 @@ def build_activity_review(
     }
 
 
+def filter_review_items_by_label(items, label):
+    query = label.strip().lower()
+
+    if not query:
+        return items
+
+    return [
+        item
+        for item in items
+        if any(query in item_label.lower() for item_label in item["labels"])
+    ]
+
+
 def group_events_by_time(events, event_gap_seconds):
     groups = []
     current_group = []

@@ -1,4 +1,7 @@
-from app.services.activity_review import build_activity_review
+from app.services.activity_review import (
+    build_activity_review,
+    filter_review_items_by_label,
+)
 
 
 def event(event_id, event_type, created_at, message=None, metadata=None):
@@ -68,3 +71,18 @@ def test_activity_review_system_only_item_is_info():
     item = review["items"][0]
     assert item["severity"] == "info"
     assert item["summary"] == "System review: status changed"
+
+
+def test_activity_review_filters_items_by_label():
+    review = build_activity_review(
+        [
+            event(1, "face", 100.0, metadata={"label": "Mohammad"}),
+            event(2, "face", 250.0, metadata={"label": "Omar"}),
+        ],
+        event_gap_seconds=30,
+    )
+
+    items = filter_review_items_by_label(review["items"], "moh")
+
+    assert len(items) == 1
+    assert items[0]["labels"] == ["Mohammad"]

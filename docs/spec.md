@@ -25,8 +25,8 @@ The current system supports:
 - 5-second rolling pipeline FPS metrics
 - System health status derived from pipeline checks
 - Persistent local motion and face events
-- Event history page with simple filters
-- Activity review page that groups related local events
+- Event history page with type, label, and time filters
+- Activity review page that groups and filters related local events
 - Local snapshots for saved motion and face events
 - Local suspicious-activity alert events
 - Live dashboard alert indicator
@@ -59,7 +59,7 @@ The current system does not yet include:
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
-| P1 | Activity review workflow | Started | Group nearby raw events into reviewable incidents with severity, labels, timing, and source event context. |
+| P1 | Activity review workflow | Started | Group and filter nearby raw events into reviewable incidents with severity, labels, timing, and source event context. |
 | P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P1 | Pipeline observability | Started | Track FPS, uptime, and derived system health status. |
@@ -198,6 +198,7 @@ Requirements:
 - Expose filterable events through `/api/events`.
 - Show the latest events in the frontend.
 - Show a dedicated event history page.
+- Filter event history by type, label, and time range.
 - Save a local JPEG snapshot when an event is recorded.
 - Apply simple cooldowns so repeated events do not flood the dashboard.
 - Create a local alert event when motion and an anonymous face happen close together.
@@ -207,6 +208,8 @@ Acceptance criteria:
 
 - The dashboard shows recent motion, face, alert, and system events.
 - The history page can filter by all, motion, face, alert, or system events.
+- The history page can filter by known or anonymous label.
+- The history page can filter by local start and end time.
 - The history page shows snapshots when they are available.
 - The history page can show local alert events.
 - The same event type does not repeat too quickly when detection flickers.
@@ -225,6 +228,7 @@ Requirements:
 - Group nearby motion, face, alert, and system events by timestamp.
 - Mark grouped items as `alert`, `detection`, or `info`.
 - Include labels, event count, duration, and source event details.
+- Filter review items by label and time range.
 - Show review items in a simple `/review` page.
 - Expose review data through `/api/review`.
 - Keep the feature local-only and database-light for the MVP.
@@ -236,6 +240,7 @@ Acceptance criteria:
 - Alert events make the whole review item severity `alert`.
 - Face or motion-only groups become `detection`.
 - System-only groups become `info`.
+- Filtering a review item by label preserves related source events in the group.
 - The review grouping gap can be tuned from `.env`.
 
 ### Accounts And Permissions

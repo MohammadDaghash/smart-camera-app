@@ -27,9 +27,10 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /api/settings`: protected read-only tuning settings summary
 - `GET /known-faces`: protected debug summary of loaded known-face labels and counts
 - `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
-- `GET /api/events`: local event history with `type` and `limit` filters
-  for `motion`, `face`, `alert`, and `system`
-- `GET /api/review`: grouped activity review items built from recent events
+- `GET /api/events`: local event history with `type`, `label`, `start_at`,
+  `end_at`, and `limit` filters
+- `GET /api/review`: grouped activity review items built from recent events,
+  with `label`, `start_at`, `end_at`, and `limit` filters
 - `GET /api/snapshots/{filename}`: protected local event snapshot image
 
 ## Folder Guide
@@ -231,7 +232,8 @@ notification service is used.
 
 Review settings control how raw events become review items. If motion, face, and
 alert events happen within `REVIEW_EVENT_GAP_SECONDS`, `/review` shows them as
-one incident instead of disconnected rows.
+one incident instead of disconnected rows. History and review pages can filter by
+label and local time range for faster debugging.
 
 ## Recommended Local Command
 

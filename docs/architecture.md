@@ -97,9 +97,9 @@ Activity review groups nearby events at /review
 - local system status transition events
 - latest local motion and face events
 - latest face debug metadata for `/api/recognition-debug`
-- filterable local event history through `/api/events`
+- local event history through `/api/events`, filterable by type, label, and time
 - protected local event snapshots through `/api/snapshots/{filename}`
-- grouped local activity review items through `/api/review`
+- grouped local activity review items through `/api/review`, filterable by label and time
 - local alert events when motion and an anonymous face happen close together
 - latest alert for the live dashboard indicator
 
@@ -113,6 +113,10 @@ gitignored.
 Activity review is computed from local events at request time. It does not add a
 new database table yet; that keeps the MVP simple while still giving the user a
 more useful review workflow.
+
+Label filtering is applied differently by page. History filters individual event
+rows. Review filters the grouped item while preserving related source events, so
+a label search still shows nearby motion or alert context.
 
 ## Performance Tuning
 

@@ -17,6 +17,9 @@ async def events(
     user: str = Depends(require_login),
     limit: int = Query(default=50, ge=1, le=200),
     event_type: str | None = Query(default=None, alias="type"),
+    label: str | None = Query(default=None, min_length=1, max_length=100),
+    start_at: float | None = Query(default=None, ge=0),
+    end_at: float | None = Query(default=None, ge=0),
 ):
     if event_type == "all":
         event_type = None
@@ -27,11 +30,26 @@ async def events(
             detail="Event type must be one of: all, motion, face, alert, system",
         )
 
+    if start_at is not None and end_at is not None and start_at > end_at:
+        raise HTTPException(
+            status_code=400,
+            detail="start_at must be less than or equal to end_at",
+        )
+
     return {
-        "events": event_log.latest(limit=limit, event_type=event_type),
+        "events": event_log.latest(
+            limit=limit,
+            event_type=event_type,
+            label=label,
+            start_at=start_at,
+            end_at=end_at,
+        ),
         "filters": {
             "limit": limit,
             "type": event_type or "all",
+            "label": label,
+            "start_at": start_at,
+            "end_at": end_at,
         },
         "retention": event_log.retention_settings(),
         "alerts": alert_rule_engine.settings(),

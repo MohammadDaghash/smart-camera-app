@@ -86,6 +86,7 @@
     }
 
     select,
+    input,
     button {
       min-height: 40px;
       border-radius: 6px;
@@ -95,9 +96,19 @@
       font: inherit;
     }
 
-    select {
+    select,
+    input {
       min-width: 140px;
       padding: 0 10px;
+    }
+
+    input[type="search"] {
+      min-width: 180px;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
     }
 
     button {
@@ -257,7 +268,22 @@
           <option value="100">100</option>
         </select>
       </label>
-      <button id="refreshButton" type="button">Refresh</button>
+      <label>
+        Label
+        <input id="eventLabel" type="search" placeholder="Mohammad">
+      </label>
+      <label>
+        From
+        <input id="startAt" type="datetime-local">
+      </label>
+      <label>
+        To
+        <input id="endAt" type="datetime-local">
+      </label>
+      <div class="filter-actions">
+        <button id="refreshButton" type="button">Refresh</button>
+        <button id="clearButton" type="button">Clear</button>
+      </div>
     </section>
 
     <p class="status" id="statusText">Loading events...</p>
@@ -268,7 +294,11 @@
   <script>
     const eventType = document.getElementById("eventType");
     const eventLimit = document.getElementById("eventLimit");
+    const eventLabel = document.getElementById("eventLabel");
+    const startAt = document.getElementById("startAt");
+    const endAt = document.getElementById("endAt");
     const refreshButton = document.getElementById("refreshButton");
+    const clearButton = document.getElementById("clearButton");
     const statusText = document.getElementById("statusText");
     const retentionText = document.getElementById("retentionText");
     const eventList = document.getElementById("eventList");
@@ -280,6 +310,14 @@
       }
 
       return new Date(timestamp * 1000).toLocaleString();
+    }
+
+    function timestampFromInput(input) {
+      if (!input.value) {
+        return "";
+      }
+
+      return Math.floor(new Date(input.value).getTime() / 1000);
     }
 
     function formatMetadata(metadata) {
@@ -377,6 +415,21 @@
         type: eventType.value,
         limit: eventLimit.value,
       });
+      const label = eventLabel.value.trim();
+      const startTimestamp = timestampFromInput(startAt);
+      const endTimestamp = timestampFromInput(endAt);
+
+      if (label) {
+        params.set("label", label);
+      }
+
+      if (startTimestamp) {
+        params.set("start_at", startTimestamp);
+      }
+
+      if (endTimestamp) {
+        params.set("end_at", endTimestamp);
+      }
 
       try {
         statusText.textContent = "Loading events...";
@@ -398,9 +451,26 @@
       }
     }
 
+    function clearFilters() {
+      eventType.value = "all";
+      eventLimit.value = "50";
+      eventLabel.value = "";
+      startAt.value = "";
+      endAt.value = "";
+      loadEvents();
+    }
+
     refreshButton.addEventListener("click", loadEvents);
+    clearButton.addEventListener("click", clearFilters);
     eventType.addEventListener("change", loadEvents);
     eventLimit.addEventListener("change", loadEvents);
+    eventLabel.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        loadEvents();
+      }
+    });
+    startAt.addEventListener("change", loadEvents);
+    endAt.addEventListener("change", loadEvents);
 
     loadEvents();
   </script>

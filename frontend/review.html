@@ -98,7 +98,8 @@
       color: #334155;
     }
 
-    select {
+    select,
+    input {
       min-height: 40px;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
@@ -106,6 +107,15 @@
       background: #ffffff;
       color: #17212b;
       font: inherit;
+    }
+
+    input[type="search"] {
+      min-width: 180px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
     }
 
     .status {
@@ -268,8 +278,17 @@
           <option value="detection">Detection</option>
           <option value="info">Info</option>
         </select>
+        <label for="labelFilter">Label</label>
+        <input id="labelFilter" type="search" placeholder="Anonymous 1">
+        <label for="startAt">From</label>
+        <input id="startAt" type="datetime-local">
+        <label for="endAt">To</label>
+        <input id="endAt" type="datetime-local">
       </div>
-      <button type="button" id="refreshButton">Refresh</button>
+      <div class="button-row">
+        <button type="button" id="refreshButton">Refresh</button>
+        <button type="button" id="clearButton">Clear</button>
+      </div>
     </section>
 
     <section class="status" id="status">Loading review items...</section>
@@ -280,7 +299,11 @@
     const statusElement = document.getElementById("status");
     const reviewList = document.getElementById("reviewList");
     const severityFilter = document.getElementById("severityFilter");
+    const labelFilter = document.getElementById("labelFilter");
+    const startAt = document.getElementById("startAt");
+    const endAt = document.getElementById("endAt");
     const refreshButton = document.getElementById("refreshButton");
+    const clearButton = document.getElementById("clearButton");
     let latestItems = [];
 
     function formatDate(seconds) {
@@ -299,6 +322,14 @@
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = Math.round(seconds % 60);
       return `${minutes}m ${remainingSeconds}s`;
+    }
+
+    function timestampFromInput(input) {
+      if (!input.value) {
+        return "";
+      }
+
+      return Math.floor(new Date(input.value).getTime() / 1000);
     }
 
     function escapeHtml(value) {
@@ -375,9 +406,25 @@
 
     async function loadReview() {
       statusElement.textContent = "Loading review items...";
+      const params = new URLSearchParams({ limit: "200" });
+      const label = labelFilter.value.trim();
+      const startTimestamp = timestampFromInput(startAt);
+      const endTimestamp = timestampFromInput(endAt);
+
+      if (label) {
+        params.set("label", label);
+      }
+
+      if (startTimestamp) {
+        params.set("start_at", startTimestamp);
+      }
+
+      if (endTimestamp) {
+        params.set("end_at", endTimestamp);
+      }
 
       try {
-        const response = await fetch("/api/review?limit=200", { cache: "no-store" });
+        const response = await fetch(`/api/review?${params}`, { cache: "no-store" });
 
         if (!response.ok) {
           throw new Error(`Review request failed: ${response.status}`);
@@ -395,8 +442,24 @@
       }
     }
 
+    function clearFilters() {
+      severityFilter.value = "all";
+      labelFilter.value = "";
+      startAt.value = "";
+      endAt.value = "";
+      loadReview();
+    }
+
     severityFilter.addEventListener("change", renderItems);
+    labelFilter.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        loadReview();
+      }
+    });
+    startAt.addEventListener("change", loadReview);
+    endAt.addEventListener("change", loadReview);
     refreshButton.addEventListener("click", loadReview);
+    clearButton.addEventListener("click", clearFilters);
 
     loadReview();
   </script>

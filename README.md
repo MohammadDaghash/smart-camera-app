@@ -31,7 +31,9 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Basic frontend status panel for camera, faces, labels, and motion
 - Persistent local camera events with simple cooldowns
 - Event history page with type and limit filters
+- Event history filters by type, label, and time range
 - Activity review page that groups nearby events into reviewable incidents
+- Activity review filters by label, severity, and time range
 - Configurable local event cleanup and retention
 - Local event snapshots shown in history
 - Local suspicious-activity alert events

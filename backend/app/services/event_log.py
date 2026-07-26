@@ -93,31 +93,52 @@ class EventLog:
                 "metadata": dict(metadata),
             }
 
-    def latest(self, limit=10, event_type=None):
+    def latest(
+        self,
+        limit=10,
+        event_type=None,
+        label=None,
+        start_at=None,
+        end_at=None,
+    ):
         with self._lock:
-            if event_type is None:
-                rows = self._connection.execute(
-                    """
-                    SELECT id, type, message, created_at, metadata_json
-                    FROM events
-                    ORDER BY created_at DESC, id DESC
-                    LIMIT ?
-                    """,
-                    (limit,),
-                ).fetchall()
-            else:
-                rows = self._connection.execute(
-                    """
-                    SELECT id, type, message, created_at, metadata_json
-                    FROM events
-                    WHERE type = ?
-                    ORDER BY created_at DESC, id DESC
-                    LIMIT ?
-                    """,
-                    (event_type, limit),
-                ).fetchall()
+            conditions = []
+            params = []
 
-            return [self._row_to_event(row) for row in rows]
+            if event_type is not None:
+                conditions.append("type = ?")
+                params.append(event_type)
+
+            if start_at is not None:
+                conditions.append("created_at >= ?")
+                params.append(start_at)
+
+            if end_at is not None:
+                conditions.append("created_at <= ?")
+                params.append(end_at)
+
+            query = """
+                SELECT id, type, message, created_at, metadata_json
+                FROM events
+            """
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += " ORDER BY created_at DESC, id DESC LIMIT ?"
+            params.append(self.max_events if label else limit)
+
+            rows = self._connection.execute(query, params).fetchall()
+            events = [self._row_to_event(row) for row in rows]
+
+            if label:
+                events = [
+                    event
+                    for event in events
+                    if event_matches_label(event, label)
+                ][:limit]
+
+            return events
 
     def update_event_metadata(self, event_id, metadata):
         with self._lock:
@@ -219,6 +240,32 @@ class EventLog:
             "created_at": row["created_at"],
             "metadata": metadata,
         }
+
+
+def event_matches_label(event, label):
+    query = label.strip().lower()
+
+    if not query:
+        return True
+
+    metadata = event.get("metadata") or {}
+    candidate_labels = []
+
+    label_value = metadata.get("label")
+
+    if isinstance(label_value, str):
+        candidate_labels.append(label_value)
+
+    labels_value = metadata.get("labels")
+
+    if isinstance(labels_value, list):
+        candidate_labels.extend(
+            value
+            for value in labels_value
+            if isinstance(value, str)
+        )
+
+    return any(query in candidate.lower() for candidate in candidate_labels)
 
 
 event_retention_seconds = None

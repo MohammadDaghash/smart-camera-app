@@ -47,7 +47,13 @@ def test_events_returns_filtered_events_when_authenticated(monkeypatch, tmp_path
     response = client.get("/api/events?type=face&limit=25")
 
     assert response.status_code == 200
-    assert response.json()["filters"] == {"limit": 25, "type": "face"}
+    assert response.json()["filters"] == {
+        "limit": 25,
+        "type": "face",
+        "label": None,
+        "start_at": None,
+        "end_at": None,
+    }
     assert response.json()["retention"] == {
         "max_events": 100,
         "retention_days": None,
@@ -119,6 +125,59 @@ def test_events_can_filter_system_events(monkeypatch, tmp_path):
     assert response.status_code == 200
     assert response.json()["filters"]["type"] == "system"
     assert response.json()["events"][0]["type"] == "system"
+
+
+def test_events_can_filter_by_label_and_time(monkeypatch, tmp_path):
+    test_event_log = EventLog(database_path=tmp_path / "events.db")
+    monkeypatch.setattr(events, "event_log", test_event_log)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+    test_event_log.add_event(
+        "face",
+        "Mohammad detected too early",
+        metadata={"label": "Mohammad"},
+        now=100.0,
+    )
+    test_event_log.add_event(
+        "face",
+        "Mohammad detected",
+        metadata={"label": "Mohammad"},
+        now=150.0,
+    )
+    test_event_log.add_event(
+        "face",
+        "Omar detected",
+        metadata={"label": "Omar"},
+        now=151.0,
+    )
+
+    response = client.get("/api/events?label=moh&start_at=125&end_at=175")
+
+    assert response.status_code == 200
+    assert response.json()["filters"]["label"] == "moh"
+    assert response.json()["filters"]["start_at"] == 125.0
+    assert response.json()["filters"]["end_at"] == 175.0
+    assert [event["message"] for event in response.json()["events"]] == [
+        "Mohammad detected"
+    ]
+
+
+def test_events_rejects_invalid_time_range(monkeypatch, tmp_path):
+    test_event_log = EventLog(database_path=tmp_path / "events.db")
+    monkeypatch.setattr(events, "event_log", test_event_log)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.get("/api/events?start_at=200&end_at=100")
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "start_at must be less than or equal to end_at"
 
 
 def test_snapshot_redirects_when_anonymous():
