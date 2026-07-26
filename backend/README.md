@@ -14,6 +14,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 - `GET /`: serves `frontend/index.html`
 - `GET /history`: serves `frontend/events.html`
+- `GET /review`: serves `frontend/review.html`
 - `GET /diagnostics`: serves `frontend/diagnostics.html`
 - `GET /settings`: serves `frontend/settings.html`
 - `GET /recognition-debug`: serves `frontend/recognition-debug.html`
@@ -28,6 +29,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
 - `GET /api/events`: local event history with `type` and `limit` filters
   for `motion`, `face`, `alert`, and `system`
+- `GET /api/review`: grouped activity review items built from recent events
 - `GET /api/snapshots/{filename}`: protected local event snapshot image
 
 ## Folder Guide
@@ -101,6 +103,7 @@ The camera pipeline is split into small helpers:
 - `app/services/alert_rules.py`: local suspicious-activity rule evaluation.
 - `app/services/event_log.py`: SQLite-backed local motion and face events with cooldown support.
 - `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
+- `app/services/activity_review.py`: groups nearby raw events into reviewable activity items.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/services/diagnostics.py`: readable health checks and recommended actions from pipeline metrics.
@@ -213,6 +216,8 @@ EVENT_SNAPSHOT_JPEG_QUALITY=85
 ALERTS_ENABLED=true
 ALERT_ANONYMOUS_MOTION_WINDOW_SECONDS=30
 ALERT_COOLDOWN_SECONDS=60
+REVIEW_EVENT_GAP_SECONDS=90
+REVIEW_SOURCE_EVENT_LIMIT=200
 ```
 
 Cooldowns prevent the same motion or face label from filling the event list too
@@ -223,6 +228,10 @@ Alert settings control the local rule that creates an `alert` event when motion
 and an anonymous face happen close together. The frontend can show local browser
 notifications for new alerts while the dashboard is open. No external
 notification service is used.
+
+Review settings control how raw events become review items. If motion, face, and
+alert events happen within `REVIEW_EVENT_GAP_SECONDS`, `/review` shows them as
+one incident instead of disconnected rows.
 
 ## Recommended Local Command
 

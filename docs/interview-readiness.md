@@ -7,7 +7,7 @@ This guide explains the project in a way that is easy to present in interviews.
 Smart Camera App is a local-first smart camera MVP. It streams a webcam feed,
 detects faces, recognizes known people from local reference photos, records local
 events, creates suspicious-activity alerts, and exposes debugging dashboards for
-recognition and pipeline performance.
+recognition, pipeline performance, and activity review.
 
 The important engineering idea is not only "camera works." The important idea is
 that the app is built as a small camera pipeline:
@@ -20,6 +20,7 @@ Camera frame
   -> label smoothing
   -> event logging
   -> alert rules
+  -> activity review grouping
   -> annotated MJPEG stream
   -> dashboard/debug pages
 ```
@@ -32,6 +33,7 @@ architecture, but we are using its high-level ideas:
 - Capture video first, then process only what is needed.
 - Track separate FPS metrics instead of one vague health status.
 - Convert low-level metrics into a simple system health status.
+- Convert low-level events into reviewable activity items.
 - Keep heavier analysis controllable by cadence.
 - Separate capture, processing, events, stats, and frontend views.
 
@@ -123,6 +125,19 @@ Show:
 - Event and alert cooldowns
 - Which values came from `.env` versus defaults
 
+7. Open activity review:
+
+```text
+http://localhost:8000/review
+```
+
+Show:
+
+- Nearby events grouped as one review item
+- Severity: `alert`, `detection`, or `info`
+- Labels involved in the activity
+- Source events that explain why the review item exists
+
 ## How To Explain The FPS Metrics
 
 The app tracks 5-second rolling performance metrics.
@@ -196,6 +211,31 @@ Example:
 Increasing `FACE_ANALYSIS_INTERVAL_FRAMES` reduces CPU work because fewer frames
 go through face recognition. The tradeoff is that labels update less often.
 
+## How To Explain Activity Review
+
+The event history is the raw log. Activity review is the human-friendly summary
+above it.
+
+Example raw events:
+
+```text
+10:00:01 motion detected
+10:00:15 Anonymous 1 detected
+10:00:16 suspicious activity alert
+```
+
+Instead of making the operator inspect three separate rows, `/review` groups them
+into one item:
+
+```text
+Alert review: Anonymous 1 near activity
+duration: 15s
+source events: motion, face, alert
+```
+
+This is closer to how mature camera systems present activity: the product should
+help the user decide what to review, not just dump logs.
+
 ## Key Technical Tradeoffs
 
 ### Local-first privacy
@@ -242,8 +282,8 @@ or two.
 - A file-length guard keeps tracked files under 1000 lines.
 - GitHub Actions runs backend tests, frontend JavaScript checks, and file-length
   guardrails automatically.
-- Frigate influenced the pipeline and observability design, but this app remains
-  a smaller MVP.
+- Frigate influenced the pipeline, observability, and review design, but this app
+  remains a smaller MVP.
 
 ## Next High-Value Improvements
 

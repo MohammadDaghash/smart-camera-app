@@ -73,6 +73,7 @@ def _env_flag(name: str, default: bool = False) -> bool:
 FRONTEND_FILE = PROJECT_DIR / "frontend" / "index.html"
 LOGIN_FILE = PROJECT_DIR / "frontend" / "login.html"
 EVENTS_FILE = PROJECT_DIR / "frontend" / "events.html"
+REVIEW_FILE = PROJECT_DIR / "frontend" / "review.html"
 RECOGNITION_DEBUG_FILE = PROJECT_DIR / "frontend" / "recognition-debug.html"
 DIAGNOSTICS_FILE = PROJECT_DIR / "frontend" / "diagnostics.html"
 SETTINGS_FILE = PROJECT_DIR / "frontend" / "settings.html"
@@ -141,6 +142,18 @@ ALERT_ANONYMOUS_MOTION_WINDOW_SECONDS = _env_int(
     minimum=1,
 )
 ALERT_COOLDOWN_SECONDS = _env_int("ALERT_COOLDOWN_SECONDS", 60, minimum=0)
+
+REVIEW_EVENT_GAP_SECONDS = _env_int(
+    "REVIEW_EVENT_GAP_SECONDS",
+    90,
+    minimum=1,
+)
+REVIEW_SOURCE_EVENT_LIMIT = _env_int(
+    "REVIEW_SOURCE_EVENT_LIMIT",
+    200,
+    minimum=1,
+    maximum=500,
+)
 
 # Authentication / session configuration.
 # Real credentials and secrets belong in backend/.env (gitignored), never here.

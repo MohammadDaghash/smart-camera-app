@@ -6,6 +6,7 @@ from app.config import (
     EVENTS_FILE,
     FRONTEND_FILE,
     RECOGNITION_DEBUG_FILE,
+    REVIEW_FILE,
     SETTINGS_FILE,
 )
 from app.utils.auth import require_login
@@ -22,6 +23,11 @@ def home(user: str = Depends(require_login)):
 @router.get("/history")
 def history(user: str = Depends(require_login)):
     return FileResponse(EVENTS_FILE)
+
+
+@router.get("/review")
+def activity_review(user: str = Depends(require_login)):
+    return FileResponse(REVIEW_FILE)
 
 
 @router.get("/recognition-debug")

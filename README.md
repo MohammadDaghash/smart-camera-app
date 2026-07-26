@@ -31,6 +31,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Basic frontend status panel for camera, faces, labels, and motion
 - Persistent local camera events with simple cooldowns
 - Event history page with type and limit filters
+- Activity review page that groups nearby events into reviewable incidents
 - Configurable local event cleanup and retention
 - Local event snapshots shown in history
 - Local suspicious-activity alert events
@@ -116,6 +117,8 @@ http://localhost:8000/diagnostics
 http://localhost:8000/api/diagnostics
 http://localhost:8000/settings
 http://localhost:8000/api/settings
+http://localhost:8000/review
+http://localhost:8000/api/review
 http://localhost:8000/known-faces
 http://localhost:8000/recognition-debug
 http://localhost:8000/api/recognition-debug
@@ -167,10 +170,10 @@ POST /login     submit credentials
 GET  /logout    clear the session
 ```
 
-Protected routes (`/`, `/history`, `/diagnostics`, `/video`, `/camera-test`,
+Protected routes (`/`, `/history`, `/review`, `/diagnostics`, `/video`, `/camera-test`,
 `/settings`, `/stats`, `/known-faces`, `/recognition-debug`,
 `/api/system-status`, `/api/diagnostics`, `/api/settings`,
-`/api/recognition-debug`, `/api/events`,
+`/api/recognition-debug`, `/api/events`, `/api/review`,
 `/api/snapshots/*`) redirect to
 `/login` when the user is not signed in.
 `/health` stays public.
@@ -285,6 +288,7 @@ demo script and system-design explanation.
 - Local browser alert notifications
 - Suspicious activity alerts
 - Local event history
+- Frigate-inspired activity review workflow
 - System status change history
 - Optional smart-home device integrations
 

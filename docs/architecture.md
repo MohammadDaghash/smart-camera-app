@@ -54,6 +54,9 @@ Event history can be viewed at /history
         |
         v
 Event snapshots can be served through /api/snapshots/{filename}
+        |
+        v
+Activity review groups nearby events at /review
 ```
 
 ## Camera Pipeline Helpers
@@ -63,6 +66,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - `backend/app/services/alert_rules.py`: creates local alert events when simple suspicious-activity rules match.
 - `backend/app/services/event_log.py`: stores local SQLite motion and face events, with cooldowns to avoid repeated event spam.
 - `backend/app/services/event_snapshots.py`: stores local JPEG snapshots for accepted events.
+- `backend/app/services/activity_review.py`: builds reviewable activity items from nearby motion, face, alert, and system events.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/diagnostics.py`: converts health checks into readable recommendations for `/api/diagnostics`.
@@ -95,6 +99,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - latest face debug metadata for `/api/recognition-debug`
 - filterable local event history through `/api/events`
 - protected local event snapshots through `/api/snapshots/{filename}`
+- grouped local activity review items through `/api/review`
 - local alert events when motion and an anonymous face happen close together
 - latest alert for the live dashboard indicator
 
@@ -104,6 +109,10 @@ by `EVENT_MAX_EVENTS` and `EVENT_RETENTION_DAYS`.
 
 Event snapshots are stored in `backend/local_data/snapshots/`, which is also
 gitignored.
+
+Activity review is computed from local events at request time. It does not add a
+new database table yet; that keeps the MVP simple while still giving the user a
+more useful review workflow.
 
 ## Performance Tuning
 

@@ -26,6 +26,7 @@ The current system supports:
 - System health status derived from pipeline checks
 - Persistent local motion and face events
 - Event history page with simple filters
+- Activity review page that groups related local events
 - Local snapshots for saved motion and face events
 - Local suspicious-activity alert events
 - Live dashboard alert indicator
@@ -58,6 +59,7 @@ The current system does not yet include:
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
+| P1 | Activity review workflow | Started | Group nearby raw events into reviewable incidents with severity, labels, timing, and source event context. |
 | P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P1 | Pipeline observability | Started | Track FPS, uptime, and derived system health status. |
@@ -211,6 +213,30 @@ Acceptance criteria:
 - Events survive backend restarts.
 - Old events are cleaned up according to local retention settings.
 - No cloud storage, external notification service, or remote database is added yet.
+
+### Activity Review Workflow
+
+Goal:
+Turn low-level event rows into reviewable activity items.
+
+Requirements:
+
+- Read recent local events from SQLite.
+- Group nearby motion, face, alert, and system events by timestamp.
+- Mark grouped items as `alert`, `detection`, or `info`.
+- Include labels, event count, duration, and source event details.
+- Show review items in a simple `/review` page.
+- Expose review data through `/api/review`.
+- Keep the feature local-only and database-light for the MVP.
+
+Acceptance criteria:
+
+- `/review` shows grouped activity instead of only raw event rows.
+- `/api/review` returns grouped items with severity, labels, timing, and events.
+- Alert events make the whole review item severity `alert`.
+- Face or motion-only groups become `detection`.
+- System-only groups become `info`.
+- The review grouping gap can be tuned from `.env`.
 
 ### Accounts And Permissions
 
