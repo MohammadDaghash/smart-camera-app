@@ -63,6 +63,7 @@ Show:
 - Motion status
 - Recent events
 - Suspicious alert banner
+- System status changes in history
 
 3. Open known-face debug:
 
@@ -157,6 +158,17 @@ If `/stats` says `consecutive_failed_reads = 3`, diagnostics shows the camera
 read check as `degraded` and recommends checking camera access or reconnecting
 the camera. This is useful in interviews because it shows that the system can
 explain failures instead of only displaying raw numbers.
+
+When the overall status changes, the app stores a local `system` event.
+
+Example:
+
+```text
+System status changed from healthy to degraded
+```
+
+That makes operational problems visible in the same history as motion, face,
+and alert events.
 
 ## Key Technical Tradeoffs
 

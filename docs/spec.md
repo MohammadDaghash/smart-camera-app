@@ -148,12 +148,14 @@ Requirements:
 - Show these metrics through `/stats` and `/recognition-debug`.
 - Expose the status through `/api/system-status`.
 - Expose readable diagnostics and recommendations through `/api/diagnostics`.
+- Record a local `system` event when the overall status changes.
 
 Acceptance criteria:
 
 - `/stats` returns 5-second rolling performance metrics.
 - `/api/system-status` returns `healthy`, `idle`, `degraded`, or `error`.
 - `/diagnostics` explains which pipeline stage needs attention.
+- Status changes such as `healthy -> degraded` appear in event history.
 - `/recognition-debug` shows the same metrics while the live stream is open.
 - Metrics make it clear whether the camera, streaming, or analysis stage is slow.
 
@@ -197,8 +199,8 @@ Requirements:
 
 Acceptance criteria:
 
-- The dashboard shows recent motion and face events.
-- The history page can filter by all, motion, face, or alert events.
+- The dashboard shows recent motion, face, alert, and system events.
+- The history page can filter by all, motion, face, alert, or system events.
 - The history page shows snapshots when they are available.
 - The history page can show local alert events.
 - The same event type does not repeat too quickly when detection flickers.

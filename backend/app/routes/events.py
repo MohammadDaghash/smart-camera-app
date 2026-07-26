@@ -9,7 +9,7 @@ from app.utils.auth import require_login
 
 router = APIRouter()
 
-ALLOWED_EVENT_TYPES = {"motion", "face", "alert"}
+ALLOWED_EVENT_TYPES = {"motion", "face", "alert", "system"}
 
 
 @router.get("/api/events")
@@ -24,7 +24,7 @@ async def events(
     if event_type is not None and event_type not in ALLOWED_EVENT_TYPES:
         raise HTTPException(
             status_code=400,
-            detail="Event type must be one of: all, motion, face, alert",
+            detail="Event type must be one of: all, motion, face, alert, system",
         )
 
     return {

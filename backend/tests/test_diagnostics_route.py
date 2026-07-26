@@ -7,6 +7,15 @@ from app.routes import auth, diagnostics
 from app.services import login_throttle, session_store
 
 
+class FakeStatusEventRecorder:
+    def __init__(self):
+        self.statuses = []
+
+    def record_if_changed(self, status):
+        self.statuses.append(status["status"])
+        return None
+
+
 def build_test_app() -> FastAPI:
     app = FastAPI()
     app.add_middleware(SessionMiddleware, secret_key="test-secret-key")
@@ -32,6 +41,8 @@ def test_diagnostics_redirects_when_anonymous():
 
 
 def test_diagnostics_returns_snapshot_when_authenticated(monkeypatch):
+    fake_recorder = FakeStatusEventRecorder()
+
     class FakePipelineStats:
         def snapshot(self):
             return {
@@ -42,6 +53,7 @@ def test_diagnostics_returns_snapshot_when_authenticated(monkeypatch):
             }
 
     monkeypatch.setattr(diagnostics, "pipeline_stats", FakePipelineStats())
+    monkeypatch.setattr(diagnostics, "status_event_recorder", fake_recorder)
     session_store.revoke_all()
     login_throttle.clear()
 
@@ -53,3 +65,4 @@ def test_diagnostics_returns_snapshot_when_authenticated(monkeypatch):
     assert response.status_code == 200
     assert response.json()["system"]["status"] == "idle"
     assert response.json()["recommendations"][0].startswith("Open the live view")
+    assert fake_recorder.statuses == ["idle"]

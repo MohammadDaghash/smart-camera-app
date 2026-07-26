@@ -25,6 +25,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /known-faces`: protected debug summary of loaded known-face labels and counts
 - `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
 - `GET /api/events`: local event history with `type` and `limit` filters
+  for `motion`, `face`, `alert`, and `system`
 - `GET /api/snapshots/{filename}`: protected local event snapshot image
 
 ## Folder Guide
@@ -101,6 +102,7 @@ The camera pipeline is split into small helpers:
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/services/diagnostics.py`: readable health checks and recommended actions from pipeline metrics.
+- `app/services/status_events.py`: records local events when the overall system status changes.
 - `app/services/recognition_debug.py`: builds the recognition debug API response from safe runtime metadata.
 - `app/services/system_status.py`: converts low-level pipeline metrics into `healthy`, `idle`, `degraded`, or `error`.
 - `app/vision/label_smoothing.py`: stabilizes recognition labels across nearby face boxes and recent frames.
@@ -164,6 +166,8 @@ systems such as Frigate:
 
 `/diagnostics` and `/api/diagnostics` add a readable layer on top of that status:
 each health check includes what happened and the next local action to try.
+When the status changes, the backend records a local `system` event so the
+transition is visible in history.
 
 Pipeline stats reset when the backend restarts. Events are stored locally in
 SQLite and survive backend restarts.

@@ -169,6 +169,11 @@
       color: #991b1b;
     }
 
+    .event-type.system {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
     .event-message {
       margin: 0;
       font-weight: 700;
@@ -221,7 +226,7 @@
     <div class="header">
       <div>
         <h1>Event History</h1>
-        <p class="subtitle">Saved local motion, face, and alert events</p>
+        <p class="subtitle">Saved local motion, face, alert, and system events</p>
       </div>
       <nav class="nav-links" aria-label="Main navigation">
         <a class="nav-link" href="/">Live View</a>
@@ -239,6 +244,7 @@
           <option value="motion">Motion</option>
           <option value="face">Face</option>
           <option value="alert">Alert</option>
+          <option value="system">System</option>
         </select>
       </label>
       <label>
@@ -281,8 +287,22 @@
 
       return Object.entries(metadata)
         .filter(([key]) => !hiddenMetadataKeys.has(key))
-        .map(([key, value]) => `${key}: ${value}`)
+        .map(([key, value]) => `${key}: ${formatMetadataValue(value)}`)
         .join(", ");
+    }
+
+    function formatMetadataValue(value) {
+      if (Array.isArray(value)) {
+        return value.map(formatMetadataValue).join("; ");
+      }
+
+      if (value && typeof value === "object") {
+        return Object.entries(value)
+          .map(([key, nestedValue]) => `${key}=${formatMetadataValue(nestedValue)}`)
+          .join(" ");
+      }
+
+      return value;
     }
 
     function renderEvents(events) {

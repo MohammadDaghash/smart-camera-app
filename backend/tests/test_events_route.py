@@ -81,7 +81,7 @@ def test_events_rejects_unknown_event_type(monkeypatch, tmp_path):
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Event type must be one of: all, motion, face, alert"
+        "Event type must be one of: all, motion, face, alert, system"
     )
 
 
@@ -101,6 +101,24 @@ def test_events_can_filter_alert_events(monkeypatch, tmp_path):
     assert response.status_code == 200
     assert response.json()["filters"]["type"] == "alert"
     assert response.json()["events"][0]["type"] == "alert"
+
+
+def test_events_can_filter_system_events(monkeypatch, tmp_path):
+    test_event_log = EventLog(database_path=tmp_path / "events.db")
+    monkeypatch.setattr(events, "event_log", test_event_log)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+    test_event_log.add_event("motion", "Motion detected", now=100.0)
+    test_event_log.add_event("system", "System status changed", now=101.0)
+
+    response = client.get("/api/events?type=system")
+
+    assert response.status_code == 200
+    assert response.json()["filters"]["type"] == "system"
+    assert response.json()["events"][0]["type"] == "system"
 
 
 def test_snapshot_redirects_when_anonymous():

@@ -22,6 +22,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Pipeline performance FPS metrics
 - Frigate-inspired system health status
 - Camera diagnostics page with readable health checks and recommendations
+- Local system status change events
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`
 - Basic frontend status panel for camera, faces, labels, and motion
@@ -268,6 +269,7 @@ demo script and system-design explanation.
 - Local browser alert notifications
 - Suspicious activity alerts
 - Local event history
+- System status change history
 - Optional smart-home device integrations
 
 ## Future AI And Security Goals

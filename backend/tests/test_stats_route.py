@@ -9,6 +9,15 @@ from app.services.event_log import EventLog
 from app.services.pipeline_stats import pipeline_stats
 
 
+class FakeStatusEventRecorder:
+    def __init__(self):
+        self.statuses = []
+
+    def record_if_changed(self, status):
+        self.statuses.append(status["status"])
+        return None
+
+
 def build_test_app() -> FastAPI:
     app = FastAPI()
     app.add_middleware(SessionMiddleware, secret_key="test-secret-key")
@@ -35,7 +44,9 @@ def test_stats_redirects_when_anonymous():
 
 def test_stats_returns_pipeline_snapshot_when_authenticated(monkeypatch, tmp_path):
     test_event_log = EventLog(database_path=tmp_path / "events.db")
+    fake_recorder = FakeStatusEventRecorder()
     monkeypatch.setattr(stats, "event_log", test_event_log)
+    monkeypatch.setattr(stats, "status_event_recorder", fake_recorder)
     session_store.revoke_all()
     login_throttle.clear()
     pipeline_stats.reset()
@@ -55,3 +66,4 @@ def test_stats_returns_pipeline_snapshot_when_authenticated(monkeypatch, tmp_pat
     assert response.json()["events"][0]["message"] == "Suspicious activity"
     assert response.json()["alerts"]["latest_alert"]["message"] == "Suspicious activity"
     assert response.json()["system"]["status"] == "idle"
+    assert fake_recorder.statuses == ["idle"]
