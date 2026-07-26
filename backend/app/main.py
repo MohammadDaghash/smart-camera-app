@@ -12,6 +12,7 @@ from app.config import (
 from app.routes import (
     auth,
     camera,
+    diagnostics,
     events,
     frontend,
     health,
@@ -38,6 +39,7 @@ app.include_router(auth.router)
 app.include_router(frontend.router)
 app.include_router(health.router)
 app.include_router(camera.router)
+app.include_router(diagnostics.router)
 app.include_router(stats.router)
 app.include_router(events.router)
 app.include_router(known_faces.router)

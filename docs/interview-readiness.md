@@ -96,6 +96,18 @@ Show:
 - Skipped analysis FPS
 - System status: healthy, idle, degraded, or error
 
+5. Open camera diagnostics:
+
+```text
+http://localhost:8000/diagnostics
+```
+
+Show:
+
+- Health checks for each pipeline stage
+- Recommended local actions
+- Pipeline metrics in one place
+
 ## How To Explain The FPS Metrics
 
 The app tracks 5-second rolling performance metrics.
@@ -134,6 +146,17 @@ Example:
 If `camera_fps = 10` but `stream_fps = 2`, the system becomes `degraded`
 because the camera is producing frames faster than the browser stream is sending
 them. That tells us where to debug first.
+
+## How To Explain Diagnostics
+
+The diagnostics page is the human-readable layer above `/stats`.
+
+Example:
+
+If `/stats` says `consecutive_failed_reads = 3`, diagnostics shows the camera
+read check as `degraded` and recommends checking camera access or reconnecting
+the camera. This is useful in interviews because it shows that the system can
+explain failures instead of only displaying raw numbers.
 
 ## Key Technical Tradeoffs
 

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera Diagnostics</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      color: #172033;
+      background: #f4f7fb;
+    }
+
+    main {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+
+    .subtitle {
+      margin-bottom: 0;
+      color: #64748b;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav-link,
+    .logout {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      color: #172033;
+      text-decoration: none;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .logout {
+      color: #ffffff;
+      border-color: #172033;
+      background: #172033;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 18px;
+      margin-bottom: 22px;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+      min-height: 36px;
+      padding: 8px 12px;
+      font-weight: 700;
+      border-radius: 999px;
+    }
+
+    .healthy {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .idle {
+      color: #92400e;
+      background: #fef3c7;
+    }
+
+    .degraded {
+      color: #9a3412;
+      background: #ffedd5;
+    }
+
+    .error {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    section {
+      min-width: 0;
+      padding: 18px;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .metrics-section {
+      margin-top: 18px;
+    }
+
+    .check-list,
+    .recommendation-list,
+    .metric-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .check-item {
+      display: grid;
+      grid-template-columns: minmax(130px, 0.35fr) minmax(0, 1fr);
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .check-item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .check-title {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+      font-weight: 700;
+    }
+
+    .check-status {
+      width: fit-content;
+      padding: 3px 8px;
+      font-size: 12px;
+      border-radius: 999px;
+    }
+
+    .check-message,
+    .check-recommendation,
+    .metric-value {
+      color: #475569;
+    }
+
+    .check-message {
+      margin-bottom: 6px;
+    }
+
+    .recommendation-list li {
+      padding-left: 12px;
+      border-left: 3px solid #2563eb;
+      color: #334155;
+    }
+
+    .metric-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric-item {
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .metric-label {
+      display: block;
+      margin-bottom: 4px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .metric-value {
+      font-weight: 700;
+    }
+
+    @media (max-width: 780px) {
+      body {
+        padding: 16px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .header,
+      .summary {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .grid,
+      .metric-list {
+        grid-template-columns: 1fr;
+      }
+
+      .check-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <div>
+        <h1>Camera Diagnostics</h1>
+        <p class="subtitle" id="updatedAt">Loading pipeline health...</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="/">Live View</a>
+        <a class="nav-link" href="/recognition-debug">Recognition Debug</a>
+        <a class="nav-link" href="/history">History</a>
+        <a class="logout" href="/logout">Log out</a>
+      </nav>
+    </div>
+
+    <section class="summary" aria-label="System summary">
+      <div>
+        <h2 id="summaryTitle">System status</h2>
+        <p class="subtitle" id="summaryMessage">Waiting for diagnostics...</p>
+      </div>
+      <span class="status-pill idle" id="statusPill">Idle</span>
+    </section>
+
+    <div class="grid">
+      <section aria-label="Health checks">
+        <h2>Health Checks</h2>
+        <ul class="check-list" id="checkList"></ul>
+      </section>
+
+      <section aria-label="Recommended actions">
+        <h2>Recommended Actions</h2>
+        <ul class="recommendation-list" id="recommendationList"></ul>
+      </section>
+    </div>
+
+    <section class="metrics-section" aria-label="Pipeline metrics">
+      <h2>Pipeline Metrics</h2>
+      <ul class="metric-list" id="metricList"></ul>
+    </section>
+  </main>
+
+  <script>
+    const updatedAt = document.getElementById("updatedAt");
+    const summaryMessage = document.getElementById("summaryMessage");
+    const statusPill = document.getElementById("statusPill");
+    const checkList = document.getElementById("checkList");
+    const recommendationList = document.getElementById("recommendationList");
+    const metricList = document.getElementById("metricList");
+
+    const metricLabels = {
+      active_streams: "Active streams",
+      camera_index: "Camera index",
+      frames_read: "Frames read",
+      frames_streamed: "Frames streamed",
+      failed_reads: "Failed reads",
+      consecutive_failed_reads: "Consecutive failed reads",
+      reconnects: "Reconnects",
+      encoding_failures: "Encoding failures",
+      analysis_frames: "Analysis frames",
+      last_face_count: "Last face count",
+      motion_active: "Motion active",
+      motion_events: "Motion events",
+      camera_fps: "Camera FPS",
+      stream_fps: "Stream FPS",
+      analysis_fps: "Analysis FPS",
+      motion_fps: "Motion FPS",
+      uptime_seconds: "Uptime seconds",
+    };
+
+    function titleCase(value) {
+      if (!value) {
+        return "Unknown";
+      }
+
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function setStatus(status) {
+      statusPill.textContent = titleCase(status);
+      statusPill.className = `status-pill ${status || "idle"}`;
+    }
+
+    function renderChecks(checks) {
+      checkList.innerHTML = "";
+
+      if (!checks || checks.length === 0) {
+        checkList.innerHTML = "<li>No checks available.</li>";
+        return;
+      }
+
+      checks.forEach((check) => {
+        const item = document.createElement("li");
+        const title = document.createElement("div");
+        const label = document.createElement("span");
+        const status = document.createElement("span");
+        const details = document.createElement("div");
+        const message = document.createElement("div");
+        const recommendation = document.createElement("div");
+
+        item.className = "check-item";
+        title.className = "check-title";
+        status.className = `check-status ${check.status}`;
+        message.className = "check-message";
+        recommendation.className = "check-recommendation";
+
+        label.textContent = check.label;
+        status.textContent = titleCase(check.status);
+        message.textContent = check.message;
+        recommendation.textContent = check.recommendation;
+
+        title.append(label, status);
+        details.append(message, recommendation);
+        item.append(title, details);
+        checkList.appendChild(item);
+      });
+    }
+
+    function renderRecommendations(recommendations) {
+      recommendationList.innerHTML = "";
+
+      if (!recommendations || recommendations.length === 0) {
+        recommendationList.innerHTML = "<li>No action needed.</li>";
+        return;
+      }
+
+      recommendations.forEach((recommendation) => {
+        const item = document.createElement("li");
+        item.textContent = recommendation;
+        recommendationList.appendChild(item);
+      });
+    }
+
+    function renderMetrics(metrics) {
+      metricList.innerHTML = "";
+
+      Object.entries(metricLabels).forEach(([key, label]) => {
+        const value = metrics?.[key];
+        const item = document.createElement("li");
+        const labelElement = document.createElement("span");
+        const valueElement = document.createElement("span");
+
+        item.className = "metric-item";
+        labelElement.className = "metric-label";
+        valueElement.className = "metric-value";
+
+        labelElement.textContent = label;
+        valueElement.textContent = formatMetric(value);
+
+        item.append(labelElement, valueElement);
+        metricList.appendChild(item);
+      });
+    }
+
+    function formatMetric(value) {
+      if (value === null || value === undefined) {
+        return "-";
+      }
+
+      if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+      }
+
+      return value;
+    }
+
+    async function updateDiagnostics() {
+      try {
+        const response = await fetch("/api/diagnostics", { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error("Diagnostics request failed");
+        }
+
+        const diagnostics = await response.json();
+        const status = diagnostics.system?.status || "idle";
+
+        setStatus(status);
+        summaryMessage.textContent = diagnostics.system?.message || "No summary available.";
+        renderChecks(diagnostics.checks);
+        renderRecommendations(diagnostics.recommendations);
+        renderMetrics(diagnostics.metrics);
+        updatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      } catch (error) {
+        setStatus("error");
+        summaryMessage.textContent = "Diagnostics unavailable. Check the backend terminal.";
+        updatedAt.textContent = "Unable to load diagnostics";
+      }
+    }
+
+    updateDiagnostics();
+    setInterval(updateDiagnostics, 2000);
+  </script>
+</body>
+</html>

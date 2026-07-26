@@ -21,6 +21,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Pipeline stats endpoint at `/stats`
 - Pipeline performance FPS metrics
 - Frigate-inspired system health status
+- Camera diagnostics page with readable health checks and recommendations
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`
 - Basic frontend status panel for camera, faces, labels, and motion
@@ -107,6 +108,8 @@ http://localhost:8000/camera-test
 http://localhost:8000/video
 http://localhost:8000/stats
 http://localhost:8000/api/system-status
+http://localhost:8000/diagnostics
+http://localhost:8000/api/diagnostics
 http://localhost:8000/known-faces
 http://localhost:8000/recognition-debug
 http://localhost:8000/api/recognition-debug
@@ -158,9 +161,10 @@ POST /login     submit credentials
 GET  /logout    clear the session
 ```
 
-Protected routes (`/`, `/history`, `/video`, `/camera-test`, `/stats`,
-`/known-faces`, `/recognition-debug`, `/api/system-status`,
-`/api/recognition-debug`, `/api/events`, `/api/snapshots/*`) redirect to
+Protected routes (`/`, `/history`, `/diagnostics`, `/video`, `/camera-test`,
+`/stats`, `/known-faces`, `/recognition-debug`, `/api/system-status`,
+`/api/diagnostics`, `/api/recognition-debug`, `/api/events`,
+`/api/snapshots/*`) redirect to
 `/login` when the user is not signed in.
 `/health` stays public.
 

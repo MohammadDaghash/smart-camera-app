@@ -65,6 +65,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - `backend/app/services/event_snapshots.py`: stores local JPEG snapshots for accepted events.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
+- `backend/app/services/diagnostics.py`: converts health checks into readable recommendations for `/api/diagnostics`.
 - `backend/app/services/recognition_debug.py`: returns safe recognition diagnostics for `/api/recognition-debug`.
 - `backend/app/services/system_status.py`: converts pipeline metrics into a concise health status.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
@@ -84,6 +85,7 @@ Event snapshots can be served through /api/snapshots/{filename}
 - motion activity, score, changed area, and event count
 - 5-second rolling camera, stream, analysis, motion, and skipped-analysis FPS
 - system status derived from pipeline health checks
+- readable camera diagnostics through `/api/diagnostics`
 - latest local motion and face events
 - latest face debug metadata for `/api/recognition-debug`
 - filterable local event history through `/api/events`

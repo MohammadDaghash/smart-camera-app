@@ -147,11 +147,13 @@ Requirements:
 - Derive a simple system status from pipeline metrics.
 - Show these metrics through `/stats` and `/recognition-debug`.
 - Expose the status through `/api/system-status`.
+- Expose readable diagnostics and recommendations through `/api/diagnostics`.
 
 Acceptance criteria:
 
 - `/stats` returns 5-second rolling performance metrics.
 - `/api/system-status` returns `healthy`, `idle`, `degraded`, or `error`.
+- `/diagnostics` explains which pipeline stage needs attention.
 - `/recognition-debug` shows the same metrics while the live stream is open.
 - Metrics make it clear whether the camera, streaming, or analysis stage is slow.
 
