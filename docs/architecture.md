@@ -16,6 +16,8 @@ or `error`.
 - Services handle application workflows like camera opening and frame streaming.
 - Vision modules handle ML and computer-vision logic.
 - Utils hold small shared helpers.
+- Experiments stay outside the live backend so model evaluation cannot break the
+  camera runtime.
 
 ## Current Data Flow
 
@@ -139,3 +141,4 @@ a label search still shows nearby motion or alert context.
 - Add confidence history without adding cloud services.
 - Add notification preferences after local browser notifications are stable.
 - Add minimal tests for pure logic and route availability.
+- Add more offline evaluation datasets before changing recognition defaults.

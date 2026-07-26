@@ -26,7 +26,9 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
 
       - name: Install OpenCV system libraries
         run: |
@@ -36,7 +38,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt pytest httpx
+          python -m pip install -r requirements-dev.txt
 
       - name: Run backend tests
         run: PYTHONPATH=. pytest -q

@@ -7,7 +7,7 @@ This guide explains the project in a way that is easy to present in interviews.
 Smart Camera App is a local-first smart camera MVP. It streams a webcam feed,
 detects faces, recognizes known people from local reference photos, records local
 events, creates suspicious-activity alerts, and exposes debugging dashboards for
-recognition, pipeline performance, and activity review.
+recognition, pipeline performance, activity review, and ML threshold evaluation.
 
 The important engineering idea is not only "camera works." The important idea is
 that the app is built as a small camera pipeline:
@@ -21,6 +21,7 @@ Camera frame
   -> event logging
   -> alert rules
   -> activity review grouping
+  -> offline ML evaluation
   -> annotated MJPEG stream
   -> dashboard/debug pages
 ```
@@ -139,6 +140,19 @@ Show:
 - Source events that explain why the review item exists
 - Filters by label and local time range
 
+8. Run the recognition evaluation toolkit:
+
+```bash
+backend/venv/bin/python experiments/recognition_eval/evaluate_faces.py
+```
+
+Show:
+
+- `predictions.csv`
+- `threshold_report.csv`
+- `confusion_matrix.png`
+- `recommended_threshold.txt`
+
 ## How To Explain The FPS Metrics
 
 The app tracks 5-second rolling performance metrics.
@@ -244,6 +258,32 @@ History filter "Mohammad" -> individual Mohammad event rows
 Review filter "Mohammad"  -> incidents involving Mohammad, with motion/alert context kept
 ```
 
+## How To Explain ML Evaluation
+
+The live app should not guess thresholds blindly. The experiment toolkit uses
+labeled images to test multiple thresholds and measure the result.
+
+Example:
+
+```text
+Threshold 0.45 -> recognizes known people more easily, but may falsely name Anonymous
+Threshold 0.55 -> fewer false known matches, but may turn known people into Anonymous
+```
+
+The report gives concrete metrics:
+
+```text
+accuracy
+macro precision
+macro recall
+macro F1
+anonymous false-positive rate
+known false-anonymous rate
+```
+
+This is the ML engineering part of the project: collect labeled examples,
+measure behavior, tune thresholds, and document the tradeoff.
+
 ## Key Technical Tradeoffs
 
 ### Local-first privacy
@@ -285,6 +325,7 @@ or two.
 - Heavy work is kept inside the camera pipeline, not inside HTTP route handlers.
 - Personal biometric data is gitignored and stored locally.
 - Debug endpoints expose metadata, not embeddings or images.
+- Recognition thresholds are evaluated with reproducible ML experiment reports.
 - Tests cover pure logic, route protection, event logging, recognition debug, and
   pipeline metrics.
 - A file-length guard keeps tracked files under 1000 lines.

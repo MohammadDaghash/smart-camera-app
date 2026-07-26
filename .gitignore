@@ -13,3 +13,11 @@ backend/local_data/
 # Keep personal face photos local unless you intentionally decide to upload them.
 backend/known_faces/*
 !backend/known_faces/.gitkeep
+
+# Keep local ML evaluation images and generated reports out of Git.
+experiments/recognition_eval/dataset/known/*
+!experiments/recognition_eval/dataset/known/.gitkeep
+experiments/recognition_eval/dataset/test/*
+!experiments/recognition_eval/dataset/test/.gitkeep
+experiments/recognition_eval/results/*
+!experiments/recognition_eval/results/.gitkeep

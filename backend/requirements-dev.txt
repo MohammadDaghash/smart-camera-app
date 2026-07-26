@@ -3,3 +3,8 @@
 # Test-only dependencies
 pytest
 httpx
+
+# Experiment/reporting dependencies
+pandas
+matplotlib
+scikit-learn

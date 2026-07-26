@@ -8,6 +8,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 
 - FastAPI backend
 - GitHub Actions CI for tests and project guardrails
+- Local ML evaluation toolkit for recognition threshold tuning
 - Browser live video stream at `/video`
 - Local webcam access through OpenCV
 - Face detection and bounding boxes
@@ -58,6 +59,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - ONNX Runtime
 - Pillow
 - SQLite
+- pandas, matplotlib, and scikit-learn for local ML experiments
 - HTML/CSS frontend
 
 ## Project Structure
@@ -234,6 +236,33 @@ After logging in, open this debug route to verify loaded labels and photo counts
 ```text
 http://localhost:8000/known-faces
 ```
+
+## ML Experiments
+
+The live app uses InsightFace embeddings for recognition. The experiment toolkit
+measures how well that recognition works before changing production thresholds.
+
+Place labeled test images under:
+
+```text
+experiments/recognition_eval/dataset/test/
+  Mohammad/
+  Omar/
+  Anonymous/
+```
+
+Run from the project root:
+
+```bash
+cd backend
+source venv/bin/activate
+pip install -r requirements-dev.txt
+cd ..
+backend/venv/bin/python experiments/recognition_eval/evaluate_faces.py
+```
+
+Reports are generated locally under `experiments/recognition_eval/results/` and
+are ignored by Git.
 
 ## Git Workflow
 

@@ -33,6 +33,7 @@ The current system supports:
 - Local browser notifications for new suspicious alerts
 - Protected known-face loading debug endpoint
 - Recognition debug page for scores, thresholds, and label reasons
+- Local ML evaluation toolkit for threshold and confusion-matrix reports
 
 The current system does not yet include:
 
@@ -61,6 +62,7 @@ The current system does not yet include:
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
 | P1 | Activity review workflow | Started | Group and filter nearby raw events into reviewable incidents with severity, labels, timing, and source event context. |
 | P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
+| P1 | ML evaluation toolkit | Started | Evaluate recognition thresholds using labeled images, metrics, and confusion matrices. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
 | P1 | Pipeline observability | Started | Track FPS, uptime, and derived system health status. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
@@ -110,6 +112,30 @@ Acceptance criteria:
 - `FACE_MATCH_THRESHOLD` can be adjusted in `.env` without code changes.
 - One weak frame should not immediately flip a stable known label to `Anonymous`.
 - Recognition settings are easy to tune during testing.
+
+### ML Evaluation Toolkit
+
+Goal:
+Measure recognition quality before changing production thresholds.
+
+Requirements:
+
+- Use labeled image folders for test data.
+- Compare test embeddings against known-face embeddings.
+- Sweep recognition thresholds.
+- Report accuracy, precision, recall, macro F1, anonymous false positives, and
+  known false-anonymous rates.
+- Generate predictions CSV, threshold CSV, confusion matrix image, and a
+  recommended threshold file.
+- Keep personal evaluation images and generated reports local-only.
+
+Acceptance criteria:
+
+- The toolkit runs without webcam access.
+- The toolkit can evaluate `Mohammad`, `Omar`, and `Anonymous` test folders.
+- The output explains whether the current threshold is too strict or too loose.
+- The generated CSV files can be opened in spreadsheet tools, Python notebooks,
+  or MATLAB for further analysis.
 
 ### Dashboard Experience
 

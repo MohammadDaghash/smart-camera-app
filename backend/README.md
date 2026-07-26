@@ -90,10 +90,17 @@ Backend test folder. Add tests as modules become more stable.
 ## Dependency Notes
 
 - Keep dependencies in `requirements.txt`.
+- Keep experiment/test dependencies in `requirements-dev.txt`.
 - Use the project virtual environment in `backend/venv`.
 - Do not commit the virtual environment.
 - Do not commit personal face images.
 - The first InsightFace run may download model files into `~/.insightface`.
+
+Install development and experiment dependencies with:
+
+```bash
+pip install -r requirements-dev.txt
+```
 
 ## Camera Pipeline Notes
 
