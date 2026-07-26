@@ -68,6 +68,19 @@ git merge origin/main
 - `/health` works
 - `/camera-test` works
 - `/video` works
+- GitHub Actions CI passes
 - No personal face images committed
 - No virtual environment files committed
 - README/docs updated if workflow changes
+
+## Continuous Integration
+
+GitHub Actions runs on pushes and pull requests for `main` and `dev`.
+
+The CI workflow checks:
+
+- backend tests with `pytest`
+- frontend inline JavaScript syntax with `node --check`
+- tracked files stay under 1000 lines
+
+If CI fails, fix the failing check before merging.

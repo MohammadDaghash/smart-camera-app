@@ -240,12 +240,13 @@ or two.
 - Tests cover pure logic, route protection, event logging, recognition debug, and
   pipeline metrics.
 - A file-length guard keeps tracked files under 1000 lines.
+- GitHub Actions runs backend tests, frontend JavaScript checks, and file-length
+  guardrails automatically.
 - Frigate influenced the pipeline and observability design, but this app remains
   a smaller MVP.
 
 ## Next High-Value Improvements
 
-- Add a small CI workflow to run backend tests on GitHub.
 - Add confidence history charts for recognition tuning.
 - Add event search by label and time.
 - Add a camera health badge on the live dashboard.

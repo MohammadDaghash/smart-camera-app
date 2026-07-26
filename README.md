@@ -7,6 +7,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 ## Current Features
 
 - FastAPI backend
+- GitHub Actions CI for tests and project guardrails
 - Browser live video stream at `/video`
 - Local webcam access through OpenCV
 - Face detection and bounding boxes
@@ -260,6 +261,16 @@ git push -u origin feature/my-feature
 Open a pull request from the feature branch into `main`. Each pull request should be reviewed before merge.
 
 See [docs/git-workflow.md](docs/git-workflow.md) for the full workflow.
+
+## CI
+
+GitHub Actions runs on pushes and pull requests for `main` and `dev`.
+
+The CI checks:
+
+- backend tests
+- frontend inline JavaScript syntax
+- tracked files stay under 1000 lines
 
 ## Roadmap
 
