@@ -18,6 +18,7 @@ from app.services.event_snapshots import event_snapshot_store
 from app.services.frame_cadence import should_process_frame
 from app.services.mjpeg_streamer import encode_mjpeg_frame
 from app.services.pipeline_stats import pipeline_stats
+from app.services.recognition_metrics import recognition_metrics_store
 from app.utils.logging import logger
 from app.vision.face_recognition import (
     build_face_annotations,
@@ -150,12 +151,34 @@ def generate_frames(camera, index):
                     face_labels,
                     faces=latest_face_annotations,
                 )
+                recognition_metrics_store.add_observations(latest_face_annotations)
 
                 for label in sorted(current_face_labels - last_face_labels):
+                    annotation = next(
+                        (
+                            face
+                            for face in latest_face_annotations
+                            if face["label"] == label
+                        ),
+                        {},
+                    )
                     event = event_log.add_event(
                         event_type="face",
                         message=f"{label} detected",
-                        metadata={"label": label},
+                        metadata={
+                            "label": label,
+                            "score": round(float(annotation.get("score", 0.0)), 4),
+                            "raw_label": annotation.get("raw_label", label),
+                            "raw_score": round(
+                                float(
+                                    annotation.get(
+                                        "raw_score",
+                                        annotation.get("score", 0.0),
+                                    )
+                                ),
+                                4,
+                            ),
+                        },
                         cooldown_key=f"face:{label}",
                         cooldown_seconds=EVENT_FACE_COOLDOWN_SECONDS,
                     )

@@ -22,6 +22,7 @@ def test_settings_summary_includes_expected_tuning_keys():
 
     assert "FACE_MATCH_THRESHOLD" in env_vars
     assert "FACE_ANALYSIS_INTERVAL_FRAMES" in env_vars
+    assert "RECOGNITION_METRICS_MAX_OBSERVATIONS" in env_vars
     assert "MOTION_SCORE_THRESHOLD" in env_vars
     assert "ALERT_COOLDOWN_SECONDS" in env_vars
     assert "REVIEW_EVENT_GAP_SECONDS" in env_vars

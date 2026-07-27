@@ -6,6 +6,7 @@ from app.config import (
     EVENTS_FILE,
     FRONTEND_FILE,
     RECOGNITION_DEBUG_FILE,
+    RECOGNITION_METRICS_FILE,
     REVIEW_FILE,
     SETTINGS_FILE,
 )
@@ -33,6 +34,11 @@ def activity_review(user: str = Depends(require_login)):
 @router.get("/recognition-debug")
 def recognition_debug(user: str = Depends(require_login)):
     return FileResponse(RECOGNITION_DEBUG_FILE)
+
+
+@router.get("/recognition-metrics")
+def recognition_metrics(user: str = Depends(require_login)):
+    return FileResponse(RECOGNITION_METRICS_FILE)
 
 
 @router.get("/diagnostics")

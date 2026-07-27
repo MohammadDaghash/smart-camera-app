@@ -18,6 +18,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /diagnostics`: serves `frontend/diagnostics.html`
 - `GET /settings`: serves `frontend/settings.html`
 - `GET /recognition-debug`: serves `frontend/recognition-debug.html`
+- `GET /recognition-metrics`: serves `frontend/recognition-metrics.html`
 - `GET /health`: simple API health check
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
@@ -28,6 +29,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /api/settings`: protected read-only tuning settings summary
 - `GET /known-faces`: protected debug summary of loaded known-face labels and counts
 - `GET /api/recognition-debug`: protected recognition scores, thresholds, and label reasons
+- `GET /api/recognition-metrics`: protected local recognition score history
 - `GET /api/events`: local event history with `type`, `label`, `start_at`,
   `end_at`, and `limit` filters
 - `GET /api/review`: grouped activity review items built from recent events,
@@ -123,6 +125,7 @@ The camera pipeline is split into small helpers:
 - `app/services/settings_summary.py`: read-only non-secret tuning settings for `/api/settings`.
 - `app/services/status_events.py`: records local events when the overall system status changes.
 - `app/services/recognition_debug.py`: builds the recognition debug API response from safe runtime metadata.
+- `app/services/recognition_metrics.py`: stores bounded local recognition label and score observations.
 - `app/services/system_status.py`: converts low-level pipeline metrics into `healthy`, `idle`, `degraded`, or `error`.
 - `app/vision/label_smoothing.py`: stabilizes recognition labels across nearby face boxes and recent frames.
 - `app/vision/motion_detection.py`: simple frame-to-frame motion detection.
@@ -140,6 +143,8 @@ FACE_LABEL_SMOOTHING_HISTORY_SIZE=5
 FACE_LABEL_SMOOTHING_MIN_VOTES=2
 FACE_TRACK_IOU_THRESHOLD=0.2
 FACE_TRACK_TTL_FRAMES=5
+RECOGNITION_METRICS_MAX_OBSERVATIONS=1000
+RECOGNITION_METRICS_SAMPLE_INTERVAL_SECONDS=1.0
 ```
 
 `1` analyzes every frame. Higher values reuse the latest face annotations between
@@ -200,11 +205,12 @@ Local event database:
 ```text
 backend/local_data/events.db
 backend/local_data/review_status.db
+backend/local_data/recognition_metrics.db
 backend/local_data/snapshots/
 ```
 
 `backend/local_data/` is gitignored. Do not commit local event history or
-review status data, or snapshots.
+recognition score history, review status data, or snapshots.
 
 Optional motion tuning:
 

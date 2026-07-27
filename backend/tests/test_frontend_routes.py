@@ -31,6 +31,15 @@ def test_recognition_debug_page_redirects_when_anonymous():
     assert response.headers["location"] == "/login"
 
 
+def test_recognition_metrics_page_redirects_when_anonymous():
+    client = TestClient(build_test_app(), follow_redirects=False)
+
+    response = client.get("/recognition-metrics")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
 def test_diagnostics_page_redirects_when_anonymous():
     client = TestClient(build_test_app(), follow_redirects=False)
 
@@ -83,6 +92,19 @@ def test_recognition_debug_page_loads_when_authenticated():
 
     assert response.status_code == 200
     assert "Recognition Debug" in response.text
+
+
+def test_recognition_metrics_page_loads_when_authenticated():
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.get("/recognition-metrics")
+
+    assert response.status_code == 200
+    assert "Recognition Metrics" in response.text
 
 
 def test_diagnostics_page_loads_when_authenticated():

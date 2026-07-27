@@ -9,6 +9,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - FastAPI backend
 - GitHub Actions CI for tests and project guardrails
 - Local ML evaluation toolkit for recognition threshold tuning
+- Local recognition score history for confidence and threshold tuning
 - Browser live video stream at `/video`
 - Local webcam access through OpenCV
 - Face detection and bounding boxes
@@ -30,6 +31,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Local system status change events
 - Known-face debug endpoint at `/known-faces`
 - Recognition debug page at `/recognition-debug`
+- Recognition metrics page at `/recognition-metrics`
 - Basic frontend status panel for camera, faces, labels, and motion
 - Persistent local camera events with simple cooldowns
 - Event history page with type and limit filters
@@ -130,6 +132,8 @@ PATCH http://localhost:8000/api/review/<review-id>/status
 http://localhost:8000/known-faces
 http://localhost:8000/recognition-debug
 http://localhost:8000/api/recognition-debug
+http://localhost:8000/recognition-metrics
+http://localhost:8000/api/recognition-metrics
 http://localhost:8000/history
 http://localhost:8000/api/events
 http://localhost:8000/api/snapshots/<snapshot-filename>
@@ -179,9 +183,9 @@ GET  /logout    clear the session
 ```
 
 Protected routes (`/`, `/history`, `/review`, `/diagnostics`, `/video`, `/camera-test`,
-`/settings`, `/stats`, `/known-faces`, `/recognition-debug`,
+`/settings`, `/stats`, `/known-faces`, `/recognition-debug`, `/recognition-metrics`,
 `/api/dashboard-summary`, `/api/system-status`, `/api/diagnostics`, `/api/settings`,
-`/api/recognition-debug`, `/api/events`, `/api/review`,
+`/api/recognition-debug`, `/api/recognition-metrics`, `/api/events`, `/api/review`,
 `/api/snapshots/*`) redirect to
 `/login` when the user is not signed in.
 `/health` stays public.

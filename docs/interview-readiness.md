@@ -33,6 +33,7 @@ architecture, but we are using its high-level ideas:
 
 - Capture video first, then process only what is needed.
 - Track separate FPS metrics instead of one vague health status.
+- Track live recognition score metrics for threshold monitoring.
 - Convert low-level metrics into a simple system health status.
 - Convert low-level events into reviewable activity items.
 - Combine health, alerts, review counts, and FPS into one dashboard summary.
@@ -103,7 +104,21 @@ Show:
 - Skipped analysis FPS
 - System status: healthy, idle, degraded, or error
 
-5. Open camera diagnostics:
+5. Open recognition metrics:
+
+```text
+http://localhost:8000/recognition-metrics
+```
+
+Show:
+
+- Score history chart
+- Match threshold line
+- Per-label average, min, and max scores
+- Near-threshold observation count
+- Latest raw/displayed label observations
+
+6. Open camera diagnostics:
 
 ```text
 http://localhost:8000/diagnostics
@@ -305,11 +320,29 @@ known false-anonymous rate
 This is the ML engineering part of the project: collect labeled examples,
 measure behavior, tune thresholds, and document the tradeoff.
 
+The recognition metrics page adds the runtime side of that story. It records
+bounded local label/score observations while the camera is running, then shows
+whether scores are comfortably above the threshold or often near the decision
+boundary.
+
+Example:
+
+```text
+Mohammad average raw score: 0.72
+threshold: 0.45
+near-threshold observations: 0
+```
+
+That means the current threshold is probably stable for Mohammad in that local
+lighting/camera setup. If many observations sit around `0.45`, the threshold or
+reference photos need more testing.
+
 ## Key Technical Tradeoffs
 
 ### Local-first privacy
 
-Known-face photos, face embeddings, events, and snapshots stay local.
+Known-face photos, face embeddings, recognition score history, events, and
+snapshots stay local.
 
 Tradeoff:
 Local-first is safer for privacy, but remote/mobile access needs more work later.
@@ -347,6 +380,7 @@ or two.
 - Personal biometric data is gitignored and stored locally.
 - Debug endpoints expose metadata, not embeddings or images.
 - Recognition thresholds are evaluated with reproducible ML experiment reports.
+- Live recognition score history supports threshold monitoring during demos.
 - Activity review supports saved operator status for lightweight triage.
 - The dashboard has an operator summary API instead of forcing the UI to reason
   directly over raw metrics.
@@ -360,5 +394,4 @@ or two.
 
 ## Next High-Value Improvements
 
-- Add confidence history charts for recognition tuning.
 - Add a clear architecture diagram to the README.

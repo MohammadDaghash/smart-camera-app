@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recognition Metrics</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #17212b;
+      background: #eef3f7;
+      padding: 24px;
+    }
+
+    main {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+      border: 1px solid #d8e0e8;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 30px;
+    }
+
+    h2 {
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .subtitle,
+    .status,
+    .empty {
+      margin: 6px 0 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .nav-link,
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #ffffff;
+      background: #2563eb;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-link.secondary {
+      background: #334155;
+    }
+
+    .toolbar,
+    .panel,
+    .metric {
+      border: 1px solid #d8e0e8;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label {
+      color: #334155;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    input,
+    select {
+      min-height: 38px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #17212b;
+      background: #ffffff;
+      font: inherit;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 14px;
+    }
+
+    .metric span {
+      display: block;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+      overflow-wrap: anywhere;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .chart-wrap {
+      overflow-x: auto;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      min-width: 620px;
+      height: 260px;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .axis {
+      stroke: #cbd5e1;
+      stroke-width: 1;
+    }
+
+    .threshold-line {
+      stroke: #dc2626;
+      stroke-dasharray: 6 6;
+      stroke-width: 2;
+    }
+
+    .score-line {
+      fill: none;
+      stroke: #2563eb;
+      stroke-width: 3;
+    }
+
+    .chart-label {
+      fill: #475569;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #64748b;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .known {
+      color: #15803d;
+      font-weight: 800;
+    }
+
+    .anonymous {
+      color: #b45309;
+      font-weight: 800;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 16px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Recognition Metrics</h1>
+        <p class="subtitle" id="updatedAt">Loading...</p>
+      </div>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="/">Live View</a>
+        <a class="nav-link secondary" href="/recognition-debug">Recognition Debug</a>
+        <a class="nav-link secondary" href="/review">Review</a>
+        <a class="nav-link secondary" href="/diagnostics">Diagnostics</a>
+      </nav>
+    </header>
+
+    <section class="toolbar" aria-label="Metric filters">
+      <div class="controls">
+        <label for="labelFilter">Label</label>
+        <input id="labelFilter" type="search" placeholder="Mohammad">
+        <label for="limitSelect">Limit</label>
+        <select id="limitSelect">
+          <option value="100">100</option>
+          <option value="200" selected>200</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
+      </div>
+      <button type="button" id="refreshButton">Refresh</button>
+    </section>
+
+    <section class="metric-grid" aria-label="Recognition summary">
+      <div class="metric">
+        <span>Total</span>
+        <strong id="totalObservations">0</strong>
+      </div>
+      <div class="metric">
+        <span>Known</span>
+        <strong id="knownObservations">0</strong>
+      </div>
+      <div class="metric">
+        <span>Anonymous</span>
+        <strong id="anonymousObservations">0</strong>
+      </div>
+      <div class="metric">
+        <span>Near Threshold</span>
+        <strong id="nearThresholdObservations">0</strong>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="panel" aria-label="Score history">
+        <h2>Score History</h2>
+        <div class="chart-wrap">
+          <svg id="scoreChart" viewBox="0 0 720 260" role="img" aria-label="Recognition score history"></svg>
+        </div>
+        <p class="empty" id="chartEmpty" hidden>No recognition observations yet.</p>
+      </section>
+
+      <section class="panel" aria-label="Per label scores">
+        <h2>Per Label</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Count</th>
+                <th>Avg</th>
+                <th>Min</th>
+                <th>Max</th>
+              </tr>
+            </thead>
+            <tbody id="labelBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" aria-label="Latest observations">
+      <h2>Latest Observations</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Label</th>
+              <th>Score</th>
+              <th>Raw Label</th>
+              <th>Raw Score</th>
+            </tr>
+          </thead>
+          <tbody id="observationBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const updatedAt = document.getElementById("updatedAt");
+    const labelFilter = document.getElementById("labelFilter");
+    const limitSelect = document.getElementById("limitSelect");
+    const refreshButton = document.getElementById("refreshButton");
+    const totalObservations = document.getElementById("totalObservations");
+    const knownObservations = document.getElementById("knownObservations");
+    const anonymousObservations = document.getElementById("anonymousObservations");
+    const nearThresholdObservations = document.getElementById("nearThresholdObservations");
+    const scoreChart = document.getElementById("scoreChart");
+    const chartEmpty = document.getElementById("chartEmpty");
+    const labelBody = document.getElementById("labelBody");
+    const observationBody = document.getElementById("observationBody");
+
+    function score(value) {
+      if (value === null || value === undefined) {
+        return "-";
+      }
+
+      return Number(value).toFixed(2);
+    }
+
+    function formatTime(seconds) {
+      if (!seconds) {
+        return "-";
+      }
+
+      return new Date(seconds * 1000).toLocaleTimeString();
+    }
+
+    function labelClass(label) {
+      return String(label || "").toLowerCase().startsWith("anonymous")
+        ? "anonymous"
+        : "known";
+    }
+
+    function cell(text, className) {
+      const element = document.createElement("td");
+      element.textContent = text ?? "-";
+
+      if (className) {
+        element.className = className;
+      }
+
+      return element;
+    }
+
+    function svgElement(name, attributes = {}) {
+      const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+
+      for (const [key, value] of Object.entries(attributes)) {
+        element.setAttribute(key, value);
+      }
+
+      return element;
+    }
+
+    function renderChart(observations, threshold) {
+      scoreChart.replaceChildren();
+      const width = 720;
+      const height = 260;
+      const padding = 34;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+
+      chartEmpty.hidden = observations.length > 0;
+
+      scoreChart.append(
+        svgElement("line", {
+          x1: padding,
+          y1: height - padding,
+          x2: width - padding,
+          y2: height - padding,
+          class: "axis",
+        }),
+        svgElement("line", {
+          x1: padding,
+          y1: padding,
+          x2: padding,
+          y2: height - padding,
+          class: "axis",
+        })
+      );
+
+      const thresholdY = padding + (1 - threshold) * chartHeight;
+      scoreChart.appendChild(svgElement("line", {
+        x1: padding,
+        y1: thresholdY,
+        x2: width - padding,
+        y2: thresholdY,
+        class: "threshold-line",
+      }));
+      scoreChart.appendChild(svgElement("text", {
+        x: padding + 8,
+        y: Math.max(16, thresholdY - 8),
+        class: "chart-label",
+      }));
+      scoreChart.lastChild.textContent = `threshold ${score(threshold)}`;
+
+      if (!observations.length) {
+        return;
+      }
+
+      const denominator = Math.max(1, observations.length - 1);
+      const points = observations.map((observation, index) => {
+        const x = padding + (index / denominator) * chartWidth;
+        const y = padding + (1 - Number(observation.raw_score || 0)) * chartHeight;
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+      }).join(" ");
+
+      scoreChart.appendChild(svgElement("polyline", {
+        points,
+        class: "score-line",
+      }));
+    }
+
+    function renderLabels(labels) {
+      labelBody.replaceChildren();
+
+      for (const item of labels || []) {
+        const row = document.createElement("tr");
+        row.append(
+          cell(item.label, labelClass(item.label)),
+          cell(item.count),
+          cell(score(item.average_score)),
+          cell(score(item.min_score)),
+          cell(score(item.max_score))
+        );
+        labelBody.appendChild(row);
+      }
+
+      if (!labelBody.children.length) {
+        const row = document.createElement("tr");
+        const emptyCell = cell("No label metrics yet.");
+        emptyCell.colSpan = 5;
+        row.appendChild(emptyCell);
+        labelBody.appendChild(row);
+      }
+    }
+
+    function renderObservations(observations) {
+      observationBody.replaceChildren();
+
+      for (const observation of observations.slice(-12).reverse()) {
+        const row = document.createElement("tr");
+        row.append(
+          cell(formatTime(observation.created_at)),
+          cell(observation.label, labelClass(observation.label)),
+          cell(score(observation.score)),
+          cell(observation.raw_label, labelClass(observation.raw_label)),
+          cell(score(observation.raw_score))
+        );
+        observationBody.appendChild(row);
+      }
+
+      if (!observationBody.children.length) {
+        const row = document.createElement("tr");
+        const emptyCell = cell("No observations yet.");
+        emptyCell.colSpan = 5;
+        row.appendChild(emptyCell);
+        observationBody.appendChild(row);
+      }
+    }
+
+    function renderMetrics(data) {
+      const summary = data.summary || {};
+      const observations = data.observations || [];
+
+      totalObservations.textContent = summary.total_observations || 0;
+      knownObservations.textContent = summary.known_observations || 0;
+      anonymousObservations.textContent = summary.anonymous_observations || 0;
+      nearThresholdObservations.textContent = summary.near_threshold_observations || 0;
+
+      renderChart(observations, data.settings?.face_match_threshold || 0.45);
+      renderLabels(summary.per_label || []);
+      renderObservations(observations);
+      updatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+    }
+
+    async function loadMetrics() {
+      const params = new URLSearchParams({ limit: limitSelect.value });
+      const label = labelFilter.value.trim();
+
+      if (label) {
+        params.set("label", label);
+      }
+
+      try {
+        const response = await fetch(`/api/recognition-metrics?${params}`, {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Recognition metrics request failed: ${response.status}`);
+        }
+
+        renderMetrics(await response.json());
+      } catch (error) {
+        updatedAt.textContent = "Recognition metrics unavailable";
+        console.error(error);
+      }
+    }
+
+    refreshButton.addEventListener("click", loadMetrics);
+    limitSelect.addEventListener("change", loadMetrics);
+    labelFilter.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        loadMetrics();
+      }
+    });
+
+    loadMetrics();
+    setInterval(loadMetrics, 3000);
+  </script>
+</body>
+</html>

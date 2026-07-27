@@ -61,6 +61,20 @@ def build_settings_summary():
                         "Frames a tracked face can be missing before it expires.",
                         "Higher keeps labels around longer after brief detection gaps.",
                     ),
+                    setting(
+                        "RECOGNITION_METRICS_MAX_OBSERVATIONS",
+                        config.RECOGNITION_METRICS_MAX_OBSERVATIONS,
+                        "integer",
+                        "Maximum local recognition score observations retained.",
+                        "Higher keeps more score history on disk.",
+                    ),
+                    setting(
+                        "RECOGNITION_METRICS_SAMPLE_INTERVAL_SECONDS",
+                        config.RECOGNITION_METRICS_SAMPLE_INTERVAL_SECONDS,
+                        "float",
+                        "Minimum seconds between saved recognition score samples.",
+                        "Higher reduces database writes.",
+                    ),
                 ],
             },
             {

@@ -83,6 +83,7 @@ Dashboard summary combines health, review, alert, and FPS state
 - `backend/app/services/settings_summary.py`: exposes non-secret tuning values for `/api/settings`.
 - `backend/app/services/status_events.py`: records local `system` events for status transitions.
 - `backend/app/services/recognition_debug.py`: returns safe recognition diagnostics for `/api/recognition-debug`.
+- `backend/app/services/recognition_metrics.py`: stores bounded local label/score observations for threshold monitoring.
 - `backend/app/services/system_status.py`: converts pipeline metrics into a concise health status.
 - `backend/app/services/camera_service.py`: compatibility wrapper for older imports.
 - `backend/app/routes/known_faces.py`: exposes a protected known-face loading summary without embeddings or images.
@@ -107,6 +108,7 @@ Dashboard summary combines health, review, alert, and FPS state
 - local system status transition events
 - latest local motion and face events
 - latest face debug metadata for `/api/recognition-debug`
+- local recognition score history through `/api/recognition-metrics`
 - local event history through `/api/events`, filterable by type, label, and time
 - protected local event snapshots through `/api/snapshots/{filename}`
 - grouped local activity review items through `/api/review`, filterable by label and time
@@ -125,6 +127,11 @@ Activity review items are computed from local events at request time. Review
 status is stored separately in `backend/local_data/review_status.db`, which keeps
 triage decisions durable without copying raw events or snapshots.
 
+Recognition score history is stored in
+`backend/local_data/recognition_metrics.db`. It stores labels, displayed scores,
+raw labels, raw scores, track ids, and timestamps. It does not store face images
+or embeddings.
+
 Label filtering is applied differently by page. History filters individual event
 rows. Review filters the grouped item while preserving related source events, so
 a label search still shows nearby motion or alert context.
@@ -141,7 +148,7 @@ a label search still shows nearby motion or alert context.
 
 - Known-face images stay local.
 - `.gitignore` excludes `backend/known_faces/*`.
-- Local events and snapshots stay under `backend/local_data/`.
+- Local events, recognition score history, and snapshots stay under `backend/local_data/`.
 - Browser notifications are local to the open dashboard session.
 - No external notification service, cloud storage, or smart-home integration exists yet.
 

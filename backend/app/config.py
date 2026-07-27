@@ -75,12 +75,14 @@ LOGIN_FILE = PROJECT_DIR / "frontend" / "login.html"
 EVENTS_FILE = PROJECT_DIR / "frontend" / "events.html"
 REVIEW_FILE = PROJECT_DIR / "frontend" / "review.html"
 RECOGNITION_DEBUG_FILE = PROJECT_DIR / "frontend" / "recognition-debug.html"
+RECOGNITION_METRICS_FILE = PROJECT_DIR / "frontend" / "recognition-metrics.html"
 DIAGNOSTICS_FILE = PROJECT_DIR / "frontend" / "diagnostics.html"
 SETTINGS_FILE = PROJECT_DIR / "frontend" / "settings.html"
 KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
 LOCAL_DATA_DIR = BACKEND_DIR / "local_data"
 EVENTS_DB_FILE = LOCAL_DATA_DIR / "events.db"
 REVIEW_STATUS_DB_FILE = LOCAL_DATA_DIR / "review_status.db"
+RECOGNITION_METRICS_DB_FILE = LOCAL_DATA_DIR / "recognition_metrics.db"
 EVENT_SNAPSHOTS_DIR = LOCAL_DATA_DIR / "snapshots"
 
 CAMERA_INDEXES = [0, 1, 2]
@@ -113,6 +115,16 @@ FACE_MATCH_THRESHOLD = _env_float(
     0.45,
     minimum=0.0,
     maximum=1.0,
+)
+RECOGNITION_METRICS_MAX_OBSERVATIONS = _env_int(
+    "RECOGNITION_METRICS_MAX_OBSERVATIONS",
+    1000,
+    minimum=1,
+)
+RECOGNITION_METRICS_SAMPLE_INTERVAL_SECONDS = _env_float(
+    "RECOGNITION_METRICS_SAMPLE_INTERVAL_SECONDS",
+    1.0,
+    minimum=0.0,
 )
 KNOWN_FACE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 

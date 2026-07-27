@@ -35,6 +35,7 @@ The current system supports:
 - Protected known-face loading debug endpoint
 - Recognition debug page for scores, thresholds, and label reasons
 - Local ML evaluation toolkit for threshold and confusion-matrix reports
+- Local recognition score history for confidence and threshold monitoring
 
 The current system does not yet include:
 
@@ -62,7 +63,7 @@ The current system does not yet include:
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
 | P1 | Activity review workflow | Started | Group, filter, and triage nearby raw events into reviewable incidents with severity, labels, timing, source event context, and saved status. |
-| P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
+| P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, score history, and smoothing. |
 | P1 | ML evaluation toolkit | Started | Evaluate recognition thresholds using labeled images, metrics, and confusion matrices. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, motion, alert, review, FPS, and top-action status around the stream. |
 | P1 | Pipeline observability | Started | Track FPS, uptime, and derived system health status. |
@@ -101,6 +102,7 @@ Requirements:
 - Compare faces using stable embeddings.
 - Expose a protected debug endpoint for loaded known-face labels and counts.
 - Expose a protected debug page for recent raw and smoothed recognition results.
+- Store bounded local score observations for recognition confidence history.
 - Tune confidence thresholds from local environment settings.
 - Smooth recognition labels across several frames.
 
@@ -110,6 +112,8 @@ Acceptance criteria:
 - Unknown people remain labeled as `Anonymous`.
 - `/known-faces` shows source image counts and loaded embedding counts.
 - `/recognition-debug` shows current raw score, smoothed label, and reason.
+- `/recognition-metrics` shows local score history and per-label score summaries.
+- `/api/recognition-metrics` exposes bounded local score observations.
 - `FACE_MATCH_THRESHOLD` can be adjusted in `.env` without code changes.
 - One weak frame should not immediately flip a stable known label to `Anonymous`.
 - Recognition settings are easy to tune during testing.
@@ -181,6 +185,7 @@ Requirements:
 - Track face-analysis FPS.
 - Track motion-processing FPS.
 - Track skipped-analysis FPS.
+- Track bounded recognition score observations.
 - Derive a simple system status from pipeline metrics.
 - Show these metrics through `/stats` and `/recognition-debug`.
 - Expose the status through `/api/system-status`.
