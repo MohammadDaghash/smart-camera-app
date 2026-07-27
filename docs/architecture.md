@@ -62,6 +62,9 @@ Activity review groups nearby events at /review
         |
         v
 Saved review status is read/written from local SQLite
+        |
+        v
+Dashboard summary combines health, review, alert, and FPS state
 ```
 
 ## Camera Pipeline Helpers
@@ -72,6 +75,7 @@ Saved review status is read/written from local SQLite
 - `backend/app/services/event_log.py`: stores local SQLite motion and face events, with cooldowns to avoid repeated event spam.
 - `backend/app/services/event_snapshots.py`: stores local JPEG snapshots for accepted events.
 - `backend/app/services/activity_review.py`: builds reviewable activity items from nearby motion, face, alert, and system events.
+- `backend/app/services/dashboard_summary.py`: builds the live dashboard's operator-facing summary from existing local state.
 - `backend/app/services/review_status.py`: persists local review decisions such as `reviewed` or `false_positive`.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
@@ -98,7 +102,7 @@ Saved review status is read/written from local SQLite
 - 5-second rolling camera, stream, analysis, motion, and skipped-analysis FPS
 - system status derived from pipeline health checks
 - readable camera diagnostics through `/api/diagnostics`
-- dashboard summary showing the top recommended diagnostic action
+- dashboard summary through `/api/dashboard-summary`, including review counts, latest alert, FPS, and top action
 - read-only tuning settings through `/api/settings`
 - local system status transition events
 - latest local motion and face events

@@ -23,6 +23,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Pipeline stats endpoint at `/stats`
 - Pipeline performance FPS metrics
 - Frigate-inspired system health status
+- Live dashboard operational summary with review counts, alert state, FPS, and top action
 - Camera diagnostics page with readable health checks and recommendations
 - Live dashboard diagnostics summary with the top recommended action
 - Read-only camera settings page for local tuning values
@@ -117,6 +118,7 @@ http://localhost:8000/health
 http://localhost:8000/camera-test
 http://localhost:8000/video
 http://localhost:8000/stats
+http://localhost:8000/api/dashboard-summary
 http://localhost:8000/api/system-status
 http://localhost:8000/diagnostics
 http://localhost:8000/api/diagnostics
@@ -178,7 +180,7 @@ GET  /logout    clear the session
 
 Protected routes (`/`, `/history`, `/review`, `/diagnostics`, `/video`, `/camera-test`,
 `/settings`, `/stats`, `/known-faces`, `/recognition-debug`,
-`/api/system-status`, `/api/diagnostics`, `/api/settings`,
+`/api/dashboard-summary`, `/api/system-status`, `/api/diagnostics`, `/api/settings`,
 `/api/recognition-debug`, `/api/events`, `/api/review`,
 `/api/snapshots/*`) redirect to
 `/login` when the user is not signed in.

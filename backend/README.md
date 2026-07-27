@@ -22,6 +22,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `GET /camera-test`: checks whether OpenCV can open the webcam
 - `GET /video`: MJPEG live video stream with face overlays
 - `GET /stats`: current in-memory camera pipeline statistics and latest local events
+- `GET /api/dashboard-summary`: protected operational summary for the live dashboard
 - `GET /api/system-status`: protected health summary based on pipeline metrics
 - `GET /api/diagnostics`: protected readable health checks and recommended actions
 - `GET /api/settings`: protected read-only tuning settings summary
@@ -114,6 +115,7 @@ The camera pipeline is split into small helpers:
 - `app/services/event_log.py`: SQLite-backed local motion and face events with cooldown support.
 - `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
 - `app/services/activity_review.py`: groups nearby raw events into reviewable activity items.
+- `app/services/dashboard_summary.py`: combines health, review, alert, and FPS data for the homepage.
 - `app/services/review_status.py`: stores local review status decisions in SQLite.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.

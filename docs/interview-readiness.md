@@ -35,6 +35,7 @@ architecture, but we are using its high-level ideas:
 - Track separate FPS metrics instead of one vague health status.
 - Convert low-level metrics into a simple system health status.
 - Convert low-level events into reviewable activity items.
+- Combine health, alerts, review counts, and FPS into one dashboard summary.
 - Keep heavier analysis controllable by cadence.
 - Separate capture, processing, events, stats, and frontend views.
 
@@ -64,6 +65,7 @@ Show:
 - Live MJPEG webcam stream
 - Face labels on the video
 - Motion status
+- Operational summary with new review count, latest alert, FPS, and top action
 - Recent events
 - Suspicious alert banner
 - Diagnostics summary with top recommended action
@@ -199,8 +201,9 @@ them. That tells us where to debug first.
 ## How To Explain Diagnostics
 
 The diagnostics page is the human-readable layer above `/stats`.
-The live dashboard shows the top recommendation so the operator can see the
-next action without opening the full diagnostics page.
+The live dashboard uses `/api/dashboard-summary` as the operator-facing layer:
+it combines system status, review counts, latest alert, FPS, recent events, and
+the top recommended local action.
 
 Example:
 
@@ -345,6 +348,8 @@ or two.
 - Debug endpoints expose metadata, not embeddings or images.
 - Recognition thresholds are evaluated with reproducible ML experiment reports.
 - Activity review supports saved operator status for lightweight triage.
+- The dashboard has an operator summary API instead of forcing the UI to reason
+  directly over raw metrics.
 - Tests cover pure logic, route protection, event logging, recognition debug, and
   pipeline metrics.
 - A file-length guard keeps tracked files under 1000 lines.
@@ -356,5 +361,4 @@ or two.
 ## Next High-Value Improvements
 
 - Add confidence history charts for recognition tuning.
-- Add a camera health badge on the live dashboard.
 - Add a clear architecture diagram to the README.

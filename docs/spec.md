@@ -30,6 +30,7 @@ The current system supports:
 - Local snapshots for saved motion and face events
 - Local suspicious-activity alert events
 - Live dashboard alert indicator
+- Live dashboard operational summary with review counts, alert state, FPS, and top action
 - Local browser notifications for new suspicious alerts
 - Protected known-face loading debug endpoint
 - Recognition debug page for scores, thresholds, and label reasons
@@ -63,7 +64,7 @@ The current system does not yet include:
 | P1 | Activity review workflow | Started | Group, filter, and triage nearby raw events into reviewable incidents with severity, labels, timing, source event context, and saved status. |
 | P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
 | P1 | ML evaluation toolkit | Started | Evaluate recognition thresholds using labeled images, metrics, and confusion matrices. |
-| P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
+| P1 | Dashboard experience | Started | Show live camera, face, label, motion, alert, review, FPS, and top-action status around the stream. |
 | P1 | Pipeline observability | Started | Track FPS, uptime, and derived system health status. |
 | P2 | Activity analysis | Planned | Turn basic motion signals into useful events over time. |
 | P2 | Accounts and permissions | Planned | Add admin and lower-privilege user roles when remote or shared access is needed. |
@@ -149,6 +150,10 @@ Requirements:
 - Show camera and recognition status clearly.
 - Show the current motion status clearly.
 - Show the latest suspicious alert clearly.
+- Show new review item counts clearly.
+- Show camera FPS and stream/analysis FPS clearly.
+- Show the top recommended local action clearly.
+- Expose homepage summary data through `/api/dashboard-summary`.
 - Allow local browser notifications for new suspicious alerts.
 - Present known and anonymous labels in a readable way.
 - Work well on desktop and mobile screens.
@@ -158,6 +163,9 @@ Acceptance criteria:
 - Users can tell whether the camera is connected.
 - Users can tell whether recognition is active.
 - Users can tell when suspicious activity was detected.
+- Users can tell how many new review items need attention.
+- Users can see the current camera FPS and stream/analysis FPS.
+- Users can open review, diagnostics, and history from the summary area.
 - Users can enable browser notifications from the live dashboard.
 - UI changes do not break the live stream.
 

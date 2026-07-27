@@ -16,13 +16,13 @@
       color: #1f2937;
       background: #f3f4f6;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 24px;
     }
 
     main {
-      width: min(900px, 100%);
+      width: min(1100px, 100%);
       background: #ffffff;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
@@ -93,6 +93,132 @@
       margin: -8px 0 20px;
       color: #6b7280;
       font-size: 13px;
+    }
+
+    .dashboard-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin: 0 0 20px;
+      padding: 18px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #eff6ff;
+    }
+
+    .dashboard-summary.alert {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .dashboard-summary.review {
+      border-color: #fed7aa;
+      background: #fff7ed;
+    }
+
+    .dashboard-summary.healthy {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .dashboard-summary.error {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .dashboard-summary.idle,
+    .dashboard-summary.degraded {
+      border-color: #fed7aa;
+      background: #fff7ed;
+    }
+
+    .summary-eyebrow {
+      display: inline-block;
+      margin-bottom: 6px;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .headline-title {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .headline-detail {
+      margin: 0;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .action-link {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #1f2937;
+      background: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .action-link.primary {
+      border-color: #2563eb;
+      color: #ffffff;
+      background: #2563eb;
+    }
+
+    .action-link:hover {
+      text-decoration: underline;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 0 0 18px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .summary-metric {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .summary-metric span,
+    .summary-metric small {
+      display: block;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-metric strong {
+      display: block;
+      margin: 5px 0;
+      color: #0f172a;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-metric .compact {
+      font-size: 14px;
+      line-height: 1.35;
     }
 
     .diagnostics-summary {
@@ -322,10 +448,23 @@
       .diagnostics-summary {
         grid-template-columns: 1fr;
       }
+
+      .dashboard-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        justify-content: flex-start;
+      }
+
+      .summary-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 460px) {
-      .status-panel {
+      .status-panel,
+      .summary-strip {
         grid-template-columns: 1fr;
       }
     }
@@ -353,7 +492,41 @@
         <span class="alert-title" id="alertTitle">Suspicious activity detected</span>
         <span class="alert-detail" id="alertDetail"></span>
       </div>
-      <a class="alert-link" href="/history">View history</a>
+      <a class="alert-link" href="/review">Review alert</a>
+    </section>
+    <section class="dashboard-summary idle" id="dashboardSummary" aria-label="Operational summary">
+      <div>
+        <span class="summary-eyebrow">Operational Summary</span>
+        <h2 class="headline-title" id="headlineTitle">Loading camera status...</h2>
+        <p class="headline-detail" id="headlineDetail">Checking the local camera pipeline.</p>
+      </div>
+      <div class="quick-actions">
+        <a class="action-link primary" href="/review" id="reviewAction">Review: 0 new</a>
+        <a class="action-link" href="/diagnostics">Diagnostics</a>
+        <a class="action-link" href="/history">History</a>
+      </div>
+    </section>
+    <section class="summary-strip" aria-label="Dashboard summary metrics">
+      <div class="summary-metric">
+        <span>New Reviews</span>
+        <strong id="newReviewCount">0</strong>
+        <small id="reviewBreakdown">0 alerts</small>
+      </div>
+      <div class="summary-metric">
+        <span>Latest Alert</span>
+        <strong class="compact" id="latestAlertText">No alert</strong>
+        <small id="latestAlertTime">No suspicious activity</small>
+      </div>
+      <div class="summary-metric">
+        <span>Camera FPS</span>
+        <strong id="cameraFps">0.00</strong>
+        <small id="fpsBreakdown">Stream 0.00 | Analysis 0.00</small>
+      </div>
+      <div class="summary-metric">
+        <span>Top Action</span>
+        <strong class="compact" id="topAction">Loading...</strong>
+        <small>From diagnostics</small>
+      </div>
     </section>
     <section class="status-panel" aria-label="Live camera status">
       <div class="status-item">
@@ -412,6 +585,17 @@
     const alertDetail = document.getElementById("alertDetail");
     const notificationButton = document.getElementById("notificationButton");
     const statsUpdatedAt = document.getElementById("statsUpdatedAt");
+    const dashboardSummary = document.getElementById("dashboardSummary");
+    const headlineTitle = document.getElementById("headlineTitle");
+    const headlineDetail = document.getElementById("headlineDetail");
+    const reviewAction = document.getElementById("reviewAction");
+    const newReviewCount = document.getElementById("newReviewCount");
+    const reviewBreakdown = document.getElementById("reviewBreakdown");
+    const latestAlertText = document.getElementById("latestAlertText");
+    const latestAlertTime = document.getElementById("latestAlertTime");
+    const cameraFps = document.getElementById("cameraFps");
+    const fpsBreakdown = document.getElementById("fpsBreakdown");
+    const topAction = document.getElementById("topAction");
     const diagnosticsSummary = document.getElementById("diagnosticsSummary");
     const diagnosticsMessage = document.getElementById("diagnosticsMessage");
     const diagnosticsAction = document.getElementById("diagnosticsAction");
@@ -566,31 +750,85 @@
       }
     }
 
-    async function updateDiagnosticsSummary() {
-      try {
-        const response = await fetch("/api/diagnostics", { cache: "no-store" });
+    function setDashboardHeadline(headline) {
+      const state = headline?.state || "idle";
+      dashboardSummary.classList.remove(
+        "alert",
+        "review",
+        "healthy",
+        "idle",
+        "degraded",
+        "error"
+      );
+      dashboardSummary.classList.add(state);
+      headlineTitle.textContent = headline?.title || "Camera status unavailable";
+      headlineDetail.textContent = headline?.detail || "Open diagnostics for details.";
+    }
 
-        if (!response.ok) {
-          throw new Error(`Diagnostics request failed: ${response.status}`);
-        }
+    function renderReviewSummary(review) {
+      const newItems = review?.new_items || 0;
+      const alertItems = review?.alert_items || 0;
+      const reviewedItems = review?.reviewed_items || 0;
+      const falsePositiveItems = review?.false_positive_items || 0;
 
-        const diagnostics = await response.json();
-        const status = diagnostics.system?.status || "idle";
-        const action = diagnostics.recommendations?.[0] || "No action needed.";
+      newReviewCount.textContent = String(newItems);
+      reviewAction.textContent = `Review: ${newItems} new`;
+      reviewBreakdown.textContent = `${alertItems} alert${alertItems === 1 ? "" : "s"} | ${reviewedItems} reviewed | ${falsePositiveItems} false positive`;
+    }
 
-        setDiagnosticsSummary(
-          diagnostics.system?.message || "No diagnostics message available.",
-          action,
-          diagnosticsClass(status)
-        );
-      } catch (error) {
-        setDiagnosticsSummary(
-          "Diagnostics unavailable.",
-          "Check the backend terminal logs.",
-          "error"
-        );
-        console.error(error);
+    function renderAlertSummary(latestAlert) {
+      if (!latestAlert) {
+        latestAlertText.textContent = "No alert";
+        latestAlertTime.textContent = "No suspicious activity";
+        return;
       }
+
+      latestAlertText.textContent = latestAlert.message || "Suspicious activity";
+      latestAlertTime.textContent = formatEventTime(latestAlert);
+    }
+
+    function renderPerformanceSummary(performance) {
+      const currentCameraFps = Number(performance?.camera_fps || 0);
+      const currentStreamFps = Number(performance?.stream_fps || 0);
+      const currentAnalysisFps = Number(performance?.analysis_fps || 0);
+
+      cameraFps.textContent = currentCameraFps.toFixed(2);
+      fpsBreakdown.textContent = `Stream ${currentStreamFps.toFixed(2)} | Analysis ${currentAnalysisFps.toFixed(2)}`;
+    }
+
+    function renderOperationalSummary(summary) {
+      const system = summary.system?.status || "idle";
+      const activeStreams = summary.camera?.active_streams || 0;
+      const framesRead = summary.camera?.frames_read || 0;
+      const faces = summary.analysis?.face_count || 0;
+      const labels = formatLabels(summary.analysis?.labels);
+      const motionActive = Boolean(summary.motion?.active);
+      const latestAlert = summary.alerts?.latest_alert;
+
+      setDashboardHeadline(summary.headline);
+      renderReviewSummary(summary.review);
+      renderAlertSummary(latestAlert);
+      renderPerformanceSummary(summary.performance);
+      topAction.textContent = summary.top_action || "No action needed.";
+
+      setValue(systemStatus, statusText(system), statusClass(system));
+      if (activeStreams > 0 || framesRead > 0) {
+        setValue(cameraStatus, "Live", "ok");
+      } else {
+        setValue(cameraStatus, "Waiting", "warn");
+      }
+
+      setValue(faceCount, String(faces), faces > 0 ? "ok" : "");
+      setValue(faceLabels, labels, labels === "None" ? "" : "ok");
+      setValue(motionStatus, motionActive ? "Detected" : "No motion", motionActive ? "warn" : "ok");
+      renderAlert(latestAlert);
+      sendAlertNotification(latestAlert);
+      renderEvents(summary.events || []);
+      setDiagnosticsSummary(
+        summary.system?.message || "No diagnostics message available.",
+        summary.top_action || "No action needed.",
+        diagnosticsClass(system)
+      );
     }
 
     function sendAlertNotification(latestAlert) {
@@ -628,46 +866,31 @@
 
     async function updateStats() {
       try {
-        const response = await fetch("/stats", { cache: "no-store" });
+        const response = await fetch("/api/dashboard-summary", { cache: "no-store" });
 
         if (!response.ok) {
-          throw new Error(`Stats request failed: ${response.status}`);
+          throw new Error(`Dashboard summary request failed: ${response.status}`);
         }
 
         const contentType = response.headers.get("content-type") || "";
 
         if (!contentType.includes("application/json")) {
-          throw new Error("Stats response was not JSON");
+          throw new Error("Dashboard summary response was not JSON");
         }
 
-        const stats = await response.json();
-        const activeStreams = stats.camera?.active_streams || 0;
-        const framesRead = stats.camera?.frames_read || 0;
-        const faces = stats.analysis?.last_face_count || 0;
-        const labels = formatLabels(stats.analysis?.last_labels);
-        const motionActive = Boolean(stats.motion?.motion_active);
-        const system = stats.system?.status || "idle";
-
-        setValue(systemStatus, statusText(system), statusClass(system));
-        if (activeStreams > 0 || framesRead > 0) {
-          setValue(cameraStatus, "Live", "ok");
-        } else {
-          setValue(cameraStatus, "Waiting", "warn");
-        }
-
-        setValue(faceCount, String(faces), faces > 0 ? "ok" : "");
-        setValue(faceLabels, labels, labels === "None" ? "" : "ok");
-        setValue(motionStatus, motionActive ? "Detected" : "No motion", motionActive ? "warn" : "ok");
-        renderAlert(stats.alerts?.latest_alert);
-        sendAlertNotification(stats.alerts?.latest_alert);
-        renderEvents(stats.events || []);
-
+        renderOperationalSummary(await response.json());
         statsUpdatedAt.textContent = `Updated ${new Date().toLocaleTimeString()}`;
       } catch (error) {
+        setDashboardHeadline({
+          state: "error",
+          title: "Dashboard summary unavailable",
+          detail: "Check the backend terminal logs.",
+        });
         setValue(systemStatus, "Unknown", "error");
         setValue(cameraStatus, "Unknown", "error");
         setValue(motionStatus, "Unknown", "error");
         setValue(alertStatus, "Unknown", "error");
+        topAction.textContent = "Check the backend terminal logs.";
         alertBanner.hidden = true;
         statsUpdatedAt.textContent = "Stats unavailable";
         console.error(error);
@@ -677,9 +900,7 @@
     notificationButton.addEventListener("click", requestNotifications);
     syncNotificationButton();
     updateStats();
-    updateDiagnosticsSummary();
     setInterval(updateStats, 1000);
-    setInterval(updateDiagnosticsSummary, 2000);
   </script>
 </body>
 </html>
