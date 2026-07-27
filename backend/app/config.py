@@ -80,6 +80,7 @@ SETTINGS_FILE = PROJECT_DIR / "frontend" / "settings.html"
 KNOWN_FACES_DIR = BACKEND_DIR / "known_faces"
 LOCAL_DATA_DIR = BACKEND_DIR / "local_data"
 EVENTS_DB_FILE = LOCAL_DATA_DIR / "events.db"
+REVIEW_STATUS_DB_FILE = LOCAL_DATA_DIR / "review_status.db"
 EVENT_SNAPSHOTS_DIR = LOCAL_DATA_DIR / "snapshots"
 
 CAMERA_INDEXES = [0, 1, 2]

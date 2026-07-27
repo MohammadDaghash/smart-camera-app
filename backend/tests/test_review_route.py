@@ -6,6 +6,7 @@ from app.config import AUTH_PASSWORD, AUTH_USERNAME
 from app.routes import auth, review
 from app.services import login_throttle, session_store
 from app.services.event_log import EventLog
+from app.services.review_status import ReviewStatusStore
 
 
 def build_test_app() -> FastAPI:
@@ -23,6 +24,16 @@ def login(client: TestClient):
     )
 
 
+def use_test_review_stores(monkeypatch, tmp_path):
+    test_event_log = EventLog(database_path=tmp_path / "events.db")
+    test_review_status_store = ReviewStatusStore(
+        database_path=tmp_path / "review_status.db"
+    )
+    monkeypatch.setattr(review, "event_log", test_event_log)
+    monkeypatch.setattr(review, "review_status_store", test_review_status_store)
+    return test_event_log, test_review_status_store
+
+
 def test_review_redirects_when_anonymous():
     client = TestClient(build_test_app(), follow_redirects=False)
 
@@ -33,8 +44,10 @@ def test_review_redirects_when_anonymous():
 
 
 def test_review_returns_grouped_items_when_authenticated(monkeypatch, tmp_path):
-    test_event_log = EventLog(database_path=tmp_path / "events.db")
-    monkeypatch.setattr(review, "event_log", test_event_log)
+    test_event_log, _ = use_test_review_stores(
+        monkeypatch,
+        tmp_path,
+    )
     session_store.revoke_all()
     login_throttle.clear()
 
@@ -58,6 +71,11 @@ def test_review_returns_grouped_items_when_authenticated(monkeypatch, tmp_path):
 
     assert response.status_code == 200
     assert response.json()["settings"]["source_event_limit"] == 25
+    assert response.json()["settings"]["allowed_statuses"] == [
+        "new",
+        "reviewed",
+        "false_positive",
+    ]
     assert response.json()["filters"] == {
         "limit": 25,
         "label": None,
@@ -66,11 +84,12 @@ def test_review_returns_grouped_items_when_authenticated(monkeypatch, tmp_path):
     }
     assert response.json()["items"][0]["severity"] == "alert"
     assert response.json()["items"][0]["labels"] == ["Anonymous 1"]
+    assert response.json()["items"][0]["review_status"] == "new"
+    assert response.json()["items"][0]["review_status_updated_at"] is None
 
 
 def test_review_filters_by_label_without_losing_group_context(monkeypatch, tmp_path):
-    test_event_log = EventLog(database_path=tmp_path / "events.db")
-    monkeypatch.setattr(review, "event_log", test_event_log)
+    test_event_log, _ = use_test_review_stores(monkeypatch, tmp_path)
     session_store.revoke_all()
     login_throttle.clear()
 
@@ -101,8 +120,7 @@ def test_review_filters_by_label_without_losing_group_context(monkeypatch, tmp_p
 
 
 def test_review_filters_by_time(monkeypatch, tmp_path):
-    test_event_log = EventLog(database_path=tmp_path / "events.db")
-    monkeypatch.setattr(review, "event_log", test_event_log)
+    test_event_log, _ = use_test_review_stores(monkeypatch, tmp_path)
     session_store.revoke_all()
     login_throttle.clear()
 
@@ -118,8 +136,7 @@ def test_review_filters_by_time(monkeypatch, tmp_path):
 
 
 def test_review_rejects_invalid_time_range(monkeypatch, tmp_path):
-    test_event_log = EventLog(database_path=tmp_path / "events.db")
-    monkeypatch.setattr(review, "event_log", test_event_log)
+    use_test_review_stores(monkeypatch, tmp_path)
     session_store.revoke_all()
     login_throttle.clear()
 
@@ -130,3 +147,64 @@ def test_review_rejects_invalid_time_range(monkeypatch, tmp_path):
 
     assert response.status_code == 400
     assert response.json()["detail"] == "start_at must be less than or equal to end_at"
+
+
+def test_review_status_update_redirects_when_anonymous():
+    client = TestClient(build_test_app(), follow_redirects=False)
+
+    response = client.patch(
+        "/api/review/review-1-2/status",
+        json={"status": "reviewed"},
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_review_status_update_persists_for_review_item(monkeypatch, tmp_path):
+    test_event_log, _ = use_test_review_stores(monkeypatch, tmp_path)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+    test_event_log.add_event("motion", "Motion detected", now=100.0)
+    test_event_log.add_event(
+        "face",
+        "Anonymous 1 detected",
+        metadata={"label": "Anonymous 1"},
+        now=101.0,
+    )
+
+    update_response = client.patch(
+        "/api/review/review-1-2/status",
+        json={"status": "false_positive"},
+    )
+
+    assert update_response.status_code == 200
+    assert update_response.json()["status"] == "false_positive"
+
+    review_response = client.get("/api/review")
+
+    assert review_response.status_code == 200
+    assert review_response.json()["items"][0]["id"] == "review-1-2"
+    assert review_response.json()["items"][0]["review_status"] == "false_positive"
+
+
+def test_review_status_update_rejects_invalid_status(monkeypatch, tmp_path):
+    use_test_review_stores(monkeypatch, tmp_path)
+    session_store.revoke_all()
+    login_throttle.clear()
+
+    client = TestClient(build_test_app(), follow_redirects=False)
+    login(client)
+
+    response = client.patch(
+        "/api/review/review-1-2/status",
+        json={"status": "ignored"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
+        "status must be one of: new, reviewed, false_positive"
+    )

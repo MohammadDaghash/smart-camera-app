@@ -60,7 +60,7 @@ The current system does not yet include:
 | P0 | Basic recognition labels | Working | Label known faces and unknown faces locally. |
 | P1 | Basic activity signal | Started | Detect frame-to-frame motion and expose stats locally. |
 | P1 | Local event history | Started | Store local motion, face, and alert events in SQLite with filters, snapshots, cooldowns, and retention cleanup. |
-| P1 | Activity review workflow | Started | Group and filter nearby raw events into reviewable incidents with severity, labels, timing, and source event context. |
+| P1 | Activity review workflow | Started | Group, filter, and triage nearby raw events into reviewable incidents with severity, labels, timing, source event context, and saved status. |
 | P1 | Recognition quality | Started | Improve stability using multiple photos, thresholds, debug visibility, and smoothing. |
 | P1 | ML evaluation toolkit | Started | Evaluate recognition thresholds using labeled images, metrics, and confusion matrices. |
 | P1 | Dashboard experience | Started | Show live camera, face, label, and motion status around the stream. |
@@ -256,8 +256,10 @@ Requirements:
 - Mark grouped items as `alert`, `detection`, or `info`.
 - Include labels, event count, duration, and source event details.
 - Filter review items by label and time range.
+- Save review item status as `new`, `reviewed`, or `false_positive`.
 - Show review items in a simple `/review` page.
 - Expose review data through `/api/review`.
+- Expose review status updates through `/api/review/{review_id}/status`.
 - Keep the feature local-only and database-light for the MVP.
 
 Acceptance criteria:
@@ -268,6 +270,8 @@ Acceptance criteria:
 - Face or motion-only groups become `detection`.
 - System-only groups become `info`.
 - Filtering a review item by label preserves related source events in the group.
+- Review status can be changed from the `/review` page.
+- Review status survives browser refreshes and backend restarts.
 - The review grouping gap can be tuned from `.env`.
 
 ### Accounts And Permissions

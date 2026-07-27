@@ -113,9 +113,32 @@
       min-width: 180px;
     }
 
-    .button-row {
+    .button-row,
+    .action-row {
       display: flex;
       gap: 8px;
+    }
+
+    .action-row {
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .status-button {
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      background: #ffffff;
+    }
+
+    .status-button.active,
+    .status-button:hover {
+      color: #ffffff;
+      background: #2563eb;
+    }
+
+    .status-button.false-positive.active,
+    .status-button.false-positive:hover {
+      background: #dc2626;
     }
 
     .status {
@@ -194,6 +217,26 @@
     .pill.info {
       background: #e2e8f0;
       color: #334155;
+    }
+
+    .pill.new {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill.reviewed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill.false-positive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-meta {
+      color: #64748b;
+      font-size: 13px;
     }
 
     .event-list {
@@ -278,6 +321,13 @@
           <option value="detection">Detection</option>
           <option value="info">Info</option>
         </select>
+        <label for="reviewStatusFilter">Status</label>
+        <select id="reviewStatusFilter">
+          <option value="all">All</option>
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="false_positive">False Positive</option>
+        </select>
         <label for="labelFilter">Label</label>
         <input id="labelFilter" type="search" placeholder="Anonymous 1">
         <label for="startAt">From</label>
@@ -299,6 +349,7 @@
     const statusElement = document.getElementById("status");
     const reviewList = document.getElementById("reviewList");
     const severityFilter = document.getElementById("severityFilter");
+    const reviewStatusFilter = document.getElementById("reviewStatusFilter");
     const labelFilter = document.getElementById("labelFilter");
     const startAt = document.getElementById("startAt");
     const endAt = document.getElementById("endAt");
@@ -346,6 +397,24 @@
       return ["alert", "detection", "info"].includes(severity) ? severity : "info";
     }
 
+    function reviewStatusClass(status) {
+      if (["new", "reviewed", "false_positive"].includes(status)) {
+        return status.replace("_", "-");
+      }
+
+      return "new";
+    }
+
+    function formatReviewStatus(status) {
+      const labels = {
+        new: "New",
+        reviewed: "Reviewed",
+        false_positive: "False Positive",
+      };
+
+      return labels[status] || "New";
+    }
+
     function renderPills(item) {
       const labels = item.labels.length ? item.labels : ["No labels"];
       const typePills = item.types.map((type) => (
@@ -355,12 +424,37 @@
         `<span class="pill">${escapeHtml(label)}</span>`
       ));
       const severity = severityClass(item.severity);
+      const reviewStatus = item.review_status || "new";
 
       return [
         `<span class="pill ${severity}">${severity}</span>`,
+        `<span class="pill ${reviewStatusClass(reviewStatus)}">${formatReviewStatus(reviewStatus)}</span>`,
         ...typePills,
         ...labelPills,
       ].join("");
+    }
+
+    function renderStatusActions(item) {
+      const reviewStatus = item.review_status || "new";
+      const updatedAt = item.review_status_updated_at
+        ? `Updated ${formatDate(item.review_status_updated_at)}`
+        : "Not reviewed yet";
+      const actions = [
+        ["reviewed", "Mark Reviewed"],
+        ["false_positive", "False Positive"],
+        ["new", "Reset"],
+      ];
+
+      const buttons = actions.map(([status, label]) => {
+        const active = reviewStatus === status ? " active" : "";
+        const statusClass = reviewStatusClass(status);
+        return `<button type="button" class="status-button ${statusClass}${active}" data-review-id="${escapeHtml(item.id)}" data-status="${status}">${label}</button>`;
+      }).join("");
+
+      return `
+        <div class="action-row">${buttons}</div>
+        <div class="status-meta">${updatedAt}</div>
+      `;
     }
 
     function renderEvents(events) {
@@ -375,8 +469,13 @@
 
     function renderItems() {
       const selectedSeverity = severityFilter.value;
+      const selectedReviewStatus = reviewStatusFilter.value;
       const visibleItems = latestItems.filter((item) => (
-        selectedSeverity === "all" || item.severity === selectedSeverity
+        (selectedSeverity === "all" || item.severity === selectedSeverity)
+        && (
+          selectedReviewStatus === "all"
+          || (item.review_status || "new") === selectedReviewStatus
+        )
       ));
 
       if (!visibleItems.length) {
@@ -400,8 +499,53 @@
           </div>
           <div class="pill-row">${renderPills(item)}</div>
           <div class="event-list">${renderEvents(item.events)}</div>
+          ${renderStatusActions(item)}
         </article>
       `).join("");
+
+      wireStatusButtons();
+    }
+
+    function wireStatusButtons() {
+      reviewList.querySelectorAll("[data-review-id][data-status]").forEach((button) => {
+        button.addEventListener("click", () => {
+          updateReviewStatus(button.dataset.reviewId, button.dataset.status);
+        });
+      });
+    }
+
+    async function updateReviewStatus(reviewId, reviewStatus) {
+      statusElement.textContent = "Saving review status...";
+
+      try {
+        const response = await fetch(`/api/review/${encodeURIComponent(reviewId)}/status`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: reviewStatus }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Status update failed: ${response.status}`);
+        }
+
+        const updatedStatus = await response.json();
+        latestItems = latestItems.map((item) => (
+          item.id === reviewId
+            ? {
+                ...item,
+                review_status: updatedStatus.status,
+                review_status_updated_at: updatedStatus.updated_at,
+              }
+            : item
+        ));
+        statusElement.textContent = "Review status saved.";
+        renderItems();
+      } catch (error) {
+        console.error(error);
+        statusElement.textContent = "Could not save review status. Check the backend terminal.";
+      }
     }
 
     async function loadReview() {
@@ -444,6 +588,7 @@
 
     function clearFilters() {
       severityFilter.value = "all";
+      reviewStatusFilter.value = "all";
       labelFilter.value = "";
       startAt.value = "";
       endAt.value = "";
@@ -451,6 +596,7 @@
     }
 
     severityFilter.addEventListener("change", renderItems);
+    reviewStatusFilter.addEventListener("change", renderItems);
     labelFilter.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         loadReview();

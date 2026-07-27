@@ -31,6 +31,8 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
   `end_at`, and `limit` filters
 - `GET /api/review`: grouped activity review items built from recent events,
   with `label`, `start_at`, `end_at`, and `limit` filters
+- `PATCH /api/review/{review_id}/status`: saves a local review status:
+  `new`, `reviewed`, or `false_positive`
 - `GET /api/snapshots/{filename}`: protected local event snapshot image
 
 ## Folder Guide
@@ -112,6 +114,7 @@ The camera pipeline is split into small helpers:
 - `app/services/event_log.py`: SQLite-backed local motion and face events with cooldown support.
 - `app/services/event_snapshots.py`: local JPEG snapshots for saved events.
 - `app/services/activity_review.py`: groups nearby raw events into reviewable activity items.
+- `app/services/review_status.py`: stores local review status decisions in SQLite.
 - `app/services/mjpeg_streamer.py`: JPEG encoding and MJPEG chunk formatting.
 - `app/services/pipeline_stats.py`: in-memory counters for camera reads, stream output, reconnects, and face analysis.
 - `app/services/diagnostics.py`: readable health checks and recommended actions from pipeline metrics.
@@ -194,11 +197,12 @@ Local event database:
 
 ```text
 backend/local_data/events.db
+backend/local_data/review_status.db
 backend/local_data/snapshots/
 ```
 
 `backend/local_data/` is gitignored. Do not commit local event history or
-snapshots.
+review status data, or snapshots.
 
 Optional motion tuning:
 
@@ -240,7 +244,9 @@ notification service is used.
 Review settings control how raw events become review items. If motion, face, and
 alert events happen within `REVIEW_EVENT_GAP_SECONDS`, `/review` shows them as
 one incident instead of disconnected rows. History and review pages can filter by
-label and local time range for faster debugging.
+label and local time range for faster debugging. Review decisions are stored
+locally as `new`, `reviewed`, or `false_positive`, so refreshes and backend
+restarts keep the operator's triage state.
 
 ## Recommended Local Command
 

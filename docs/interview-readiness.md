@@ -255,6 +255,20 @@ source events: motion, face, alert
 This is closer to how mature camera systems present activity: the product should
 help the user decide what to review, not just dump logs.
 
+Each review item also has a local status:
+
+```text
+new -> needs attention
+reviewed -> already checked
+false_positive -> the app detected activity, but it was not useful
+```
+
+Example:
+
+If `Anonymous 1 near activity` is checked and turns out to be harmless, mark it
+`false_positive`. The app stores that decision locally, so the review page still
+shows the same status after refresh or backend restart.
+
 Filtering works at both levels:
 
 ```text
@@ -330,6 +344,7 @@ or two.
 - Personal biometric data is gitignored and stored locally.
 - Debug endpoints expose metadata, not embeddings or images.
 - Recognition thresholds are evaluated with reproducible ML experiment reports.
+- Activity review supports saved operator status for lightweight triage.
 - Tests cover pure logic, route protection, event logging, recognition debug, and
   pipeline metrics.
 - A file-length guard keeps tracked files under 1000 lines.
@@ -341,6 +356,5 @@ or two.
 ## Next High-Value Improvements
 
 - Add confidence history charts for recognition tuning.
-- Add saved review status: new, reviewed, false positive.
 - Add a camera health badge on the live dashboard.
 - Add a clear architecture diagram to the README.

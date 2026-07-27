@@ -59,6 +59,9 @@ Event snapshots can be served through /api/snapshots/{filename}
         |
         v
 Activity review groups nearby events at /review
+        |
+        v
+Saved review status is read/written from local SQLite
 ```
 
 ## Camera Pipeline Helpers
@@ -69,6 +72,7 @@ Activity review groups nearby events at /review
 - `backend/app/services/event_log.py`: stores local SQLite motion and face events, with cooldowns to avoid repeated event spam.
 - `backend/app/services/event_snapshots.py`: stores local JPEG snapshots for accepted events.
 - `backend/app/services/activity_review.py`: builds reviewable activity items from nearby motion, face, alert, and system events.
+- `backend/app/services/review_status.py`: persists local review decisions such as `reviewed` or `false_positive`.
 - `backend/app/services/mjpeg_streamer.py`: converts annotated frames into MJPEG response chunks.
 - `backend/app/services/pipeline_stats.py`: keeps in-memory counters for `/stats`.
 - `backend/app/services/diagnostics.py`: converts health checks into readable recommendations for `/api/diagnostics`.
@@ -102,6 +106,7 @@ Activity review groups nearby events at /review
 - local event history through `/api/events`, filterable by type, label, and time
 - protected local event snapshots through `/api/snapshots/{filename}`
 - grouped local activity review items through `/api/review`, filterable by label and time
+- saved review status through `/api/review/{review_id}/status`
 - local alert events when motion and an anonymous face happen close together
 - latest alert for the live dashboard indicator
 
@@ -112,9 +117,9 @@ by `EVENT_MAX_EVENTS` and `EVENT_RETENTION_DAYS`.
 Event snapshots are stored in `backend/local_data/snapshots/`, which is also
 gitignored.
 
-Activity review is computed from local events at request time. It does not add a
-new database table yet; that keeps the MVP simple while still giving the user a
-more useful review workflow.
+Activity review items are computed from local events at request time. Review
+status is stored separately in `backend/local_data/review_status.db`, which keeps
+triage decisions durable without copying raw events or snapshots.
 
 Label filtering is applied differently by page. History filters individual event
 rows. Review filters the grouped item while preserving related source events, so

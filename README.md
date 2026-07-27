@@ -35,6 +35,7 @@ The long-term goal is to grow this into a smart camera system that can recognize
 - Event history filters by type, label, and time range
 - Activity review page that groups nearby events into reviewable incidents
 - Activity review filters by label, severity, and time range
+- Saved activity review status: `new`, `reviewed`, and `false_positive`
 - Configurable local event cleanup and retention
 - Local event snapshots shown in history
 - Local suspicious-activity alert events
@@ -123,6 +124,7 @@ http://localhost:8000/settings
 http://localhost:8000/api/settings
 http://localhost:8000/review
 http://localhost:8000/api/review
+PATCH http://localhost:8000/api/review/<review-id>/status
 http://localhost:8000/known-faces
 http://localhost:8000/recognition-debug
 http://localhost:8000/api/recognition-debug
