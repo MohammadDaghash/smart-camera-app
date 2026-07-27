@@ -125,7 +125,8 @@ Requirements:
 - Sweep recognition thresholds.
 - Report accuracy, precision, recall, macro F1, anonymous false positives, and
   known false-anonymous rates.
-- Generate predictions CSV, threshold CSV, confusion matrix image, and a
+- Generate predictions CSV, score distribution CSV, per-label metrics CSV,
+  threshold CSV, confusion matrix image, threshold plot, summary JSON, and a
   recommended threshold file.
 - Keep personal evaluation images and generated reports local-only.
 

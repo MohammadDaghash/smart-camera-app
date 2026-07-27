@@ -262,7 +262,9 @@ backend/venv/bin/python experiments/recognition_eval/evaluate_faces.py
 ```
 
 Reports are generated locally under `experiments/recognition_eval/results/` and
-are ignored by Git.
+are ignored by Git. The main outputs are predictions, score distribution,
+per-label metrics, threshold report, confusion matrix, threshold plot, and a
+machine-readable summary JSON.
 
 ## Git Workflow
 

@@ -149,8 +149,12 @@ backend/venv/bin/python experiments/recognition_eval/evaluate_faces.py
 Show:
 
 - `predictions.csv`
+- `score_distribution.csv`
+- `per_label_metrics.csv`
 - `threshold_report.csv`
 - `confusion_matrix.png`
+- `threshold_plot.png`
+- `summary.json`
 - `recommended_threshold.txt`
 
 ## How To Explain The FPS Metrics

@@ -73,10 +73,24 @@ Expected reports:
 
 ```text
 predictions.csv
+score_distribution.csv
+per_label_metrics.csv
 threshold_report.csv
 confusion_matrix.png
+threshold_plot.png
 recommended_threshold.txt
+summary.json
 ```
+
+Report meanings:
+
+- `predictions.csv`: one row per test image at the current threshold.
+- `score_distribution.csv`: best-match score per image before applying a threshold.
+- `per_label_metrics.csv`: precision, recall, F1, and support per label.
+- `threshold_report.csv`: accuracy and error rates across all swept thresholds.
+- `confusion_matrix.png`: true label vs predicted label at the current threshold.
+- `threshold_plot.png`: threshold tradeoff chart for accuracy, F1, and error rates.
+- `summary.json`: machine-readable experiment summary and dataset warnings.
 
 ## How To Explain It
 

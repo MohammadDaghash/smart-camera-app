@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -110,3 +111,105 @@ def test_prediction_rows_marks_no_face_samples():
 
     assert rows[0]["predicted_label"] == recognition_eval.NO_FACE_LABEL
     assert rows[0]["status"] == "no_face"
+
+
+def test_dataset_summary_reports_counts_and_warnings():
+    known_sources = [
+        recognition_eval.ImageSource(label="Mohammad", path=Path("mohammad.jpg")),
+        recognition_eval.ImageSource(label="Omar", path=Path("omar.jpg")),
+    ]
+    known_embeddings = [
+        recognition_eval.EmbeddingRecord(
+            label="Mohammad",
+            path=Path("mohammad.jpg"),
+            embedding=np.array([1.0, 0.0], dtype=np.float32),
+        ),
+        recognition_eval.EmbeddingRecord(
+            label="Omar",
+            path=Path("omar.jpg"),
+            embedding=np.array([0.0, 1.0], dtype=np.float32),
+        ),
+    ]
+    test_sources = [
+        recognition_eval.ImageSource(label="Mohammad", path=Path("test.jpg")),
+    ]
+    samples = [
+        recognition_eval.EvaluationSample(
+            true_label="Mohammad",
+            path=Path("test.jpg"),
+            best_label="Mohammad",
+            best_score=0.8,
+            status="ok",
+        ),
+    ]
+
+    summary = recognition_eval.build_dataset_summary(
+        known_sources,
+        known_embeddings,
+        test_sources,
+        samples,
+    )
+    warnings = recognition_eval.dataset_warnings(summary)
+
+    assert summary["known_usable_embeddings"] == 2
+    assert summary["test_images_by_label"] == {"Mohammad": 1}
+    assert any("No Anonymous test images" in warning for warning in warnings)
+    assert any("Omar" in warning for warning in warnings)
+
+
+def test_save_outputs_writes_complete_report(tmp_path):
+    samples = [
+        recognition_eval.EvaluationSample(
+            true_label="Mohammad",
+            path=Path("mohammad-test.jpg"),
+            best_label="Mohammad",
+            best_score=0.8,
+            status="ok",
+        ),
+        recognition_eval.EvaluationSample(
+            true_label="Anonymous",
+            path=Path("anonymous-test.jpg"),
+            best_label="Mohammad",
+            best_score=0.6,
+            status="ok",
+        ),
+    ]
+    known_sources = [
+        recognition_eval.ImageSource(label="Mohammad", path=Path("mohammad.jpg")),
+    ]
+    test_sources = [
+        recognition_eval.ImageSource(label="Mohammad", path=Path("mohammad-test.jpg")),
+        recognition_eval.ImageSource(label="Anonymous", path=Path("anonymous-test.jpg")),
+    ]
+    known_embeddings = [
+        recognition_eval.EmbeddingRecord(
+            label="Mohammad",
+            path=Path("mohammad.jpg"),
+            embedding=np.array([1.0, 0.0], dtype=np.float32),
+        ),
+    ]
+
+    recommendation = recognition_eval.save_outputs(
+        samples=samples,
+        thresholds=[0.5, 0.7],
+        output_dir=tmp_path,
+        current_threshold=0.5,
+        known_sources=known_sources,
+        test_sources=test_sources,
+        known_embeddings=known_embeddings,
+    )
+
+    assert recommendation == 0.7
+    assert (tmp_path / "predictions.csv").exists()
+    assert (tmp_path / "score_distribution.csv").exists()
+    assert (tmp_path / "per_label_metrics.csv").exists()
+    assert (tmp_path / "threshold_report.csv").exists()
+    assert (tmp_path / "confusion_matrix.png").exists()
+    assert (tmp_path / "threshold_plot.png").exists()
+
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["recommended_threshold"] == 0.7
+    assert summary["dataset"]["test_images_by_label"] == {
+        "Anonymous": 1,
+        "Mohammad": 1,
+    }
