@@ -2,6 +2,8 @@
 
 Smart Camera App is currently a local monolith with a clear internal backend layout.
 
+For visual diagrams, see [Architecture Diagram](architecture-diagram.md).
+
 The camera path is inspired by Frigate's high-level pipeline approach: acquire
 frames first, then apply heavier analysis at a controlled cadence before sending
 output to the viewer. We are not copying Frigate's full NVR architecture.

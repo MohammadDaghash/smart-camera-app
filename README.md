@@ -88,6 +88,12 @@ smart-camera-app/
 └── README.md
 ```
 
+## Interview Docs
+
+- [Architecture diagram](docs/architecture-diagram.md)
+- [Interview demo script](docs/demo-script.md)
+- [Interview readiness guide](docs/interview-readiness.md)
+
 ## Running Locally
 
 From the project root:

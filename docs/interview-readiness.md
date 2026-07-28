@@ -2,6 +2,9 @@
 
 This guide explains the project in a way that is easy to present in interviews.
 
+For a visual system map, see [Architecture Diagram](architecture-diagram.md).
+For a step-by-step presentation flow, see [Demo Script](demo-script.md).
+
 ## One-Minute Project Summary
 
 Smart Camera App is a local-first smart camera MVP. It streams a webcam feed,
@@ -130,7 +133,7 @@ Show:
 - Recommended local actions
 - Pipeline metrics in one place
 
-6. Open camera settings:
+7. Open camera settings:
 
 ```text
 http://localhost:8000/settings
@@ -143,7 +146,7 @@ Show:
 - Event and alert cooldowns
 - Which values came from `.env` versus defaults
 
-7. Open activity review:
+8. Open activity review:
 
 ```text
 http://localhost:8000/review
@@ -157,7 +160,7 @@ Show:
 - Source events that explain why the review item exists
 - Filters by label and local time range
 
-8. Run the recognition evaluation toolkit:
+9. Run the recognition evaluation toolkit:
 
 ```bash
 backend/venv/bin/python experiments/recognition_eval/evaluate_faces.py
@@ -394,4 +397,5 @@ or two.
 
 ## Next High-Value Improvements
 
-- Add a clear architecture diagram to the README.
+- Add a short seeded demo mode so the review/history pages can be shown even
+  before the camera has produced enough local events.
